@@ -1,6 +1,6 @@
 import type { Awaitable, ClientEvents } from "discord.js";
 
-type ReservedClientEvent =
+export type ReservedClientEvent =
 	| "ready"
 	| "debug"
 	| "warn"

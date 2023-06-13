@@ -4,6 +4,7 @@
 		"alwaysStrict": true,
 		"baseUrl": ".",
 		"checkJs": true,
+		"declaration": true,
 		"esModuleInterop": true,
 		"exactOptionalPropertyTypes": false,
 		"forceConsistentCasingInFileNames": true,

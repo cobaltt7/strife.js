@@ -20,7 +20,7 @@ import {
 export const commandData: ApplicationCommandData[] = [];
 export const commands = new Map<string, CommandData & { command: Command }>();
 
-type Option = { description: string; required?: boolean } & (
+export type Option = { description: string; required?: boolean } & (
 	| {
 			type: ApplicationCommandOptionType.Channel;
 			channelTypes?: ChannelType[];
@@ -78,26 +78,19 @@ type Option = { description: string; required?: boolean } & (
 			  }
 	  ))
 );
-interface BaseCommandData {
+export interface BaseCommandData {
 	name: string;
 	restricted?: true;
 }
-interface BaseChatInputCommandData extends BaseCommandData {
+export interface BaseChatInputCommandData extends BaseCommandData {
 	description: string;
 	type?: never;
-	/**
-	 * Pass `false` to ignore bad words in this command’s options. Pass `"channel"` to only ignore bad words if the channel allows bad
-	 * words.
-	 *
-	 * @default true
-	 */
-	censored?: "channel" | false;
 }
-interface ChatInputCommandData extends BaseChatInputCommandData {
+export interface ChatInputCommandData extends BaseChatInputCommandData {
 	options?: { [key: string]: Option };
 	subcommands?: never;
 }
-interface ChatInputSubcommandData<O extends { [key: string]: { [key: string]: Option } }>
+export interface ChatInputSubcommandData<O extends { [key: string]: { [key: string]: Option } }>
 	extends BaseChatInputCommandData {
 	options?: never;
 	subcommands: {
@@ -108,20 +101,19 @@ interface ChatInputSubcommandData<O extends { [key: string]: { [key: string]: Op
 		};
 	};
 }
-interface ContextMenuCommandData<T extends typeof ApplicationCommandType["Message" | "User"]>
+export interface ContextMenuCommandData<T extends typeof ApplicationCommandType["Message" | "User"]>
 	extends BaseCommandData {
 	description?: never;
 	type: T;
-	censored?: never;
 	options?: never;
 	subcommands?: never;
 }
 
-type CommandData =
+export type CommandData =
 	| ChatInputCommandData
 	| ChatInputSubcommandData<{ [key: string]: { [key: string]: Option } }>
 	| ContextMenuCommandData<typeof ApplicationCommandType["Message" | "User"]>;
-type Command =
+export type Command =
 	| ((interaction: ChatInputCommandInteraction<"cached" | "raw">) => any)
 	| ((interaction: MessageContextMenuCommandInteraction) => any)
 	| ((interaction: UserContextMenuCommandInteraction) => any);
