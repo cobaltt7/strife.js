@@ -63,7 +63,7 @@ export type Option = { description: string; required?: boolean } & (
 			maxValue?: never;
 	  } & (
 			| {
-					choices?: { [key: string]: string };
+					choices?: Record<string, string>;
 					minLength?: never;
 					maxLength?: never;
 					autocomplete?: never;
@@ -226,7 +226,18 @@ function transformOptions(options: { [key: string]: Option }) {
 					}))
 					.sort((one, two) => one.name.localeCompare(two.name));
 
-			if (option.channelTypes) transformed.channelTypes = option.channelTypes;
+			transformed.channelTypes = option.channelTypes ?? [
+				ChannelType.GuildText,
+				ChannelType.GuildVoice,
+				ChannelType.GuildCategory,
+				ChannelType.GuildAnnouncement,
+				ChannelType.AnnouncementThread,
+				ChannelType.PublicThread,
+				ChannelType.PrivateThread,
+				ChannelType.GuildStageVoice,
+				ChannelType.GuildDirectory,
+				ChannelType.GuildForum,
+			];
 			if (option.maxLength !== undefined) transformed.maxLength = option.maxLength;
 			if (option.minLength !== undefined) transformed.minLength = option.minLength;
 

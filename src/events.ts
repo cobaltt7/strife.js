@@ -24,7 +24,7 @@ defineEvent.pre = function pre<EventName extends ClientEvent>(
 	event: (...args: ClientEvents[EventName]) => Awaitable<boolean>,
 ) {
 	if (preEvents[eventName])
-		throw new ReferenceError("Pre event for event " + eventName + " already exists");
+		throw new ReferenceError("Pre-event for event " + eventName + " already exists");
 	preEvents[eventName] = event as Event;
 	allEvents[eventName] ??= [];
 };
