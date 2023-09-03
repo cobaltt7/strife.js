@@ -24,7 +24,7 @@ import url from "node:url";
 
 await login({
 	clientOptions: { intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers] },
-	modulesDir: path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "./modules"),
+	modulesDirectory: path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "./modules"),
 });
 ```
 
@@ -34,7 +34,7 @@ Once `login` has been called, you may import `client` from anywhere in your app:
 import { client } from "strife.js";
 import { Client } from "discord.js";
 
-client instanceof Client // true
+client instanceof Client; // true
 ```
 
 Note that `client` is `undefined` before `login` is called, and this behavior is not accounted for in the types, so plan appropriately.
@@ -47,14 +47,13 @@ Type: `ClientOptions`
 
 Options to pass to discord.js. As in discord.js, `intents` is the only required property. strife.js has some defaults on top of discord.js's:
 
--   `allowedMentions` is set to only ping users by default (including replied users)
+-   `allowedMentions` is set to only ping users by default (including replied users) to avoid accidental mass pings
 -   `failIfNotExists` is set to `false` to return `null` instead of erroring in certain cases
 -   `partials` is set to all available partials to avoid missed events
--   `ws.large_threshold` is set to `0` to start with as much data as possible.
 
 Of course, these are all overridable.
 
-#### `modulesDir`
+#### `modulesDirectory`
 
 Type: `string`
 
@@ -72,42 +71,33 @@ Type: `string | undefined`
 
 The message to display to the user when commands fail. Omit to use Discord's default `❗ The application did not respond`.
 
-#### `commandsGuildId`
-
-Type: `Snowflake | undefined`
-
-If provided, all commands will be guild commands only available in the guild with this id, and commands registered in any other guilds/globally will be deleted.
-
 #### `handleError`
 
 Type: `((error: any, event: ClientEvent | RepliableInteraction) => Awaitable<void>) | undefined`
 
 Called when an error occurs in discord.js or any event, component, or command handler. Defaults to `console.error`.
 
-#### `productionId`
+#### `defaultCommandAccess`
 
-Type: `Snowflake | undefined`
+Type: `boolean | Snowflake | Snowflake[]`
 
-If provided and is equal to the bot's user ID, the bot will crash right after connecting to Discord to avoid accidentally deploying in-development features to the production bot. Use the `--production` flag on the command line to deploy anyway.
+The default value of [a command's `access` field](#access).
 
 ## Usage
 
 It is strongly reccomended to use this framework with TypeScript. In the future, this framework will provide more powerful dynamic types for your bots.
 
-Every file in [`modulesDir`](#modulesdir), and every `index.js` in subdirectories of `modulesDir` will be automatically imported after logging in, but before commands are registered. It is recommended to only call the below functions in those files.
+Every file in [`modulesDirectory`](#modulesdirectory), and every `index.js` in subdirectories of `modulesDirectory` will be automatically imported after logging in, but before commands are registered. It is recommended to only call the below functions in those files.
 
 ### Commands
 
-Use the `defineCommand` function to define a command.
+Use the `defineChatCommand` function to define a basic chat command.
 
 ```js
-import { defineCommand } from "strife.js";
+import { defineChatCommand } from "strife.js";
 
-defineCommand(
-	{
-		name: "ping",
-		description: "Ping!",
-	},
+defineChatCommand(
+	{ name: "ping", description: "Ping!" },
 
 	async (interaction) => {
 		await interaction.reply("Pong!");
@@ -122,10 +112,10 @@ Use the `restricted: true` option to deny members permission to use the command,
 You can specify options for commands using the `options` property. This is a key-value pair where the keys are option names and the values are option details.
 
 ```js
-import { defineCommand } from "strife.js";
+import { defineChatCommand } from "strife.js";
 import { ApplicationCommandOptionType, User } from "discord.js";
 
-defineCommand(
+defineChatCommand(
 	{
 		name: "say",
 		description: "Send a message",
@@ -140,7 +130,7 @@ defineCommand(
 		},
 	},
 
-	async (interaction) => {
+	async (interaction, options) => {
 		// code here...
 	}
 );
@@ -155,19 +145,22 @@ Some types of options have additional customization fields:
 -   `String` commands allow a couple additional fields:
     -   `choices` (`Record<string, string>`) to require users to pick values from a predefined list. The keys are the values passed to your bot and the values are the descriptons displayed to the users. No other additional fields are allowed for this option when using `choices`.
     -   `minLength` (`number`) and/or `maxLength` (`number`) to define lower and upper bounds for this option's length respectively. Defaults to `0` and `6_000` respectively.
-    -   `autocomplete` (`(interaction: AutocompleteInteraction<"cached" | "raw">) => Awaitable<ApplicationCommandOptionChoiceData<string>[]>`) to give users dynamic choices.
+    -   `autocomplete` (`(interaction: AutocompleteInteraction) => ApplicationCommandOptionChoiceData<string>[]`) to give users dynamic choices.
         -   Use `interaction.options.getFocused()` to get the value of the option so far. You can also use `interaction.options.getBoolean()`, `.getInteger()`, `.getNumber()`, and `.getString()`. Other option getters will not work, use `interaction.options.get()` instead.
-        -   Return an array of choice objects. It will be truncated to fit the 25 item limit automatically. Avoid returning promises, this will be disallowed in the future.
+        -   Return an array of choice objects. It will be truncated to fit the 25 item limit automatically.
         -   Note that Discord does not require users to select values from the options, handle values appropriately.
+        -   Also note that TypeScript cannot automatically infer the value of the type parameter, however it will error if you set it incorrectly.
+
+To retrive option values at runtime, you can utilize the second `options` parameter of the command handler. You can always use Discord.JS's `interaction.options` API, however the `options` parameter is a key-value object of options. That is often simpler to use and has better types when using TypeScript.
 
 #### Subcommands
 
-You can specify subcommands for commands using the `subcommands` property. This is a key-value pair where the keys are subcommand names and the values are subcommand details.
+You can specify subcommands using the `defineSubcommands` function. Define subcommands using the `subcommands` property, which is a key-value pair where the keys are subcommand names and the values are subcommand details. Subcommands must have `name`s and `description`s and may have `options`.
 
 ```js
-import { defineCommand } from "strife.js";
+import { defineSubcommands } from "strife.js";
 
-defineCommand(
+defineSubcommands(
 	{
 		name: "xp",
 		description: "Commands to view users’ XP amounts",
@@ -178,27 +171,60 @@ defineCommand(
 		},
 	},
 
-	async (interaction) => {
+	async (interaction, { subcommand, options }) => {
 		// code here...
 	}
 );
 ```
 
-The root command description is not displayed anywhere in Discord clients, but it is sill required by the Discord API. Subcommands support options in the same way as regular commands. Subcommand groups are not currently supported.
+The root command description is not displayed anywhere in Discord clients, but it is sill required by the Discord API. Subcommands support options in the same way as regular commands.
 
-#### Context Menu Commands
+When using subcommands, the second argument to the handler is an object with the properties `subcommand` (`string`) and `options` (key-value pair as in `defineChatCommand`).
 
-By default, commands are chat input commands. You make it a context menu command by using `type`:
+#### Subcommand Groups
+
+You can specify subcommand groups using the `defineSubGroups` function. Define subgroups using the `subcommands` property, which is a key-value pair where the keys are subgroup names and the values are subgroup details. Subgroups must have `name`s, `description`s, and `subcommands`. Subcommands must have `name`s and `description`s and may have `options`.
 
 ```js
-import { defineCommand } from "strife.js";
+import { defineSubGroups } from "strife.js";
+
+defineSubGroups(
+	{
+		name: "foo",
+		description: "...",
+
+		subcommands: {
+			bar: {
+				description: "...",
+				subcommands: {
+					baz: { description: "..." },
+				},
+			},
+		},
+	},
+
+	async (interaction, { subcommand, subGroup, options }) => {
+		// code here...
+	}
+);
+```
+
+The root command description and subgroup descriptions are not displayed anywhere in Discord clients, but they are sill required by the Discord API. Subcommands support options in the same way as regular commands.
+
+When using subcommands, the second argument to the handler is an object with the properties `subcommand` (`string`), `subGroup` (`string`), and `options` (key-value pair as in `defineChatCommand`).
+
+Mixing subgroups and subcommands on the same level is not currently supported.
+
+#### Menu Commands
+
+You can specify menu commands using the `defineMenuCommand` function.
+
+```js
+import { defineChatCommand } from "strife.js";
 import { ApplicationCommandType } from "discord.js";
 
-defineCommand(
-	{
-		name: "User Info",
-		type: ApplicationCommandType.User,
-	},
+defineMenuCommand(
+	{ name: "User Info", type: ApplicationCommandType.User },
 
 	async (interaction) => {
 		// code here...
@@ -207,6 +233,14 @@ defineCommand(
 ```
 
 Message context menu commands are also supported with `ApplicationCommandType.Message`.
+
+#### Access
+
+By default, commands are allowed in all guilds plus DMs.
+
+To change this behavior, you can set `defaultCommandAccess` when logging in. Pass in `Snowflake | Snowflake[]` to only define commands in specified guilds, `false` to define them in every guild but no DMs, or `true` to use the default configuration.
+
+Commands also support a root level `access` option to override this on a per-command basis. It supports the same options, with the addition of `@default` in the array of `Snowflake`s to extend the default guilds. `@default` is not available if `defaultCommandAccess` is unset or is set to a boolean.
 
 ### Events
 
@@ -241,7 +275,7 @@ Remember to return a boolean to explicitly say whether execution should continue
 
 A use case for this would be an automoderation system working alongside an XP system. The automoderation system could define a pre-event to delete rule-breaking messages and return `false` so users do not receive XP for rule-breaking messages.
 
-You are only allowed to define one pre-event for every `ClientEvent`. You can define a pre-event along with or without defining normal events.
+You are only allowed to define one pre-event for every `ClientEvent`. You can define a pre-event with or without defining normal events.
 
 ### Components
 
@@ -255,29 +289,42 @@ defineButton("foobar", async (interaction, data) => {
 });
 ```
 
-The button id (`"foobar"` in this example) and the `data` parameter of the callback function are both taken from the button's `customId`. For example, if the `customId` is `"abcd_foobar"`, then the callback for the `foobar` button will be called and the `data` parameter will have a value of `"abcd"`.
+The button ID (`"foobar"` in this example) and the `data` parameter of the callback function are both taken from the button's `customId`. For example, if the `customId` is `"abcd_foobar"`, then the callback for the `foobar` button will be called and the `data` parameter will have a value of `"abcd"`.
 
 The button `data` may not have underscores but the `id` may. For example, a `customId` of `"foo_bar_baz"` will result in an `id` of `"bar_baz"` and the `data` `"foo"`. You can also omit the data from the `customId` alltogether - a `customId` of `"_foobar"` will result in an `id` of `"foobar"` and the `data` `""`.
 
 It is not required for all `customId`s to follow this format nor to have an associated handler. You are free to collect interactions in any other way you wish alongside or independent of strife.js.
 
-`defineModal` and `defineSelect` work in the same way as `defineButton`, but for modals and select menus respectively.
+`defineModal` works in the same way as `defineButton` but for modals.
+
+`defineSelect` also works similarly to `defineButton` for select menus with one exception. By default, `defineSelect` collects all types of select menus. However, you can specify certain types of select menus to collect for better type safety, especially with TypeScript.
+
+```js
+import { defineSelect } from "strife.js";
+import { ComponentType } from "discord.js";
+
+defineSelect("foobar", ComponentType.StringSelect, async (interaction, data) => {
+	// code here...
+});
+```
+
+You can specify `SelectMenuType | SelectMenuType[]`. Note that this does not allow you to define multiple callback for the same ID but different types. If a non-matching type is encountered, nothing will happen and you are expected to handle the interaction yourself.
 
 ## Style Guide
 
-None of the following are requirements other than those using the word "must", however they are all *strongly* encoraged. An ESLint plugin to enforce this style guide may be created in the future.
+None of the following are requirements other than those using the word "must", however they are all _strongly_ encoraged. An ESLint plugin to enforce this style guide may be created in the future.
 
-It is reccomended to call your [`modulesDir`](#modulesdir) `modules`. Each file or folder in `modulesDir` should be a different feature of your bot.
+It is reccomended to call your [`modulesDirectory`](#modulesdirectory) `modules`. Each file or folder in `modulesDirectory` should be a different feature of your bot.
 
 It is discoraged to import one module from another. Each module should work independently.
 
 ### File Modules
 
-JavaScript files that lie directly inside `modulesDir` should be short - a couple hundred lines at most. If they are any longer, make them [directory modules](#directory-modules) instead.
+JavaScript files that lie directly inside `modulesDirectory` should be short - a couple hundred lines at most. If they are any longer, make them [directory modules](#directory-modules) instead.
 
 ### Directory Modules
 
-Subdirectories of `modulesDir` *must* have an `index.js` file. This file should contain all the definitions for the module. In other words, `defineCommand`, `defineEvent`, etc. should only be used in the `index.js` of directory modules. If any callback is more than a few dozen lines long, it should instead be imported from another file in the same directory. If multiple files use the same values, constants for example, they should go in `misc.js` in that directory.
+Subdirectories of `modulesDirectory` _must_ have an `index.js` file. This file should contain all the definitions for the module. In other words, `defineChatCommand`, `defineEvent`, etc. should only be used in the `index.js` of directory modules. If any callback is more than a few dozen lines long, it should instead be imported from another file in the same directory. If multiple files use the same values, constants for example, they should go in `misc.js` in that directory.
 
 ## Imports
 
@@ -292,12 +339,16 @@ import {
 	type ClientOptions,
 	type RepliableInteraction,
 	type Snowflake,
+	type SelectMenuType,
 	ApplicationCommandType,
 } from "discord.js";
 import {
 	type ClientEvent,
 	defineButton,
-	defineCommand,
+	defineChatCommand,
+	defineSubcommands,
+	defineSubGroups,
+	defineMenuCommand,
 	defineEvent,
 	defineModal,
 	defineSelect,

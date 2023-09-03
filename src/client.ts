@@ -9,39 +9,32 @@ import {
 	version,
 	type RepliableInteraction,
 	type ClientOptions,
+	type ApplicationCommandData,
+	GuildMember,
+	GuildChannel,
+	Role,
 } from "discord.js";
-import pkg from "../package.json" assert { type: "json" };
 import path from "node:path";
 import url from "node:url";
 import fileSystem from "node:fs/promises";
-import defineEvent, { type ClientEvent, type Event, getEvents } from "./events.js";
-import { commandData, commands } from "./commands.js";
-import { buttons, modals, selects } from "./components.js";
+import { defineEvent, type ClientEvent, type Event, getEvents } from "./definition/events.js";
+import { buttons, modals, selects } from "./definition/components.js";
+import { DEFAULT_GUILDS } from "./util.js";
+import { NoSubcommand, autocompleters, commands } from "./definition/commands.js";
+import type {
+	DefaultCommandAccess,
+	MenuCommandHandler,
+	RootCommandHandler,
+	SubGroupsHandler,
+	SubcommandHandler,
+} from "./index.js";
+
+const globalCommandKey = Symbol("global");
 
 export let client: Client<true> = undefined as any;
 
-export default async function login(options: {
-	handleError?: (error: any, event: string | RepliableInteraction) => Awaitable<void>;
-	clientOptions: ClientOptions;
-	modulesDir: string;
-	commandsGuildId?: Snowflake;
-	productionId?: Snowflake;
-	commandErrorMessage?: string;
-	botToken?: string;
-}) {
-	const handleError =
-		options.handleError ??
-		((event, error) =>
-			console.error(
-				`[${
-					typeof event == "string"
-						? event
-						: event.isCommand()
-						? `/${event.command?.name}`
-						: `${event.constructor.name}: ${event.customId}`
-				}]`,
-				error,
-			));
+export async function login(options: LoginOptions) {
+	const handleError = options.handleError ?? defaultErrorHandler;
 	const [major, minor = "", patch] = version.split(".");
 	if (major !== "14" || +minor < 9 || patch?.includes("-dev")) {
 		process.emitWarning(
@@ -63,7 +56,6 @@ export default async function login(options: {
 			Partials.ThreadMember,
 		],
 		...options.clientOptions,
-		ws: { large_threshold: 0, ...(options.clientOptions.ws ?? {}) },
 	});
 
 	const readyPromise = new Promise<Client<true>>((resolve) => Handler.once("ready", resolve));
@@ -103,12 +95,15 @@ export default async function login(options: {
 	await Handler.login(options.botToken ?? process.env.BOT_TOKEN);
 	client = await readyPromise;
 
-	console.log(`Connected to Discord with tag ${client.user.tag ?? ""} on version ${pkg.version}`);
+	console.log(`Connected to Discord with tag ${client.user.tag ?? ""}`);
 
-	if (client.user.id === options.productionId && !process.argv.includes("--production"))
-		throw new Error("Refusing to run on prod without --production flag");
-
-	const directory = options.modulesDir;
+	if ("modulesDir" in options) {
+		process.emitWarning(
+			"The `modulesDir` option is deprecated. Please use `modulesDirectory` instead.",
+			"DeprecationWarning",
+		);
+	}
+	const directory = options.modulesDirectory;
 	const modules = await fileSystem.readdir(directory);
 
 	const promises = modules.map(async (module) => {
@@ -124,19 +119,25 @@ export default async function login(options: {
 
 	defineEvent("interactionCreate", async (interaction) => {
 		if (interaction.isAutocomplete()) {
-			if (!interaction.inGuild()) throw new TypeError("Used command in DM");
-			const command = commands.get(interaction.command?.name ?? "");
+			const command = interaction.command?.name ?? "";
+			const subGroup = interaction.options.getSubcommandGroup();
+			const subcommand = interaction.options.getSubcommand(false);
+			const option = interaction.options.getFocused(true).name;
 
-			const { autocomplete } =
-				command?.options?.[interaction.options.getFocused(true).name] ?? {};
+			const autocomplete =
+				autocompleters[command]?.[subGroup ?? NoSubcommand]?.[subcommand ?? NoSubcommand]?.[
+					option
+				];
 
 			if (!autocomplete) {
 				throw new ReferenceError(
-					`Command \`${interaction.command?.name}\` autocomplete handler not found`,
+					`Autocomplete handler for \`/${command}${subGroup ? " " + subGroup : ""}${
+						subcommand ? " " + subcommand : ""
+					}\`'s \`${option}\` option not found`,
 				);
 			}
 
-			return interaction.respond((await autocomplete(interaction)).slice(0, 25));
+			return interaction.respond(autocomplete(interaction).slice(0, 25));
 		}
 
 		if (!interaction.isCommand()) {
@@ -149,15 +150,45 @@ export default async function login(options: {
 
 			return;
 		}
-		if (!interaction.inGuild()) throw new TypeError("Used command in DM");
 
-		const command = commands.get(interaction.command?.name ?? "");
+		const command = commands[interaction.command?.name ?? ""];
 
 		if (!command)
 			throw new ReferenceError(`Command \`${interaction.command?.name}\` not found`);
 
-		// @ts-expect-error TS2345 -- No concrete fix to this
-		await command.command(interaction);
+		if (interaction.isContextMenuCommand())
+			await (command.command as MenuCommandHandler)(interaction);
+		else {
+			const optionsData = interaction.options.data.map(
+				async (option) =>
+					[
+						option.name,
+						option.attachment ||
+							(!option.channel || option.channel instanceof GuildChannel
+								? option.channel
+								: await interaction.guild?.channels.fetch(option.channel.id)) ||
+							(option.member instanceof GuildMember && option.member) ||
+							option.user ||
+							(!option.role || option.role instanceof Role
+								? option.role
+								: await interaction.guild?.roles.fetch(option.role.id)) ||
+							option.value,
+					] as const,
+			);
+			const options = Object.fromEntries(await Promise.all(optionsData));
+
+			const subGroup = interaction.options.getSubcommandGroup();
+			const subcommand = interaction.options.getSubcommand(false);
+			if (subGroup && subcommand)
+				await (command.command as SubGroupsHandler)(interaction, {
+					subcommand,
+					subGroup: subGroup,
+					options,
+				});
+			else if (subcommand)
+				await (command.command as SubcommandHandler)(interaction, { subcommand, options });
+			else await (command.command as RootCommandHandler)(interaction, options);
+		}
 	});
 
 	for (const [event, execute] of Object.entries(getEvents()) as [ClientEvent, Event][]) {
@@ -194,21 +225,87 @@ export default async function login(options: {
 		});
 	}
 
-	if (options.commandsGuildId) {
-		await client.application.commands.set(commandData, options.commandsGuildId);
-		await client.guilds.fetch().then(
-			async (guilds) =>
-				await Promise.all(
-					guilds.map(async (otherGuild) => {
-						if (otherGuild.id !== options.commandsGuildId)
-							await client.application.commands
-								.set([], otherGuild.id)
-								.catch(() => {});
-					}),
-				),
+	const defaultCommands =
+		options.defaultCommandAccess !== undefined &&
+		typeof options.defaultCommandAccess !== "boolean" &&
+		[options.defaultCommandAccess].flat();
+	const guildCommands = Object.entries(commands).reduce<{
+		[key: Snowflake]: ApplicationCommandData[];
+		[globalCommandKey]?: ApplicationCommandData[];
+	}>((accumulator, [name, command]) => {
+		const access = command.access ?? options.defaultCommandAccess ?? true;
+		if (typeof access === "boolean") {
+			accumulator[globalCommandKey] ??= [];
+			accumulator[globalCommandKey].push({ ...command, name, dmPermission: access });
+		} else {
+			const guilds = [access].flat();
+			if (guilds.includes(DEFAULT_GUILDS)) {
+				if (defaultCommands) guilds.push(...defaultCommands);
+				else {
+					throw new ReferenceError(
+						`Cannot use \`${DEFAULT_GUILDS}\` without explicitly setting default guilds`,
+					);
+				}
+			}
+			for (const guild of guilds) {
+				if (guild === DEFAULT_GUILDS) continue;
+				accumulator[guild] ??= [];
+				accumulator[guild]?.push({ ...command, name });
+			}
+		}
+		return accumulator;
+	}, {});
+
+	const guilds = await client.guilds.fetch();
+	await Promise.all(
+		guilds.map(async (guild) => {
+			const commandData = guildCommands[guild.id];
+			if (commandData) {
+				await client.application.commands.set(commandData, guild.id);
+				guildCommands[guild.id] = [];
+				return;
+			}
+			await client.application.commands.set([], guild.id).catch(() => {});
+		}),
+	);
+
+	await client.application.commands.set(guildCommands[globalCommandKey] ?? []);
+	guildCommands[globalCommandKey] = [];
+
+	for (const guildId in guildCommands) {
+		if (!Object.prototype.hasOwnProperty.call(guildCommands, guildId)) continue;
+
+		const commands = guildCommands[guildId];
+		if (!commands?.length) continue;
+
+		await handleError(
+			new ReferenceError(`Could not register commands in missing guild \`${guildId}\``),
+			"ready",
 		);
-		await client.application.commands.set([]);
-	} else {
-		await client.application.commands.set(commandData);
 	}
+}
+
+export type LoginOptions = {
+	clientOptions: ClientOptions;
+	modulesDirectory: string;
+	botToken?: string;
+	commandErrorMessage?: string;
+	handleError?: typeof defaultErrorHandler;
+} & (DefaultCommandAccess extends { inGuild: true }
+	? { defaultCommandAccess: false | Snowflake | Snowflake[] }
+	: { defaultCommandAccess?: true });
+export function defaultErrorHandler(
+	error: any,
+	event: string | RepliableInteraction,
+): Awaitable<void> {
+	console.error(
+		`[${
+			typeof event == "string"
+				? event
+				: event.isCommand()
+				? `/${event.command?.name}`
+				: `${event.constructor.name}: ${event.customId}`
+		}]`,
+		error,
+	);
 }

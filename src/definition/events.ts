@@ -1,18 +1,12 @@
 import type { Awaitable, ClientEvents } from "discord.js";
 
-export type ReservedClientEvent =
-	| "ready"
-	| "debug"
-	| "warn"
-	| "error"
-	| "invalidated"
-	| "guildUnavailable";
+export type ReservedClientEvent = "ready" | "debug" | "warn" | "error" | "invalidated";
 export type ClientEvent = Exclude<keyof ClientEvents, ReservedClientEvent>;
 export type Event = (...args: ClientEvents[ClientEvent]) => unknown;
 const allEvents: Record<string, Event[]> = {};
 const preEvents: Record<string, Event> = {};
 
-export default function defineEvent<EventName extends ClientEvent>(
+export function defineEvent<EventName extends ClientEvent>(
 	eventName: EventName,
 	event: (...args: ClientEvents[EventName]) => unknown,
 ) {
@@ -24,7 +18,7 @@ defineEvent.pre = function pre<EventName extends ClientEvent>(
 	event: (...args: ClientEvents[EventName]) => Awaitable<boolean>,
 ) {
 	if (preEvents[eventName])
-		throw new ReferenceError("Pre-event for event " + eventName + " already exists");
+		throw new ReferenceError("Pre-handler for event " + eventName + " already exists");
 	preEvents[eventName] = event as Event;
 	allEvents[eventName] ??= [];
 };
@@ -42,8 +36,8 @@ export function getEvents(): { [E in ClientEvent]?: Event } {
 				(result): result is PromiseRejectedResult => result.status === "rejected",
 			);
 
-			if (failures.length === 1) throw failures[0]?.reason;
-			if (failures.length) throw AggregateError(failures);
+			if (failures.length === 1) throw new Error(failures[0]?.reason);
+			if (failures.length) throw new AggregateError(failures);
 		};
 
 		parsedEvents[eventName] = preEvent
