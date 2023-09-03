@@ -238,9 +238,46 @@ Message context menu commands are also supported with `ApplicationCommandType.Me
 
 By default, commands are allowed in all guilds plus DMs.
 
-To change this behavior, you can set `defaultCommandAccess` when logging in. Pass in `Snowflake | Snowflake[]` to only define commands in specified guilds, `false` to define them in every guild but no DMs, or `true` to use the default configuration.
+To change this behavior, you can set `defaultCommandAccess` when logging in. Pass in `Snowflake | Snowflake[]` to only define commands in specified guilds, `false` to define them in every guild but no DMs, or `true` to use the default configuration. When using TypeScript, it is necessary to augment the `DefaultCommandAccess` interface when changing this. To do that, add the following in a new `.d.ts` file:
+
+```ts
+declare module "strife.js" {
+	export interface DefaultCommandAccess {
+		inGuild: true;
+	}
+}
+```
 
 Commands also support a root level `access` option to override this on a per-command basis. It supports the same options, with the addition of `@default` in the array of `Snowflake`s to extend the default guilds. `@default` is not available if `defaultCommandAccess` is unset or is set to a boolean.
+
+#### Augments
+
+You can define custom command properties by using augments (advanced usage):
+
+```ts
+declare module "strife.js" {
+	export interface AugmentedMenuCommandData<
+		InGuild extends boolean,
+		Context extends MenuCommandContext
+	> {}
+
+	export interface AugmentedRootCommandData<
+		InGuild extends boolean,
+		Options extends RootCommandOptions<InGuild>
+	> {}
+	export interface AugmentedSubcommandData<
+		InGuild extends boolean,
+		Options extends SubcommandOptions<InGuild>
+	> {}
+	export interface AugmentedSubGroupsData<
+		InGuild extends boolean,
+		Options extends SubGroupsOptions<InGuild>
+	> {}
+
+	export interface AugmentedChatCommandData<InGuild extends boolean> {}
+	export interface AugmentedCommandData<InGuild extends boolean> {}
+}
+```
 
 ### Events
 
