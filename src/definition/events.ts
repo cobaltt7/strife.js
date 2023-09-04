@@ -36,7 +36,7 @@ export function getEvents(): { [E in ClientEvent]?: Event } {
 				(result): result is PromiseRejectedResult => result.status === "rejected",
 			);
 
-			if (failures.length === 1) throw new Error(failures[0]?.reason);
+			if (failures.length === 1) throw failures[0]?.reason;
 			if (failures.length) throw new AggregateError(failures);
 		};
 

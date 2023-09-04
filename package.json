@@ -1,9 +1,9 @@
 {
 	"name": "strife.js",
-	"version": "1.0.6",
+	"version": "2.0.0-dev.0",
 	"type": "module",
-	"main": "dist/src/index.js",
-	"types": "dist/src/index.d.ts",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
 	"scripts": {
 		"build": "tsc --project tsconfig.json",
 		"dev": "tsc --project tsconfig.json --watch",

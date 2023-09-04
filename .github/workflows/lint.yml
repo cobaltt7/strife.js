@@ -8,36 +8,6 @@ on:
 permissions: write-all
 
 jobs:
-    bump:
-        name: Bump dependencies
-        if: github.ref_name == 'main' && github.repository_owner == 'scratchaddons-community'
-        runs-on: ubuntu-20.04
-
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v3.6.0
-              with:
-                  ref: ${{ github.head_ref }}
-
-            - name: Bump
-              id: sync_types
-              uses: RedGuy12/sync-types@v1.2.16
-
-            - name: Commit
-              id: commit
-              uses: stefanzweifel/git-auto-commit-action@v4.16.0
-              with:
-                  commit_message: Bump dependencies
-                  branch: ${{ github.head_ref }}
-
-            - name: Comment
-              if: steps.commit.outputs.changes_detected == 'true'
-              run: |
-                  body="$(cat ${{ steps.sync_types.outputs.output-dir }}/changes.md)$(cat ${{ steps.sync_types.outputs.output-dir }}/sync.md)"
-                  gh api "repos/${{ github.repository }}/commits/${{ steps.commit.outputs.commit_hash }}/comments" -F "body=$body"
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
     format:
         name: Format
         if: ${{ always() }} && startsWith(github.ref_name, 'dependabot/') != true
