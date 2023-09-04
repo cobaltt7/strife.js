@@ -114,26 +114,11 @@ export type ApplicationCommandData = {
 	options?: ApplicationCommandOptionData[];
 } & Omit<CommandData<boolean>, "description" | "type" | "options" | "defaultMemberPermissions">;
 
-export type CommandData<
-	InGuild extends boolean,
-	Options extends
-		| MenuCommandContext
-		| SubGroupsOptions<InGuild>
-		| SubcommandOptions<InGuild>
-		| RootCommandOptions<InGuild> =
-		| MenuCommandContext
-		| SubGroupsOptions<InGuild>
-		| SubcommandOptions<InGuild>
-		| RootCommandOptions<InGuild>,
-> = Options extends MenuCommandContext
-	? MenuCommandData<InGuild, Options>
-	: Options extends SubGroupsOptions<InGuild>
-	? SubGroupsData<InGuild, Options>
-	: Options extends SubcommandOptions<InGuild>
-	? SubcommandData<InGuild, Options>
-	: Options extends RootCommandOptions<InGuild>
-	? RootCommandData<InGuild, Options>
-	: never;
+export type CommandData<InGuild extends boolean> =
+	| MenuCommandData<InGuild, MenuCommandContext>
+	| SubGroupsData<InGuild, SubGroupsOptions<InGuild>>
+	| SubcommandData<InGuild, SubcommandOptions<InGuild>>
+	| RootCommandData<InGuild, RootCommandOptions<InGuild> >;
 
 export type BaseChatCommandData<InGuild extends boolean> = {
 	description: string;

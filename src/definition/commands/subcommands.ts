@@ -76,7 +76,7 @@ export type SubcommandHandler = (
 	options: { subcommand: string; options: OptionsToType<boolean, RootCommandOptions<boolean>> },
 ) => any;
 
-export type SubcommandData<InGuild extends boolean, Options extends SubcommandOptions<boolean>> = {
+export type SubcommandData<InGuild extends boolean, Options extends SubcommandOptions<InGuild>> = {
 	options?: never;
 	subcommands: {
 		[key in keyof Options]: Omit<RootCommandData<InGuild, Options[key]>, BaseCommandKeys>;

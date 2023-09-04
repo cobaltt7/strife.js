@@ -42,7 +42,7 @@ export type RootCommandHandler<
 
 export type RootCommandData<
 	InGuild extends boolean,
-	Options extends RootCommandOptions<boolean>,
+	Options extends RootCommandOptions<InGuild> = {},
 > = { options?: Options; subcommands?: never } & BaseChatCommandData<InGuild> &
 	AugmentedRootCommandData<InGuild, Options>;
 export interface AugmentedRootCommandData<

@@ -89,7 +89,7 @@ export type SubGroupsHandler = (
 	},
 ) => any;
 
-export type SubGroupsData<InGuild extends boolean, Options extends SubGroupsOptions<boolean>> = {
+export type SubGroupsData<InGuild extends boolean, Options extends SubGroupsOptions<InGuild>> = {
 	options?: never;
 	subcommands: {
 		[key in keyof Options]: Omit<SubcommandData<InGuild, Options[key]>, BaseCommandKeys>;

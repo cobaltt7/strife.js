@@ -166,8 +166,8 @@ defineSubcommands(
 		description: "Commands to view users’ XP amounts",
 
 		subcommands: {
-			rank: { description: "View your XP rank" },
-			top: { description: "View the server XP leaderboard" },
+			rank: { description: "View your XP rank", options: {} },
+			top: { description: "View the server XP leaderboard", options: {} },
 		},
 	},
 
@@ -179,7 +179,7 @@ defineSubcommands(
 
 The root command description is not displayed anywhere in Discord clients, but it is sill required by the Discord API. Subcommands support options in the same way as regular commands.
 
-When using subcommands, the second argument to the handler is an object with the properties `subcommand` (`string`) and `options` (key-value pair as in `defineChatCommand`).
+When using subcommands, the second argument to the handler is an object with the properties `subcommand` (`string`) and `options` (key-value pair as in `defineChatCommand`). In order for this parameter to be correctly typed, all subcommands must have `options` set, even if just to an empty object.
 
 #### Subcommand Groups
 
@@ -197,7 +197,7 @@ defineSubGroups(
 			bar: {
 				description: "...",
 				subcommands: {
-					baz: { description: "..." },
+					baz: { description: "...", options: {} },
 				},
 			},
 		},
@@ -211,7 +211,7 @@ defineSubGroups(
 
 The root command description and subgroup descriptions are not displayed anywhere in Discord clients, but they are sill required by the Discord API. Subcommands support options in the same way as regular commands.
 
-When using subcommands, the second argument to the handler is an object with the properties `subcommand` (`string`), `subGroup` (`string`), and `options` (key-value pair as in `defineChatCommand`).
+When using subcommands, the second argument to the handler is an object with the properties `subcommand` (`string`), `subGroup` (`string`), and `options` (key-value pair as in `defineChatCommand`). In order for this parameter to be correctly typed, all subcommands must have `options` set, even if just to an empty object.
 
 Mixing subgroups and subcommands on the same level is not currently supported.
 
