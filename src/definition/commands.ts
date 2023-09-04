@@ -118,7 +118,7 @@ export type CommandData<InGuild extends boolean> =
 	| MenuCommandData<InGuild, MenuCommandContext>
 	| SubGroupsData<InGuild, SubGroupsOptions<InGuild>>
 	| SubcommandData<InGuild, SubcommandOptions<InGuild>>
-	| RootCommandData<InGuild, RootCommandOptions<InGuild> >;
+	| RootCommandData<InGuild, RootCommandOptions<InGuild>>;
 
 export type BaseChatCommandData<InGuild extends boolean> = {
 	description: string;
