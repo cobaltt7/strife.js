@@ -13,6 +13,7 @@ import {
 	GuildMember,
 	GuildChannel,
 	Role,
+	ApplicationCommandOptionType,
 } from "discord.js";
 import path from "node:path";
 import url from "node:url";
@@ -159,7 +160,12 @@ export async function login(options: LoginOptions) {
 		if (interaction.isContextMenuCommand())
 			await (command.command as MenuCommandHandler)(interaction);
 		else {
-			const optionsData = interaction.options.data.map(
+			const rawOptions =
+				interaction.options.data[0]?.options?.[0]?.options ??
+				interaction.options.data[0]?.options ??
+				interaction.options.data;
+
+			const optionsData = rawOptions.map(
 				async (option) =>
 					[
 						option.name,
