@@ -13,7 +13,6 @@ import {
 	GuildMember,
 	GuildChannel,
 	Role,
-	ApplicationCommandOptionType,
 } from "discord.js";
 import path from "node:path";
 import url from "node:url";
