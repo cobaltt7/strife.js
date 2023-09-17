@@ -20,16 +20,18 @@ export function defineChatCommand(
 	data: RootCommandData<boolean, RootCommandOptions<boolean>>,
 	command: RootCommandHandler,
 ): void {
-	if (commands[data.name])
+	const oldCommand = commands[data.name]?.[0];
+	if (oldCommand && oldCommand.command !== command)
 		throw new ReferenceError("Command " + data.name + " has already been defined");
 
-	commands[data.name] = {
+	commands[data.name] ??= [];
+	commands[data.name]?.push({
 		type: ApplicationCommandType.ChatInput,
 		defaultMemberPermissions: data.restricted ? new PermissionsBitField() : null,
 		...data,
 		command,
 		options: data.options && transformOptions(data.options, { command: data.name }),
-	};
+	});
 }
 
 export type RootCommandHandler<

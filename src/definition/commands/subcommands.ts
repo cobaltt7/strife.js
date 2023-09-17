@@ -39,16 +39,18 @@ export function defineSubcommands(
 	data: SubcommandData<boolean, SubcommandOptions<boolean>>,
 	command: SubcommandHandler,
 ): void {
-	if (commands[data.name])
+	const oldCommand = commands[data.name]?.[0];
+	if (oldCommand && oldCommand.command !== command)
 		throw new ReferenceError("Command " + data.name + " has already been defined");
 
-	commands[data.name] = {
+	commands[data.name] ??= [];
+	commands[data.name]?.push({
 		type: ApplicationCommandType.ChatInput,
 		defaultMemberPermissions: data.restricted ? new PermissionsBitField() : null,
 		...data,
 		command,
 		options: transformSubcommands(data.subcommands, { command: data.name }),
-	};
+	});
 }
 
 export function transformSubcommands(

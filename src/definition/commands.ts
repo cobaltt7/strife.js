@@ -17,7 +17,7 @@ import type { MenuCommandContext, MenuCommandData } from "./commands/menu.js";
 import type { DEFAULT_GUILDS } from "../util.js";
 import type { AutocompleteHandler, Option } from "./commands/options.js";
 
-export const commands: Record<string, ApplicationCommandData> = {};
+export const commands: Record<string, ApplicationCommandData[]> = {};
 export const NoSubcommand = Symbol("no subcommand");
 export const autocompleters: Record<
 	string,

@@ -25,15 +25,17 @@ export function defineMenuCommand(
 	data: MenuCommandData<boolean, MenuCommandContext>,
 	command: (interaction: Extract<Interaction, { commandType: MenuCommandContext }>) => any,
 ): void {
-	if (commands[data.name])
+	const oldCommand = commands[data.name]?.[0];
+	if (oldCommand && oldCommand.command !== command)
 		throw new ReferenceError("Command " + data.name + " has already been defined");
 
-	commands[data.name] = {
+	commands[data.name] ??= [];
+	commands[data.name]?.push({
 		defaultMemberPermissions: data.restricted ? new PermissionsBitField() : null,
 		description: "",
 		...data,
 		command,
-	};
+	});
 }
 
 export type MenuCommandHandler = (

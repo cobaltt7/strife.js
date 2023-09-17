@@ -55,10 +55,12 @@ export function defineSubGroups(
 	data: SubGroupsData<boolean, SubGroupsOptions<boolean>>,
 	command: SubGroupsHandler,
 ): void {
-	if (commands[data.name])
+	const oldCommand = commands[data.name]?.[0];
+	if (oldCommand && oldCommand.command !== command)
 		throw new ReferenceError("Command " + data.name + " has already been defined");
 
-	commands[data.name] = {
+	commands[data.name] ??= [];
+	commands[data.name]?.push({
 		defaultMemberPermissions: data.restricted ? new PermissionsBitField() : null,
 		...data,
 		type: ApplicationCommandType.ChatInput,
@@ -77,7 +79,7 @@ export function defineSubGroups(
 				}),
 			}),
 		),
-	};
+	});
 }
 
 export type SubGroupsHandler = (

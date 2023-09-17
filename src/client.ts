@@ -20,14 +20,11 @@ import fileSystem from "node:fs/promises";
 import { defineEvent, type ClientEvent, type Event, getEvents } from "./definition/events.js";
 import { buttons, modals, selects } from "./definition/components.js";
 import { DEFAULT_GUILDS } from "./util.js";
-import { NoSubcommand, autocompleters, commands } from "./definition/commands.js";
-import type {
-	DefaultCommandAccess,
-	MenuCommandHandler,
-	RootCommandHandler,
-	SubGroupsHandler,
-	SubcommandHandler,
-} from "./index.js";
+import { NoSubcommand, autocompleters, commands, type DefaultCommandAccess } from "./definition/commands.js";
+import type { MenuCommandHandler } from "./definition/commands/menu.js";
+import type { SubGroupsHandler } from "./definition/commands/subGroups.js";
+import type { SubcommandHandler } from "./definition/commands/subcommands.js";
+import type { RootCommandHandler } from "./definition/commands/root.js";
 
 const globalCommandKey = Symbol("global");
 
@@ -151,13 +148,12 @@ export async function login(options: LoginOptions) {
 			return;
 		}
 
-		const command = commands[interaction.command?.name ?? ""];
+		const { command } = commands[interaction.command?.name ?? ""]?.[0] ?? {};
 
 		if (!command)
 			throw new ReferenceError(`Command \`${interaction.command?.name}\` not found`);
 
-		if (interaction.isContextMenuCommand())
-			await (command.command as MenuCommandHandler)(interaction);
+		if (interaction.isContextMenuCommand()) await (command as MenuCommandHandler)(interaction);
 		else {
 			const rawOptions =
 				interaction.options.data[0]?.options?.[0]?.options ??
@@ -185,14 +181,14 @@ export async function login(options: LoginOptions) {
 			const subGroup = interaction.options.getSubcommandGroup();
 			const subcommand = interaction.options.getSubcommand(false);
 			if (subGroup && subcommand)
-				await (command.command as SubGroupsHandler)(interaction, {
+				await (command as SubGroupsHandler)(interaction, {
 					subcommand,
 					subGroup: subGroup,
 					options,
 				});
 			else if (subcommand)
-				await (command.command as SubcommandHandler)(interaction, { subcommand, options });
-			else await (command.command as RootCommandHandler)(interaction, options);
+				await (command as SubcommandHandler)(interaction, { subcommand, options });
+			else await (command as RootCommandHandler)(interaction, options);
 		}
 	});
 
@@ -230,32 +226,38 @@ export async function login(options: LoginOptions) {
 		});
 	}
 
-	const defaultCommands =
+	const defaultGuilds =
 		options.defaultCommandAccess !== undefined &&
 		typeof options.defaultCommandAccess !== "boolean" &&
 		[options.defaultCommandAccess].flat();
 	const guildCommands = Object.entries(commands).reduce<{
 		[key: Snowflake]: ApplicationCommandData[];
 		[globalCommandKey]?: ApplicationCommandData[];
-	}>((accumulator, [name, command]) => {
-		const access = command.access ?? options.defaultCommandAccess ?? true;
-		if (typeof access === "boolean") {
-			accumulator[globalCommandKey] ??= [];
-			accumulator[globalCommandKey].push({ ...command, name, dmPermission: access });
-		} else {
-			const guilds = [access].flat();
-			if (guilds.includes(DEFAULT_GUILDS)) {
-				if (defaultCommands) guilds.push(...defaultCommands);
-				else {
-					throw new ReferenceError(
-						`Cannot use \`${DEFAULT_GUILDS}\` without explicitly setting default guilds`,
+	}>((accumulator, [name, commands]) => {
+		for (const command of commands) {
+			const access = command.access ?? options.defaultCommandAccess ?? true;
+			if (typeof access === "boolean") {
+				if (commands.length > 1)
+					throw new TypeError(
+						`Cannot set a boolean access on a command with a duplicate name`,
 					);
+				accumulator[globalCommandKey] ??= [];
+				accumulator[globalCommandKey].push({ ...command, name, dmPermission: access });
+			} else {
+				const guilds = [access].flat();
+				if (guilds.includes(DEFAULT_GUILDS)) {
+					if (defaultGuilds) guilds.push(...defaultGuilds);
+					else {
+						throw new ReferenceError(
+							`Cannot use \`${DEFAULT_GUILDS}\` without explicitly setting default guilds`,
+						);
+					}
 				}
-			}
-			for (const guild of guilds) {
-				if (guild === DEFAULT_GUILDS) continue;
-				accumulator[guild] ??= [];
-				accumulator[guild]?.push({ ...command, name });
+				for (const guild of guilds) {
+					if (guild === DEFAULT_GUILDS) continue;
+					accumulator[guild] ??= [];
+					accumulator[guild]?.push({ ...command, name });
+				}
 			}
 		}
 		return accumulator;
