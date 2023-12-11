@@ -1,0 +1,80 @@
+name: Lint
+on:
+    push:
+    pull_request_target:
+    workflow_dispatch:
+
+permissions: write-all
+
+jobs:
+    format:
+        name: Format
+        if: startsWith(github.ref_name, 'dependabot/') == false
+        runs-on: ubuntu-20.04
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4.1.1
+              with:
+                  ref: ${{ github.head_ref }}
+                  repository: ${{ github.event.pull_request.head.repo.full_name }}
+
+            - name: Setup Node.JS
+              uses: actions/setup-node@v4.0.0
+              with:
+                  node-version: "20.6.0"
+                  cache: npm
+
+            - name: Install
+              run: npm ci
+
+            - name: Format
+              run: npm run format
+
+            - name: Commit
+              uses: stefanzweifel/git-auto-commit-action@v5.0.0
+              with:
+                  commit_message: Format
+
+    analyze:
+        name: Analyze
+        runs-on: ubuntu-20.04
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4.1.1
+              with:
+                  ref: ${{ github.head_ref }}
+                  repository: ${{ github.event.pull_request.head.repo.full_name }}
+
+            - name: Setup CodeQL
+              uses: github/codeql-action/init@v2.3.3
+              with:
+                  languages: javascript
+                  queries: security-and-quality
+
+            - name: Analyze
+              uses: github/codeql-action/analyze@v2
+
+    build:
+        name: Build
+        runs-on: ubuntu-20.04
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4.1.1
+              with:
+                  ref: ${{ github.head_ref }}
+                  repository: ${{ github.event.pull_request.head.repo.full_name }}
+
+            - name: Setup Node.JS
+              uses: actions/setup-node@v4.0.0
+              with:
+                  node-version: "20.6.0"
+                  cache: npm
+
+            - name: Install
+              run: npm ci
+
+            - name: Build
+              run: npm run build
