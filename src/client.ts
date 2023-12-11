@@ -20,7 +20,12 @@ import fileSystem from "node:fs/promises";
 import { defineEvent, type ClientEvent, type Event, getEvents } from "./definition/events.js";
 import { buttons, modals, selects } from "./definition/components.js";
 import { DEFAULT_GUILDS } from "./util.js";
-import { NoSubcommand, autocompleters, commands, type DefaultCommandAccess } from "./definition/commands.js";
+import {
+	NoSubcommand,
+	autocompleters,
+	commands,
+	type DefaultCommandAccess,
+} from "./definition/commands.js";
 import type { MenuCommandHandler } from "./definition/commands/menu.js";
 import type { SubGroupsHandler } from "./definition/commands/subGroups.js";
 import type { SubcommandHandler } from "./definition/commands/subcommands.js";
