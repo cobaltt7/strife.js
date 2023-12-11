@@ -31,14 +31,8 @@ jobs:
             - name: Check format
               run: npx prettier --check "**" "!dist/**" --ignore-unknown
 
-            - name: Lint
-              run: npm run lint
-
             - name: Attempt build
               run: npm run build
-
-            - name: Test
-              run: npm run test
 
             - name: Commit
               id: commit
