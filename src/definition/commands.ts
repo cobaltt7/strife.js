@@ -66,7 +66,7 @@ export function transformOptions(
 				transformed.choices = Object.entries(option.choices)
 					.map(([choice, value]) => ({
 						name: choice,
-						value,
+						value, // todo: oops
 					}))
 					.sort((one, two) => one.name.localeCompare(two.name));
 

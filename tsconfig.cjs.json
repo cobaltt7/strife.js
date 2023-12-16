@@ -1,0 +1,10 @@
+{
+	"compilerOptions": {
+		"module": "CommonJS",
+		"moduleResolution": "Node16",
+		"outDir": "dist/cjs",
+		"resolveJsonModule": true,
+		"target": "ES2020"
+	},
+	"extends": "./tsconfig.json"
+}

@@ -1,0 +1,12 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"declaration": true,
+		"emitDeclarationOnly": true,
+		"module": "ES2020",
+		"moduleResolution": "NodeNext",
+		"outDir": "dist/types",
+		"resolveJsonModule": true,
+		"target": "ES2021"
+	}
+}
