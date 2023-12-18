@@ -35,5 +35,5 @@
 	"engines": {
 		"node": ">=18.11.1",
 		"npm": ">=8.0.0"
-	}
+	}, "overrides":{"discord-api-types": "0.37.53"}
 }
