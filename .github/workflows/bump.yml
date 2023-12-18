@@ -28,15 +28,15 @@ jobs:
             - name: Install
               run: npm ci
 
-            - name: Check format
-              run: npx prettier --check "**" "!dist/**" --ignore-unknown
+            - name: Format
+              run: npm run format
 
             - name: Attempt build
               run: npm run build
 
             - name: Exit on failure
               if: failure()
-              run: exit 0
+              run: exit 1
 
             - name: Commit
               id: commit
