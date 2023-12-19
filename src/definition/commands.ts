@@ -64,10 +64,7 @@ export function transformOptions(
 
 			if (option.choices)
 				transformed.choices = Object.entries(option.choices)
-					.map(([choice, value]) => ({
-						name: choice,
-						value, // todo: oops
-					}))
+					.map(([value, name]) => ({ value, name }))
 					.sort((one, two) => one.name.localeCompare(two.name));
 
 			transformed.channelTypes = option.channelTypes ?? [

@@ -1,4 +1,4 @@
-import { type CacheType } from "discord.js";
+import type { CacheType } from "discord.js";
 
 export type CacheReducer<InGuild extends boolean> = InGuild extends true
 	? "cached" | "raw"

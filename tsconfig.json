@@ -1,17 +1,16 @@
 {
 	"compilerOptions": {
 		"allowJs": true,
-		"baseUrl": "./",
-		"checkJs": true,
 		"allowUnreachableCode": false,
 		"allowUnusedLabels": false,
+		"baseUrl": "./",
+		"checkJs": true,
+		"declaration": true,
+		"declarationMap": true,
 		"esModuleInterop": true,
-		"experimentalDecorators": true,
 		"forceConsistentCasingInFileNames": true,
-		"isolatedModules": true,
-		"jsx": "preserve",
-		"lib": ["ESNext", "DOM"],
-		"maxNodeModuleJsDepth": 0,
+		"importHelpers": true,
+		"module": "NodeNext",
 		"noEmitOnError": true,
 		"noErrorTruncation": true,
 		"noFallthroughCasesInSwitch": true,
@@ -19,9 +18,11 @@
 		"noUncheckedIndexedAccess": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
+		"outDir": "dist",
+		"resolveJsonModule": true,
 		"sourceMap": true,
 		"strict": true,
-		"stripInternal": true
+		"target": "es2021",		"verbatimModuleSyntax": true
 	},
 	"exclude": ["node_modules", ".git", "dist"],
 	"typeAcquisition": { "enable": true }

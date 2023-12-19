@@ -369,6 +369,7 @@ This guide references the following imported values in inline code blocks:
 
 ```js
 import {
+	ApplicationCommandType,
 	type ApplicationCommandOptionType
 	type AutocompleteInteraction,
 	type Awaitable,
@@ -377,10 +378,8 @@ import {
 	type RepliableInteraction,
 	type Snowflake,
 	type SelectMenuType,
-	ApplicationCommandType,
 } from "discord.js";
 import {
-	type ClientEvent,
 	defineButton,
 	defineChatCommand,
 	defineSubcommands,
@@ -389,6 +388,7 @@ import {
 	defineEvent,
 	defineModal,
 	defineSelect,
+	type ClientEvent,
 } from "strife.js";
 import path from "node:path";
 import url from "node:url";

@@ -1,14 +1,8 @@
 {
 	"name": "strife.js",
-	"version": "3.1.3",
-	"exports": {
-		".": {
-			"types": "./dist/types/index.d.ts",
-			"require": "./dist/cjs/index.js",
-			"import": "./dist/esm/index.js",
-			"default": "./dist/esm/index.js"
-		}
-	},
+	"version": "4.0.0",
+	"type": "module",
+	"main": "./dist/index.js",
 	"files": [
 		"dist",
 		"src",
@@ -17,11 +11,14 @@
 		"LICENSE"
 	],
 	"scripts": {
-		"build": "rm -rf dist && tsc --build tsconfig.cjs.json tsconfig.esm.json tsconfig.types.json && echo {\"type\":\"module\"} > ./dist/esm/package.json",
+		"build": "rm -rf dist && tsc --build tsconfig.json",
 		"dev": "npm run build && tsc --project tsconfig.esm.json --watch",
 		"format": "prettier --write \"**\" \"!dist/**\" --ignore-unknown"
 	},
 	"prettier": "@redguy12/prettier-config",
+	"dependencies": {
+		"tslib": "2.6.2"
+	},
 	"devDependencies": {
 		"@redguy12/prettier-config": "2.0.2",
 		"@types/node": "<=18.11.1",
