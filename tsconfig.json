@@ -22,7 +22,8 @@
 		"resolveJsonModule": true,
 		"sourceMap": true,
 		"strict": true,
-		"target": "es2021",		"verbatimModuleSyntax": true
+		"target": "es2021",
+		"verbatimModuleSyntax": true
 	},
 	"exclude": ["node_modules", ".git", "dist"],
 	"typeAcquisition": { "enable": true }
