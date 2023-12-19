@@ -143,7 +143,7 @@ Some types of options have additional customization fields:
 -   `Channel` options allow `channelTypes` (`ChannelType[]`) to define allowed channel types for this option. Defaults to all supported guild channel types.
 -   `Integer` and `Number` options allow `minValue` and/or `maxValue` to define lower and upper bounds for this option respectively. Defaults to `-2 ** 53` and `2 ** 53` respectively.
 -   `String` commands allow a few additional fields:
-    -   `choices` (`Record<string, string>`) to require users to pick values from a predefined list. The keys are the descriptions displayed to the users and the values are what is passed to your bot. No other additional fields are allowed for this option when using `choices`.
+    -   `choices` (`Record<string, string>`) to require users to pick values from a predefined list. The keys are the values passed to your bot and the values are the descriptions displayed to the users. No other additional fields are allowed for this option when using `choices`.
     -   `minLength` (`number`) and/or `maxLength` (`number`) to define lower and upper bounds for this option's length respectively. Defaults to `0` and `6_000` respectively.
     -   `autocomplete` (`(interaction: AutocompleteInteraction) => ApplicationCommandOptionChoiceData<string>[]`) to give users dynamic choices.
         -   Use `interaction.options.getFocused()` to get the value of the option so far. You can also use `interaction.options.getBoolean()`, `.getInteger()`, `.getNumber()`, and `.getString()`. Other option-getters will not work, use `interaction.options.get()` instead.
