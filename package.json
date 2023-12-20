@@ -1,7 +1,6 @@
 {
 	"name": "strife.js",
 	"version": "4.0.1",
-	
 	"type": "module",
 	"main": "./dist/index.js",
 	"files": [
