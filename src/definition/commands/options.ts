@@ -103,5 +103,5 @@ export type OptionToType<InGuild extends boolean, O extends Option<InGuild>> = {
 	[ApplicationCommandOptionType.Number]: number;
 	[ApplicationCommandOptionType.String]: O extends StringAutocompleteOption<InGuild>
 		? string
-		: keyof O["choices"];
+		: O["choices"][keyof O["choices"]];
 }[O["type"]];
