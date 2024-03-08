@@ -64,7 +64,7 @@ export async function login(options: LoginOptions) {
 	Handler.on("debug", (message) => {
 		if (
 			process.env.NODE_ENV !== "production" ||
-			!(message.includes("Sending a heartbeat") || message.includes("Heartbeat acknowledged"))
+			!(message.includes("Sending a heartbeat") || ( process.env.LOG_HEARTBEATS == "true" && message.includes("Heartbeat acknowledged")))
 		)
 			console.debug(message);
 	})
