@@ -92,9 +92,10 @@ export type OptionToType<InGuild extends boolean, O extends Option<InGuild>> = {
 	[ApplicationCommandOptionType.Role]: Role | (InGuild extends true ? never : undefined);
 	[ApplicationCommandOptionType.Boolean]: boolean;
 	[ApplicationCommandOptionType.User]: GuildMember | User;
-	[ApplicationCommandOptionType.Channel]: (O["channelTypes"] extends ChannelType[]
-			? Exclude<GuildBasedChannel, { type: O["channelTypes"] }>
-			: GuildBasedChannel)
+	[ApplicationCommandOptionType.Channel]:
+		| (O["channelTypes"] extends ChannelType[]
+				? Exclude<GuildBasedChannel, { type: O["channelTypes"] }>
+				: GuildBasedChannel)
 		| (InGuild extends true ? never : undefined);
 	[ApplicationCommandOptionType.Integer]: number;
 	[ApplicationCommandOptionType.Number]: number;
@@ -102,4 +103,3 @@ export type OptionToType<InGuild extends boolean, O extends Option<InGuild>> = {
 		? string
 		: O["choices"][keyof O["choices"]];
 }[O["type"]];
-
