@@ -63,7 +63,7 @@ export function transformSubcommands(
 	metadata: { command: string; subGroup?: string },
 ): ApplicationCommandSubCommandData[] {
 	return Object.entries(subcommands).map(
-		([subcommand, command]: [string, typeof subcommands[string]]) => ({
+		([subcommand, command]: [string, (typeof subcommands)[string]]) => ({
 			name: subcommand,
 			description: command.description,
 			type: ApplicationCommandOptionType.Subcommand,

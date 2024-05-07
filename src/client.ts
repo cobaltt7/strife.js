@@ -110,9 +110,10 @@ export async function login(options: LoginOptions) {
 
 	const promises = modules.map(async (module) => {
 		const fullPath = path.join(directory, module);
-		const resolved = (await fileSystem.lstat(fullPath)).isDirectory()
-			? path.join(fullPath, "./index.js")
-			: fullPath;
+		const resolved =
+			(await fileSystem.lstat(fullPath)).isDirectory() ?
+				path.join(fullPath, "./index.js")
+			:	fullPath;
 		if (path.extname(resolved) !== ".js") return;
 
 		await import(url.pathToFileURL(path.resolve(directory, resolved)).toString());
@@ -170,14 +171,14 @@ export async function login(options: LoginOptions) {
 					[
 						option.name,
 						option.attachment ||
-							(!option.channel || option.channel instanceof GuildChannel
-								? option.channel
-								: await interaction.guild?.channels.fetch(option.channel.id)) ||
+							(!option.channel || option.channel instanceof GuildChannel ?
+								option.channel
+							:	await interaction.guild?.channels.fetch(option.channel.id)) ||
 							(option.member instanceof GuildMember && option.member) ||
 							option.user ||
-							(!option.role || option.role instanceof Role
-								? option.role
-								: await interaction.guild?.roles.fetch(option.role.id)) ||
+							(!option.role || option.role instanceof Role ?
+								option.role
+							:	await interaction.guild?.roles.fetch(option.role.id)) ||
 							option.value,
 					] as const,
 			);
@@ -203,9 +204,9 @@ export async function login(options: LoginOptions) {
 				await execute(...args);
 			} catch (error) {
 				const interaction =
-					args[0] instanceof BaseInteraction && !args[0].isAutocomplete()
-						? args[0]
-						: undefined;
+					args[0] instanceof BaseInteraction && !args[0].isAutocomplete() ?
+						args[0]
+					:	undefined;
 				await handleError(error, interaction ? interaction : event);
 
 				if (!options.commandErrorMessage) return;
@@ -303,20 +304,18 @@ export type LoginOptions = {
 	botToken?: string;
 	commandErrorMessage?: string;
 	handleError?: typeof defaultErrorHandler;
-} & (DefaultCommandAccess extends { inGuild: true }
-	? { defaultCommandAccess: false | Snowflake | Snowflake[] }
-	: { defaultCommandAccess?: true });
+} & (DefaultCommandAccess extends { inGuild: true } ?
+	{ defaultCommandAccess: false | Snowflake | Snowflake[] }
+:	{ defaultCommandAccess?: true });
 export function defaultErrorHandler(
 	error: any,
 	event: string | RepliableInteraction,
 ): Awaitable<void> {
 	console.error(
 		`[${
-			typeof event == "string"
-				? event
-				: event.isCommand()
-				? `/${event.command?.name}`
-				: `${event.constructor.name}: ${event.customId}`
+			typeof event == "string" ? event
+			: event.isCommand() ? `/${event.command?.name}`
+			: `${event.constructor.name}: ${event.customId}`
 		}]`,
 		error,
 	);

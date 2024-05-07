@@ -40,11 +40,12 @@ export function getEvents(): { [E in ClientEvent]?: Event } {
 			if (failures.length) throw new AggregateError(failures);
 		};
 
-		parsedEvents[eventName] = preEvent
-			? async function (...args: any) {
+		parsedEvents[eventName] =
+			preEvent ?
+				async function (...args: any) {
 					if (await preEvent(...args)) await event(...args);
-			  }
-			: event;
+				}
+			:	event;
 	}
 
 	return parsedEvents;

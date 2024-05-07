@@ -46,10 +46,10 @@ export function defineSelect(
 	if (!handler) throw new TypeError("No handler passed in for select menu " + selectName);
 
 	selects[selectName] =
-		types === true
-			? handler
-			: (interaction, id) =>
-					types.includes(interaction.componentType) && handler(interaction, id);
+		types === true ? handler : (
+			(interaction, id) =>
+				types.includes(interaction.componentType) && handler(interaction, id)
+		);
 }
 
 type SelectHandler<type extends SelectMenuType = SelectMenuType> = (
