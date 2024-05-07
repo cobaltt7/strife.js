@@ -88,20 +88,18 @@ export type OptionsToType<InGuild extends boolean, Options extends RootCommandOp
 
 export type OptionToType<InGuild extends boolean, O extends Option<InGuild>> = {
 	[ApplicationCommandOptionType.Attachment]: Attachment;
-	[ApplicationCommandOptionType.Mentionable]: InGuild extends true
-		? GuildMember | Role | User
-		: User;
-	[ApplicationCommandOptionType.Role]: InGuild extends true ? Role : never;
+	[ApplicationCommandOptionType.Mentionable]: GuildMember | Role | User;
+	[ApplicationCommandOptionType.Role]: Role | (InGuild extends true ? never : undefined);
 	[ApplicationCommandOptionType.Boolean]: boolean;
 	[ApplicationCommandOptionType.User]: GuildMember | User;
-	[ApplicationCommandOptionType.Channel]: InGuild extends true
-		? O["channelTypes"] extends ChannelType[]
+	[ApplicationCommandOptionType.Channel]: (O["channelTypes"] extends ChannelType[]
 			? Exclude<GuildBasedChannel, { type: O["channelTypes"] }>
-			: GuildBasedChannel
-		: never;
+			: GuildBasedChannel)
+		| (InGuild extends true ? never : undefined);
 	[ApplicationCommandOptionType.Integer]: number;
 	[ApplicationCommandOptionType.Number]: number;
 	[ApplicationCommandOptionType.String]: O extends StringAutocompleteOption<InGuild>
 		? string
 		: O["choices"][keyof O["choices"]];
 }[O["type"]];
+
