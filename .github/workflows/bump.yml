@@ -3,6 +3,13 @@ on:
     workflow_dispatch:
     schedule:
         - cron: 45 11 * * * # 60 min before Dependabot
+    push:
+        paths:
+            - package.json
+            - package-lock.json
+            - .github/workflows/bump.yml
+        branches:
+            - main
 
 permissions: write-all
 
@@ -22,7 +29,7 @@ jobs:
             - name: Setup Node.JS
               uses: actions/setup-node@v4.0.2
               with:
-                  node-version: "20.6.0"
+                  node-version: 20.6.0
                   cache: npm
 
             - name: Install
