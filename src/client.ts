@@ -250,9 +250,9 @@ export async function login(options: LoginOptions) {
 				accumulator[globalCommandKey] ??= [];
 				accumulator[globalCommandKey].push({ ...command, name, dmPermission: access });
 			} else {
-				const guilds = [access].flat();
-				if (guilds.includes(DEFAULT_GUILDS)) {
-					if (defaultGuilds) guilds.push(...defaultGuilds);
+				const guilds = new Set([access].flat());
+				if (guilds.has(DEFAULT_GUILDS)) {
+					if (defaultGuilds) guilds.add(...defaultGuilds);
 					else {
 						throw new ReferenceError(
 							`Cannot use \`${DEFAULT_GUILDS}\` without explicitly setting default guilds`,
