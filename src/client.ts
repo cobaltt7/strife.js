@@ -272,13 +272,8 @@ export async function login(options: LoginOptions) {
 	const guilds = await client.guilds.fetch();
 	await Promise.all(
 		guilds.map(async (guild) => {
-			const commandData = guildCommands[guild.id];
-			if (commandData) {
-				await client.application.commands.set(commandData, guild.id);
-				guildCommands[guild.id] = [];
-				return;
-			}
-			await client.application.commands.set([], guild.id).catch(() => {});
+			await client.application.commands.set(guildCommands[guild.id] ?? [], guild.id);
+			guildCommands[guild.id] = [];
 		}),
 	);
 
