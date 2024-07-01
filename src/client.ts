@@ -252,17 +252,19 @@ export async function login(options: LoginOptions) {
 			} else {
 				const guilds = new Set([access].flat());
 				if (guilds.has(DEFAULT_GUILDS)) {
-					if (defaultGuilds) guilds.add(...defaultGuilds);
-					else {
-						throw new ReferenceError(
-							`Cannot use \`${DEFAULT_GUILDS}\` without explicitly setting default guilds`,
-						);
-					}
+				    if (defaultGuilds) {
+        				for (let guild of defaultGuilds) guilds.add(guild);
+        				guilds.delete(DEFAULT_GUILDS);
+    				}
+    				else {
+        				throw new ReferenceError(
+            				`Cannot use \`${DEFAULT_GUILDS}\` without explicitly setting default guilds`,
+        				);
+    				}
 				}
 				for (const guild of guilds) {
-					if (guild === DEFAULT_GUILDS) continue;
-					accumulator[guild] ??= [];
-					accumulator[guild]?.push({ ...command, name });
+    				accumulator[guild] ??= [];
+    				accumulator[guild]?.push({ ...command, name });
 				}
 			}
 		}
