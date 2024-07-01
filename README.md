@@ -248,7 +248,7 @@ declare module "strife.js" {
 }
 ```
 
-Commands also support a root-level `access` option to override this on a per-command basis. It supports the same options, with the addition of `@default` in the array of `Snowflake`s to extend the default guilds. `@default` is not available if `defaultCommandAccess` is unset or is set to a boolean.
+Commands also support a root-level `access` option to override this on a per-command basis. It supports the same options, with the addition of `@defaults` in the array of `Snowflake`s to extend the default guilds. `@defaults` is not available if `defaultCommandAccess` is unset or is set to a boolean.
 
 #### Augments
 
