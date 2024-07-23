@@ -9,20 +9,19 @@ permissions: write-all
 jobs:
     format:
         name: Format
-        if: startsWith(github.ref_name, 'dependabot/') == false
         runs-on: ubuntu-20.04
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v4.1.1
+              uses: actions/checkout@v4.1.7
               with:
                   ref: ${{ github.head_ref }}
                   repository: ${{ github.event.pull_request.head.repo.full_name }}
 
             - name: Setup Node.JS
-              uses: actions/setup-node@v4.0.1
+              uses: actions/setup-node@v4.0.3
               with:
-                  node-version: "20.6.0"
+                  node-version: 20.6.0
                   cache: npm
 
             - name: Install
@@ -31,8 +30,12 @@ jobs:
             - name: Format
               run: npm run format
 
+            - name: Assert clean
+              if: startsWith(github.ref_name, 'dependabot/') == true
+              run: if [[ `git status --porcelain` ]]; then exit 1; fi
+
             - name: Commit
-              uses: stefanzweifel/git-auto-commit-action@v5.0.0
+              uses: stefanzweifel/git-auto-commit-action@v5.0.1
               with:
                   commit_message: Format
 
@@ -42,19 +45,19 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v4.1.1
+              uses: actions/checkout@v4.1.7
               with:
                   ref: ${{ github.head_ref }}
                   repository: ${{ github.event.pull_request.head.repo.full_name }}
 
             - name: Setup CodeQL
-              uses: github/codeql-action/init@v2.3.3
+              uses: github/codeql-action/init@v3.25.13
               with:
                   languages: javascript
                   queries: security-and-quality
 
             - name: Analyze
-              uses: github/codeql-action/analyze@v2
+              uses: github/codeql-action/analyze@v3.25.13
 
     build:
         name: Build
@@ -62,15 +65,15 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v4.1.1
+              uses: actions/checkout@v4.1.7
               with:
                   ref: ${{ github.head_ref }}
                   repository: ${{ github.event.pull_request.head.repo.full_name }}
 
             - name: Setup Node.JS
-              uses: actions/setup-node@v4.0.1
+              uses: actions/setup-node@v4.0.3
               with:
-                  node-version: "20.6.0"
+                  node-version: 20.6.0
                   cache: npm
 
             - name: Install

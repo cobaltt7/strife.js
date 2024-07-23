@@ -36,7 +36,6 @@ export const autocompleters: Record<
  * Convert our custom options format to something the Discord API will accept.
  *
  * @param options - The options to convert.
- *
  * @returns The converted options.
  */
 export function transformOptions(
@@ -95,11 +94,9 @@ export function transformOptions(
 			>;
 		})
 		.sort((one, two) =>
-			one.required === two.required
-				? one.name.localeCompare(two.name)
-				: one.required
-				? -1
-				: 1,
+			one.required === two.required ? one.name.localeCompare(two.name)
+			: one.required ? -1
+			: 1,
 		);
 }
 
@@ -124,25 +121,26 @@ export type BaseChatCommandData<InGuild extends boolean> = {
 	AugmentedChatCommandData<InGuild>;
 export interface AugmentedChatCommandData<_InGuild extends boolean> {}
 
-export type BaseCommandData<InGuild extends boolean> = (InGuild extends true
-	? BaseGuildCommandData
-	: BaseGlobalCommandData) &
+export type BaseCommandData<InGuild extends boolean> = (InGuild extends true ? BaseGuildCommandData
+:	BaseGlobalCommandData) &
 	AugmentedCommandData<InGuild>;
 export interface AugmentedCommandData<_InGuild extends boolean> {}
 export type BaseGuildCommandData = {
 	name: string;
 	restricted?: boolean;
-} & (DefaultCommandAccess extends { inGuild: true }
-	? { access?: false | Snowflake | (Snowflake | typeof DEFAULT_GUILDS)[] }
-	: { access: false | Snowflake | (Snowflake | typeof DEFAULT_GUILDS)[] });
+} & (DefaultCommandAccess extends { inGuild: true } ?
+	{ access?: false | Snowflake | (Snowflake | typeof DEFAULT_GUILDS)[] }
+:	{ access: false | Snowflake | (Snowflake | typeof DEFAULT_GUILDS)[] });
 export type BaseGlobalCommandData = {
 	name: string;
 	restricted?: never;
-} & (DefaultCommandAccess extends {
-	inGuild: true;
-}
-	? { access: true }
-	: { access?: true });
+} & (DefaultCommandAccess extends (
+	{
+		inGuild: true;
+	}
+) ?
+	{ access: true }
+:	{ access?: true });
 export type BaseCommandKeys = keyof BaseCommandData<boolean>;
 
 export interface DefaultCommandAccess {}

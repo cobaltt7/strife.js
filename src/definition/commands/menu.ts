@@ -54,4 +54,4 @@ export interface AugmentedMenuCommandData<
 	_InGuild extends boolean,
 	_Context extends MenuCommandContext,
 > {}
-export type MenuCommandContext = typeof ApplicationCommandType["Message" | "User"];
+export type MenuCommandContext = (typeof ApplicationCommandType)["Message" | "User"];

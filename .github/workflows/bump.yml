@@ -3,6 +3,13 @@ on:
     workflow_dispatch:
     schedule:
         - cron: 45 11 * * * # 60 min before Dependabot
+    push:
+        paths:
+            - package.json
+            - package-lock.json
+            - .github/workflows/bump.yml
+        branches:
+            - main
 
 permissions: write-all
 
@@ -13,16 +20,16 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v4.1.1
+              uses: actions/checkout@v4.1.7
 
             - name: Bump
               id: sync_types
-              uses: RedGuy12/sync-types@v2.0.0
+              uses: RedGuy12/sync-types@v2.1.1
 
             - name: Setup Node.JS
-              uses: actions/setup-node@v4.0.1
+              uses: actions/setup-node@v4.0.3
               with:
-                  node-version: "20.6.0"
+                  node-version: 20.6.0
                   cache: npm
 
             - name: Install
@@ -40,7 +47,7 @@ jobs:
 
             - name: Commit
               id: commit
-              uses: stefanzweifel/git-auto-commit-action@v5.0.0
+              uses: stefanzweifel/git-auto-commit-action@v5.0.1
               with:
                   commit_message: Bump dependencies
 

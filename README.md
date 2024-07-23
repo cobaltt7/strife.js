@@ -101,7 +101,7 @@ defineChatCommand(
 
 	async (interaction) => {
 		await interaction.reply("Pong!");
-	}
+	},
 );
 ```
 
@@ -132,7 +132,7 @@ defineChatCommand(
 
 	async (interaction, options) => {
 		// code here...
-	}
+	},
 );
 ```
 
@@ -173,7 +173,7 @@ defineSubcommands(
 
 	async (interaction, { subcommand, options }) => {
 		// code here...
-	}
+	},
 );
 ```
 
@@ -205,7 +205,7 @@ defineSubGroups(
 
 	async (interaction, { subcommand, subGroup, options }) => {
 		// code here...
-	}
+	},
 );
 ```
 
@@ -228,7 +228,7 @@ defineMenuCommand(
 
 	async (interaction) => {
 		// code here...
-	}
+	},
 );
 ```
 
@@ -248,7 +248,7 @@ declare module "strife.js" {
 }
 ```
 
-Commands also support a root-level `access` option to override this on a per-command basis. It supports the same options, with the addition of `@default` in the array of `Snowflake`s to extend the default guilds. `@default` is not available if `defaultCommandAccess` is unset or is set to a boolean.
+Commands also support a root-level `access` option to override this on a per-command basis. It supports the same options, with the addition of `@defaults` in the array of `Snowflake`s to extend the default guilds. `@defaults` is not available if `defaultCommandAccess` is unset or is set to a boolean.
 
 #### Augments
 
@@ -258,20 +258,20 @@ You can define custom command properties by using augments (advanced usage):
 declare module "strife.js" {
 	export interface AugmentedMenuCommandData<
 		InGuild extends boolean,
-		Context extends MenuCommandContext
+		Context extends MenuCommandContext,
 	> {}
 
 	export interface AugmentedRootCommandData<
 		InGuild extends boolean,
-		Options extends RootCommandOptions<InGuild>
+		Options extends RootCommandOptions<InGuild>,
 	> {}
 	export interface AugmentedSubcommandData<
 		InGuild extends boolean,
-		Options extends SubcommandOptions<InGuild>
+		Options extends SubcommandOptions<InGuild>,
 	> {}
 	export interface AugmentedSubGroupsData<
 		InGuild extends boolean,
-		Options extends SubGroupsOptions<InGuild>
+		Options extends SubGroupsOptions<InGuild>,
 	> {}
 
 	export interface AugmentedChatCommandData<InGuild extends boolean> {}

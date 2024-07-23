@@ -8,12 +8,13 @@
 		"declaration": true,
 		"declarationMap": true,
 		"esModuleInterop": true,
+		"experimentalDecorators": true,
 		"forceConsistentCasingInFileNames": true,
-		"importHelpers": true,
+		"incremental": true,
+		"isolatedModules": true,
 		"module": "NodeNext",
 		"noEmitOnError": true,
 		"noErrorTruncation": true,
-		"noFallthroughCasesInSwitch": true,
 		"noImplicitOverride": true,
 		"noUncheckedIndexedAccess": true,
 		"noUnusedLocals": true,
@@ -23,8 +24,10 @@
 		"sourceMap": true,
 		"strict": true,
 		"target": "es2021",
+		"types": ["node"],
 		"verbatimModuleSyntax": true
 	},
-	"exclude": ["node_modules", ".git", "dist"],
-	"typeAcquisition": { "enable": true }
+	"exclude": ["./node_modules", "./.git", "./dist"],
+	"typeAcquisition": { "enable": true },
+	"include": ["./**/*"]
 }

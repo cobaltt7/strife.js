@@ -113,9 +113,10 @@ export async function login(options: LoginOptions) {
 
 	const promises = modules.map(async (module) => {
 		const fullPath = path.join(directory, module);
-		const resolved = (await fileSystem.lstat(fullPath)).isDirectory()
-			? path.join(fullPath, "./index.js")
-			: fullPath;
+		const resolved =
+			(await fileSystem.lstat(fullPath)).isDirectory() ?
+				path.join(fullPath, "./index.js")
+			:	fullPath;
 		if (path.extname(resolved) !== ".js") return;
 
 		await import(url.pathToFileURL(path.resolve(directory, resolved)).toString());
@@ -173,14 +174,14 @@ export async function login(options: LoginOptions) {
 					[
 						option.name,
 						option.attachment ||
-							(!option.channel || option.channel instanceof GuildChannel
-								? option.channel
-								: await interaction.guild?.channels.fetch(option.channel.id)) ||
+							(!option.channel || option.channel instanceof GuildChannel ?
+								option.channel
+							:	await interaction.guild?.channels.fetch(option.channel.id)) ||
 							(option.member instanceof GuildMember && option.member) ||
 							option.user ||
-							(!option.role || option.role instanceof Role
-								? option.role
-								: await interaction.guild?.roles.fetch(option.role.id)) ||
+							(!option.role || option.role instanceof Role ?
+								option.role
+							:	await interaction.guild?.roles.fetch(option.role.id)) ||
 							option.value,
 					] as const,
 			);
@@ -206,9 +207,9 @@ export async function login(options: LoginOptions) {
 				await execute(...args);
 			} catch (error) {
 				const interaction =
-					args[0] instanceof BaseInteraction && !args[0].isAutocomplete()
-						? args[0]
-						: undefined;
+					args[0] instanceof BaseInteraction && !args[0].isAutocomplete() ?
+						args[0]
+					:	undefined;
 				await handleError(error, interaction ? interaction : event);
 
 				if (!options.commandErrorMessage) return;
@@ -252,17 +253,18 @@ export async function login(options: LoginOptions) {
 				accumulator[globalCommandKey] ??= [];
 				accumulator[globalCommandKey].push({ ...command, name, dmPermission: access });
 			} else {
-				const guilds = [access].flat();
-				if (guilds.includes(DEFAULT_GUILDS)) {
-					if (defaultGuilds) guilds.push(...defaultGuilds);
-					else {
+				const guilds = new Set([access].flat());
+				if (guilds.has(DEFAULT_GUILDS)) {
+					if (defaultGuilds) {
+						for (let guild of defaultGuilds) guilds.add(guild);
+						guilds.delete(DEFAULT_GUILDS);
+					} else {
 						throw new ReferenceError(
 							`Cannot use \`${DEFAULT_GUILDS}\` without explicitly setting default guilds`,
 						);
 					}
 				}
 				for (const guild of guilds) {
-					if (guild === DEFAULT_GUILDS) continue;
 					accumulator[guild] ??= [];
 					accumulator[guild]?.push({ ...command, name });
 				}
@@ -274,13 +276,8 @@ export async function login(options: LoginOptions) {
 	const guilds = await client.guilds.fetch();
 	await Promise.all(
 		guilds.map(async (guild) => {
-			const commandData = guildCommands[guild.id];
-			if (commandData) {
-				await client.application.commands.set(commandData, guild.id);
-				guildCommands[guild.id] = [];
-				return;
-			}
-			await client.application.commands.set([], guild.id).catch(() => {});
+			await client.application.commands.set(guildCommands[guild.id] ?? [], guild.id);
+			guildCommands[guild.id] = [];
 		}),
 	);
 
@@ -306,20 +303,18 @@ export type LoginOptions = {
 	botToken?: string;
 	commandErrorMessage?: string;
 	handleError?: typeof defaultErrorHandler;
-} & (DefaultCommandAccess extends { inGuild: true }
-	? { defaultCommandAccess: false | Snowflake | Snowflake[] }
-	: { defaultCommandAccess?: true });
+} & (DefaultCommandAccess extends { inGuild: true } ?
+	{ defaultCommandAccess: false | Snowflake | Snowflake[] }
+:	{ defaultCommandAccess?: true });
 export function defaultErrorHandler(
 	error: any,
 	event: string | RepliableInteraction,
 ): Awaitable<void> {
 	console.error(
 		`[${
-			typeof event == "string"
-				? event
-				: event.isCommand()
-				? `/${event.command?.name}`
-				: `${event.constructor.name}: ${event.customId}`
+			typeof event == "string" ? event
+			: event.isCommand() ? `/${event.command?.name}`
+			: `${event.constructor.name}: ${event.customId}`
 		}]`,
 		error,
 	);

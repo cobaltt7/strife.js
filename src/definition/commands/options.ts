@@ -20,7 +20,7 @@ export type Option<InGuild extends boolean> =
 	| StringChoicesOption;
 
 export interface BasicOption extends BaseOption {
-	type: typeof ApplicationCommandOptionType[
+	type: (typeof ApplicationCommandOptionType)[
 		| "Attachment"
 		| "Boolean"
 		| "Mentionable"
@@ -35,7 +35,7 @@ export interface BasicOption extends BaseOption {
 	autocomplete?: never;
 }
 export interface NumericalOption extends BaseOption {
-	type: typeof ApplicationCommandOptionType["Integer" | "Number"];
+	type: (typeof ApplicationCommandOptionType)["Integer" | "Number"];
 	minValue?: number;
 	maxValue?: number;
 	choices?: never;
@@ -81,27 +81,24 @@ export interface BaseOption {
 }
 
 export type OptionsToType<InGuild extends boolean, Options extends RootCommandOptions<InGuild>> = {
-	[OptionName in keyof Options]: Options[OptionName]["required"] extends true
-		? OptionToType<InGuild, Options[OptionName]>
-		: OptionToType<InGuild, Options[OptionName]> | undefined;
+	[OptionName in keyof Options]: Options[OptionName]["required"] extends true ?
+		OptionToType<InGuild, Options[OptionName]>
+	:	OptionToType<InGuild, Options[OptionName]> | undefined;
 };
 
 export type OptionToType<InGuild extends boolean, O extends Option<InGuild>> = {
 	[ApplicationCommandOptionType.Attachment]: Attachment;
-	[ApplicationCommandOptionType.Mentionable]: InGuild extends true
-		? GuildMember | Role | User
-		: User;
-	[ApplicationCommandOptionType.Role]: InGuild extends true ? Role : never;
+	[ApplicationCommandOptionType.Mentionable]: GuildMember | Role | User;
+	[ApplicationCommandOptionType.Role]: Role | (InGuild extends true ? never : undefined);
 	[ApplicationCommandOptionType.Boolean]: boolean;
 	[ApplicationCommandOptionType.User]: GuildMember | User;
-	[ApplicationCommandOptionType.Channel]: InGuild extends true
-		? O["channelTypes"] extends ChannelType[]
-			? Exclude<GuildBasedChannel, { type: O["channelTypes"] }>
-			: GuildBasedChannel
-		: never;
+	[ApplicationCommandOptionType.Channel]:
+		| (O["channelTypes"] extends ChannelType[] ?
+				Exclude<GuildBasedChannel, { type: O["channelTypes"] }>
+		  :	GuildBasedChannel)
+		| (InGuild extends true ? never : undefined);
 	[ApplicationCommandOptionType.Integer]: number;
 	[ApplicationCommandOptionType.Number]: number;
-	[ApplicationCommandOptionType.String]: O extends StringAutocompleteOption<InGuild>
-		? string
-		: O["choices"][keyof O["choices"]];
+	[ApplicationCommandOptionType.String]: O extends StringAutocompleteOption<InGuild> ? string
+	:	O["choices"][keyof O["choices"]];
 }[O["type"]];
