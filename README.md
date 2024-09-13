@@ -2,6 +2,8 @@
 
 A Discord bot framework.
 
+Support is available in [the Cobots server](https://discord.gg/WaEbDrXKxK).
+
 ## Installation
 
 Install alongside discord.js:
