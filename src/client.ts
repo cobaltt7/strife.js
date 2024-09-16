@@ -280,28 +280,22 @@ export async function login(options: LoginOptions) {
 			const existingCommands = await client.application.commands.fetch({
 				guildId: guild.id,
 			});
-														
+
 			const newCommands = guildCommands[guild.id] ?? [];
-			const commandsNeedUpdate = !compareCommands(
-				existingCommands,
-				newCommands,
-			);
+			const commandsNeedUpdate = !compareCommands(existingCommands, newCommands);
 
 			if (commandsNeedUpdate) {
 				await client.application.commands.set(newCommands, guild.id);
-			} 
+			}
 
 			guildCommands[guild.id] = [];
 		}),
 	);
-	
+
 	const existingGlobalCommands = await client.application.commands.fetch();
 
 	const newGlobalCommands = guildCommands[globalCommandKey] ?? [];
-	const globalCommandsNeedUpdate = !compareCommands(
-		existingGlobalCommands,
-		newGlobalCommands,
-	);
+	const globalCommandsNeedUpdate = !compareCommands(existingGlobalCommands, newGlobalCommands);
 
 	if (globalCommandsNeedUpdate) {
 		await client.application.commands.set(newGlobalCommands);
@@ -322,10 +316,7 @@ export async function login(options: LoginOptions) {
 	}
 
 	function compareCommands(
-		existingCommands: Collection<
-			string,
-			ApplicationCommand<{ guild: GuildResolvable }>
-		>,
+		existingCommands: Collection<string, ApplicationCommand<{ guild: GuildResolvable }>>,
 		newCommands: string | any[],
 	) {
 		if (existingCommands.size !== newCommands.length) return false;
