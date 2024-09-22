@@ -33,13 +33,5 @@
 	"engines": {
 		"node": ">=18.11.0",
 		"npm": ">=8.0.0"
-	},
-	"overrides": {
-		"discord-api-types": "0.37.53",
-		"@discordjs/builders": "1.6.0",
-		"@discordjs/collection": "1.5.0",
-		"@discordjs/formatters": "0.3.0",
-		"@discordjs/rest": "1.7.0",
-		"@discordjs/util": "0.2.0"
 	}
 }
