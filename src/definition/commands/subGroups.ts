@@ -4,7 +4,7 @@ import {
 	ApplicationCommandType,
 	ApplicationCommandOptionType,
 } from "discord.js";
-import type { CacheReducer } from "../../util.js";
+import type { GuildCacheReducer } from "../../util.js";
 import type { OptionsToType } from "./options.js";
 import { commands } from "../commands.js";
 import {
@@ -15,13 +15,10 @@ import {
 import type { BaseChatCommandData, BaseCommandKeys } from "../commands.js";
 import type { RootCommandOptions } from "./root.js";
 
-export function defineSubGroups<
-	InGuild extends true,
-	Options extends SubGroupsOptions<InGuild> = {},
->(
+export function defineSubGroups<InGuild extends true, Options extends SubGroupsOptions<InGuild> = {}>(
 	data: SubGroupsData<InGuild, Options>,
 	command: (
-		interaction: ChatInputCommandInteraction<CacheReducer<InGuild>>,
+		interaction: ChatInputCommandInteraction<GuildCacheReducer<InGuild>>,
 		options: {
 			[G in keyof Options]: {
 				[S in keyof Options[G]]: {
@@ -33,13 +30,10 @@ export function defineSubGroups<
 		}[keyof Options],
 	) => any,
 ): void;
-export function defineSubGroups<
-	InGuild extends false,
-	Options extends SubGroupsOptions<InGuild> = {},
->(
+export function defineSubGroups<InGuild extends false, Options extends SubGroupsOptions<InGuild> = {}>(
 	data: SubGroupsData<InGuild, Options>,
 	command: (
-		interaction: ChatInputCommandInteraction<CacheReducer<InGuild>>,
+		interaction: ChatInputCommandInteraction<GuildCacheReducer<InGuild>>,
 		options: {
 			[G in keyof Options]: {
 				[S in keyof Options[G]]: {

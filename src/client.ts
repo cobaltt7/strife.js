@@ -13,6 +13,7 @@ import {
 	GuildMember,
 	GuildChannel,
 	Role,
+	type TextBasedChannel,
 } from "discord.js";
 import path from "node:path";
 import url from "node:url";
@@ -30,13 +31,14 @@ import type { MenuCommandHandler } from "./definition/commands/menu.js";
 import type { SubGroupsHandler } from "./definition/commands/subGroups.js";
 import type { SubcommandHandler } from "./definition/commands/subcommands.js";
 import type { RootCommandHandler } from "./definition/commands/root.js";
+import { logError } from "./errors.js";
+import assert from "node:assert";
 
 const globalCommandKey = Symbol("global");
 
 export let client: Client<true> = undefined as any;
 
 export async function login(options: LoginOptions) {
-	const handleError = options.handleError ?? defaultErrorHandler;
 	const [major, minor = "", patch] = version.split(".");
 	if (major !== "14" || +minor < 9 || patch?.includes("-dev")) {
 		process.emitWarning(
@@ -98,6 +100,11 @@ export async function login(options: LoginOptions) {
 	client = await readyPromise;
 
 	console.log(`Connected to Discord with tag ${client.user.tag ?? ""}`);
+
+	const handleError =
+		typeof options.handleError === "function" ?
+			options.handleError
+		:	await buildErrorHandler(options.handleError);
 
 	if ("modulesDir" in options) {
 		process.emitWarning(
@@ -299,20 +306,22 @@ export type LoginOptions = {
 	modulesDirectory: string;
 	botToken?: string;
 	commandErrorMessage?: string;
-	handleError?: typeof defaultErrorHandler;
+	handleError?:
+		| ((error: unknown, event: RepliableInteraction | string) => Awaitable<void>)
+		| { channel: string | (() => Awaitable<TextBasedChannel>); emoji?: string }
+		| undefined;
 } & (DefaultCommandAccess extends { inGuild: true } ?
 	{ defaultCommandAccess: false | Snowflake | Snowflake[] }
 :	{ defaultCommandAccess?: true });
-export function defaultErrorHandler(
-	error: any,
-	event: string | RepliableInteraction,
-): Awaitable<void> {
-	console.error(
-		`[${
-			typeof event == "string" ? event
-			: event.isCommand() ? `/${event.command?.name}`
-			: `${event.constructor.name}: ${event.customId}`
-		}]`,
-		error,
-	);
+async function buildErrorHandler(
+	options: { channel: string | (() => Awaitable<TextBasedChannel>); emoji?: string } | undefined,
+): Promise<(error: unknown, event: RepliableInteraction | string) => Awaitable<void>> {
+	const channel =
+		typeof options?.channel === "string" ?
+			await client.channels.fetch(options.channel)
+		:	await options?.channel();
+	assert(channel?.isTextBased());
+	return async (error: unknown, event: RepliableInteraction | string) => {
+		await logError({ error, event, channel, emoji: options?.emoji });
+	};
 }

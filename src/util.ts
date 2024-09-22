@@ -1,6 +1,12 @@
 import type { CacheType } from "discord.js";
 
-export type CacheReducer<InGuild extends boolean> =
+export type GuildCacheReducer<InGuild extends boolean> =
 	InGuild extends true ? "cached" | "raw" : CacheType;
 
+/** @deprecated Use {@link GuildCacheReducer} */
+export type CacheReducer<InGuild extends boolean> = GuildCacheReducer<InGuild>;
+
 export const DEFAULT_GUILDS = "@defaults";
+
+export const footerSeperator = " • ";
+export const zeroWidthSpace = "\u200B";

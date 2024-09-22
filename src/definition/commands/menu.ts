@@ -1,5 +1,5 @@
 import { PermissionsBitField, type Interaction, ApplicationCommandType } from "discord.js";
-import type { CacheReducer } from "../../util.js";
+import type { GuildCacheReducer } from "../../util.js";
 import { commands } from "../commands.js";
 import type { BaseCommandData } from "../commands.js";
 
@@ -9,7 +9,7 @@ export function defineMenuCommand<
 >(
 	data: MenuCommandData<InGuild, Context>,
 	command: (
-		interaction: Extract<Interaction<CacheReducer<InGuild>>, { commandType: Context }>,
+		interaction: Extract<Interaction<GuildCacheReducer<InGuild>>, { commandType: Context }>,
 	) => any,
 ): void;
 export function defineMenuCommand<
@@ -18,7 +18,7 @@ export function defineMenuCommand<
 >(
 	data: MenuCommandData<InGuild, Context>,
 	command: (
-		interaction: Extract<Interaction<CacheReducer<InGuild>>, { commandType: Context }>,
+		interaction: Extract<Interaction<GuildCacheReducer<InGuild>>, { commandType: Context }>,
 	) => any,
 ): void;
 export function defineMenuCommand(

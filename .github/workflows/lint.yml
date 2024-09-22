@@ -21,7 +21,7 @@ jobs:
             - name: Setup Node.JS
               uses: actions/setup-node@v4.0.3
               with:
-                  node-version: 20.6.0
+                  node-version: 18.11.1
                   cache: npm
 
             - name: Install
@@ -61,7 +61,10 @@ jobs:
 
     build:
         name: Build
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-20.
+        strategy:
+            matrix:
+                version: [14.9, 14.10, 14.11, 14.12, 14.13, 14.14, 14.15, 14.16, "dev"]
 
         steps:
             - name: Checkout
@@ -73,8 +76,11 @@ jobs:
             - name: Setup Node.JS
               uses: actions/setup-node@v4.0.3
               with:
-                  node-version: 20.6.0
+                  node-version: 18.11.1
                   cache: npm
+
+            - name: Update Discord.js
+              run: npm install discord.js@${{ matrix.version }} --save-dev
 
             - name: Install
               run: npm ci

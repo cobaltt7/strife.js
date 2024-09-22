@@ -32,12 +32,6 @@ export const autocompleters: Record<
 		};
 	}
 > = {};
-/**
- * Convert our custom options format to something the Discord API will accept.
- *
- * @param options - The options to convert.
- * @returns The converted options.
- */
 export function transformOptions(
 	options: { [key: string]: Option<boolean> },
 	metadata:

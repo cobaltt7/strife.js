@@ -3,7 +3,7 @@ import {
 	type ChatInputCommandInteraction,
 	ApplicationCommandType,
 } from "discord.js";
-import type { CacheReducer } from "../../util.js";
+import type { GuildCacheReducer } from "../../util.js";
 import { commands, transformOptions } from "../commands.js";
 import type { Option, OptionsToType } from "./options.js";
 import type { BaseChatCommandData } from "../commands.js";
@@ -38,7 +38,7 @@ export type RootCommandHandler<
 	InGuild extends boolean = boolean,
 	Options extends RootCommandOptions<InGuild> = RootCommandOptions<InGuild>,
 > = (
-	interaction: ChatInputCommandInteraction<CacheReducer<InGuild>>,
+	interaction: ChatInputCommandInteraction<GuildCacheReducer<InGuild>>,
 	options: OptionsToType<InGuild, Options>,
 ) => any;
 

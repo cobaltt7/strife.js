@@ -5,7 +5,7 @@ import {
 	type ApplicationCommandSubCommandData,
 	ApplicationCommandOptionType,
 } from "discord.js";
-import { type CacheReducer } from "../../util.js";
+import { type GuildCacheReducer } from "../../util.js";
 import type { OptionsToType } from "./options.js";
 import { commands, transformOptions } from "../commands.js";
 import type { RootCommandData, RootCommandOptions } from "./root.js";
@@ -17,7 +17,7 @@ export function defineSubcommands<
 >(
 	data: SubcommandData<InGuild, Options>,
 	command: (
-		interaction: ChatInputCommandInteraction<CacheReducer<InGuild>>,
+		interaction: ChatInputCommandInteraction<GuildCacheReducer<InGuild>>,
 		options: {
 			[S in keyof Options]: { subcommand: S; options: OptionsToType<InGuild, Options[S]> };
 		}[keyof Options],
@@ -29,7 +29,7 @@ export function defineSubcommands<
 >(
 	data: SubcommandData<InGuild, Options>,
 	command: (
-		interaction: ChatInputCommandInteraction<CacheReducer<InGuild>>,
+		interaction: ChatInputCommandInteraction<GuildCacheReducer<InGuild>>,
 		options: {
 			[S in keyof Options]: { subcommand: S; options: OptionsToType<InGuild, Options[S]> };
 		}[keyof Options],

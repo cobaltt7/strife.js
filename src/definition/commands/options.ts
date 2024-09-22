@@ -9,7 +9,7 @@ import {
 	Role,
 	User,
 } from "discord.js";
-import type { CacheReducer } from "../../util.js";
+import type { GuildCacheReducer } from "../../util.js";
 import type { RootCommandOptions } from "./root.js";
 
 export type Option<InGuild extends boolean> =
@@ -61,7 +61,7 @@ export interface StringAutocompleteOption<InGuild extends boolean> extends BaseS
 	choices?: never;
 }
 export type AutocompleteHandler<InGuild extends boolean> = (
-	interaction: AutocompleteInteraction<CacheReducer<InGuild>>,
+	interaction: AutocompleteInteraction<GuildCacheReducer<InGuild>>,
 ) => ApplicationCommandOptionChoiceData<string>[];
 export interface StringChoicesOption extends BaseStringOption {
 	choices: Record<string, string>;
