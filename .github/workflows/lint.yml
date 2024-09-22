@@ -21,7 +21,7 @@ jobs:
             - name: Setup Node.JS
               uses: actions/setup-node@v4.0.3
               with:
-                  node-version: 18.11.0
+                  node-version: 18.17.0
                   cache: npm
 
             - name: Install
@@ -77,14 +77,14 @@ jobs:
             - name: Setup Node.JS
               uses: actions/setup-node@v4.0.3
               with:
-                  node-version: 18.11.0
+                  node-version: 18.17.0
                   cache: npm
-
-            - name: Update Discord.js
-              run: npm install discord.js@${{ matrix.version }} --save-dev
 
             - name: Install
               run: npm ci
+
+            - name: Update Discord.js
+              run: npm install discord.js@${{ matrix.version }} --save-dev
 
             - name: Build
               run: npm run build
