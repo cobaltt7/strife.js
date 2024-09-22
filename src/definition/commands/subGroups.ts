@@ -15,7 +15,10 @@ import {
 import type { BaseChatCommandData, BaseCommandKeys } from "../commands.js";
 import type { RootCommandOptions } from "./root.js";
 
-export function defineSubGroups<InGuild extends true, Options extends SubGroupsOptions<InGuild> = {}>(
+export function defineSubGroups<
+	InGuild extends true,
+	Options extends SubGroupsOptions<InGuild> = {},
+>(
 	data: SubGroupsData<InGuild, Options>,
 	command: (
 		interaction: ChatInputCommandInteraction<GuildCacheReducer<InGuild>>,
@@ -30,7 +33,10 @@ export function defineSubGroups<InGuild extends true, Options extends SubGroupsO
 		}[keyof Options],
 	) => any,
 ): void;
-export function defineSubGroups<InGuild extends false, Options extends SubGroupsOptions<InGuild> = {}>(
+export function defineSubGroups<
+	InGuild extends false,
+	Options extends SubGroupsOptions<InGuild> = {},
+>(
 	data: SubGroupsData<InGuild, Options>,
 	command: (
 		interaction: ChatInputCommandInteraction<GuildCacheReducer<InGuild>>,
