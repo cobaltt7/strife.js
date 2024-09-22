@@ -7,4 +7,4 @@ export * from "./definition/commands.js";
 export * from "./definition/components.js";
 export * from "./definition/events.js";
 export * from "./util.js";
-export * from "./errors.js"
+export * from "./errors.js";

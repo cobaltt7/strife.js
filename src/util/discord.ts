@@ -15,7 +15,6 @@ import {
 import { zeroWidthSpace, footerSeperator } from "../util.js";
 import { disableComponents } from "./messages.js";
 
-
 type PaginateOptions<Item, U extends User | false = User | false> = {
 	title: string;
 	singular: string;
