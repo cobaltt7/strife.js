@@ -63,6 +63,7 @@ jobs:
         name: Build
         runs-on: ubuntu-20.04
         strategy:
+            fail-fast: false
             matrix:
                 version:
                     ["14.9", "14.10", "14.11", "14.12", "14.13", "14.14", "14.15", "14.16", "dev"]
@@ -86,7 +87,7 @@ jobs:
             - name: Sync Discord.js dependencies
               run: |
                   new_overrides=$(curl -s "https://cdn.jsdelivr.net/npm/discord.js@${{ matrix.version }}/package.json" | jq -c '.dependencies | with_entries(.value |= gsub("\\^|>"; "~"))')
-                  new_package=$(jq --tab --argjson newData "$new_overrides" '.overrides["discord.js"] = $newData' package.json)
+                  new_package=$(jq --tab --argjson newData "$new_overrides" '.overrides = $newData' package.json)
                   echo "$new_package" > package.json
 
             - name: Install
