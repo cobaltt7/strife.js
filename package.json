@@ -17,8 +17,7 @@
 	},
 	"prettier": "@redguy12/prettier-config",
 	"dependencies": {
-		"serialize-error": "11.0.3",
-		"tslib": "2.7.0"
+		"serialize-error": "11.0.3"
 	},
 	"devDependencies": {
 		"@redguy12/prettier-config": "3.0.1",
