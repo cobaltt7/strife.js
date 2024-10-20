@@ -22,7 +22,7 @@
 	"devDependencies": {
 		"@redguy12/prettier-config": "3.0.1",
 		"@types/node": "<=18.11",
-		"discord.js": "14.16.3",
+		"discord.js": "15.0.0-dev.1729383186-6cbe2487b",
 		"prettier": "3.2.5",
 		"typescript": "5.4.5"
 	},
@@ -32,5 +32,13 @@
 	"engines": {
 		"node": ">=18.17.0",
 		"npm": ">=8.0.0"
+	},
+	"overrides": {
+		"@discordjs/builders": "1.9.1-dev.1727784293-b20346f43",
+		"@discordjs/collection": "1.6.0-dev.1690243885-6307f81.0",
+		"@discordjs/formatters": "0.6.0-dev.1729383195-6cbe2487b",
+		"@discordjs/rest": "2.4.1-dev.1729383193-6cbe2487b",
+		"@discordjs/util": "1.1.2-dev.1729383186-6cbe2487b",
+		"@discordjs/ws": "2.0.1-dev.1729383185-6cbe2487b"
 	}
 }
