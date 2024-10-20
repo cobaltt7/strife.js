@@ -90,7 +90,7 @@ jobs:
                   echo "$new_package" > package.json
 
             - name: Install
-              run: npm ci
+              run: npm install
 
             - name: Build
               run: npm run build
