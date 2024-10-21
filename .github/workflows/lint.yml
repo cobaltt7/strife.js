@@ -93,7 +93,7 @@ jobs:
             - name: Pin discord-api-types
               run: |
                   discord_api_types=$(npm pkg get overrides.discord-api-types | sed "s/~//g")
-                  npm pkg set overrides.discord-api-types=discord_api_types --json
+                  npm pkg set overrides.discord-api-types="$discord_api_types" --json
 
             - name: Install
               run: npm install
