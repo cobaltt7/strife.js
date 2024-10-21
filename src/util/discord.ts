@@ -148,7 +148,13 @@ export async function paginate<Item>(
 
 					author:
 						format ?
-							{ icon_url: format.displayAvatarURL(), name: format.displayName }
+							{
+								icon_url: format.displayAvatarURL(),
+								name:
+									"displayName" in format ?
+										format.displayName
+									:	(format as User).username,
+							}
 						:	undefined,
 
 					color,
