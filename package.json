@@ -44,7 +44,7 @@
 		"@types/node": "<=18.11",
 		"discord.js": "14.17.0-dev.1728000701-c1b849fa5",
 		"prettier": "3.3.2",
-		"typescript": "5.4.5"
+		"typescript": "5.6.3"
 	},
 	"peerDependencies": {
 		"discord.js": "*"
