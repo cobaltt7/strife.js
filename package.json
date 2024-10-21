@@ -1,7 +1,7 @@
 {
 	"name": "strife.js",
 	"version": "4.0.1",
-	"description": "Discord bot framework built around TypeScript support and ease of setup",
+	"description": "A Discord bot framework built around TypeScript support and ease of setup.",
 	"keywords": [
 		"discord",
 		"discord-bot",

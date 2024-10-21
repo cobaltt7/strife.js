@@ -64,8 +64,10 @@ export async function login(options: LoginOptions) {
 	const readyPromise = new Promise<Client<true>>((resolve) => Handler.once("ready", resolve));
 	Handler.on("debug", (message) => {
 		if (
-			process.env.NODE_ENV !== "production" ||
-			!(message.includes("Sending a heartbeat") || message.includes("Heartbeat acknowledged"))
+			options.debug === "all" ||
+			(options.debug !== false &&
+				!message.includes("Sending a heartbeat") &&
+				!message.includes("Heartbeat acknowledged"))
 		)
 			console.debug(message);
 	})
@@ -89,8 +91,8 @@ export async function login(options: LoginOptions) {
 		)
 		.on("restDebug", (message) => {
 			if (
-				process.env.NODE_ENV !== "production" ||
-				!message.includes("Received bucket hash update")
+				options.debug === "all" ||
+				(options.debug !== false && !message.includes("Received bucket hash update"))
 			)
 				console.debug(message);
 		});
@@ -110,6 +112,7 @@ export async function login(options: LoginOptions) {
 			"The `modulesDir` option is deprecated. Please use `modulesDirectory` instead.",
 			"DeprecationWarning",
 		);
+		options.modulesDirectory = options.modulesDir as string;
 	}
 	const directory = options.modulesDirectory;
 	const modules = await fileSystem.readdir(directory);
@@ -312,6 +315,7 @@ export type LoginOptions = {
 				emoji?: string;
 		  }
 		| undefined;
+	debug?: boolean | "all";
 } & (DefaultCommandAccess extends { inGuild: true } ?
 	{ defaultCommandAccess: false | Snowflake | Snowflake[] }
 :	{ defaultCommandAccess?: true });

@@ -131,13 +131,7 @@ export type BaseGuildCommandData = {
 export type BaseGlobalCommandData = {
 	name: string;
 	restricted?: never;
-} & (DefaultCommandAccess extends (
-	{
-		inGuild: true;
-	}
-) ?
-	{ access: true }
-:	{ access?: true });
+} & (DefaultCommandAccess extends { inGuild: true } ? { access: true } : { access?: true });
 export type BaseCommandKeys = keyof BaseCommandData<boolean>;
 
 export interface DefaultCommandAccess {}
