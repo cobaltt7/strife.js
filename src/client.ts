@@ -24,6 +24,7 @@ import {
 	NoSubcommand,
 	autocompleters,
 	commands,
+	type BaseCommandData,
 	type DefaultCommandAccess,
 } from "./definition/commands.js";
 import type { MenuCommandHandler } from "./definition/commands/menu.js";
@@ -35,8 +36,19 @@ import assert from "node:assert";
 
 const globalCommandKey = Symbol("global");
 
+/**
+ * The client instance created by {@link login()}.
+ *
+ * Note that although this is typed as {@link Client<true>}, it is `undefined` prior to calling {@link login()}, contrary
+ * to the types. Please plan appropriately.
+ */
 export let client: Client<true> = undefined as any;
 
+/**
+ * Connect to Discord and instantiate a discord.js client.
+ *
+ * @param options The options to se when logging in.
+ */
 export async function login(options: LoginOptions) {
 	const [major, minor = "", patch] = version.split(".");
 	if (major !== "14" || +minor < 9 || patch?.includes("-dev")) {
@@ -61,11 +73,13 @@ export async function login(options: LoginOptions) {
 		...options.clientOptions,
 	});
 
+	const debug = options.debug ?? (process.env.NODE_ENV === "production" ? true : "all");
+
 	const readyPromise = new Promise<Client<true>>((resolve) => Handler.once("ready", resolve));
 	Handler.on("debug", (message) => {
 		if (
-			options.debug === "all" ||
-			(options.debug !== false &&
+			debug === "all" ||
+			(debug &&
 				!message.includes("Sending a heartbeat") &&
 				!message.includes("Heartbeat acknowledged"))
 		)
@@ -90,10 +104,7 @@ export async function login(options: LoginOptions) {
 			),
 		)
 		.on("restDebug", (message) => {
-			if (
-				options.debug === "all" ||
-				(options.debug !== false && !message.includes("Received bucket hash update"))
-			)
+			if (debug === "all" || (debug && !message.includes("Received bucket hash update")))
 				console.debug(message);
 		});
 
@@ -107,25 +118,26 @@ export async function login(options: LoginOptions) {
 			options.handleError
 		:	await buildErrorHandler(options.handleError);
 
-	if ("modulesDir" in options) {
+	if (options.modulesDir) {
 		process.emitWarning(
 			"The `modulesDir` option is deprecated. Please use `modulesDirectory` instead.",
 			"DeprecationWarning",
 		);
-		options.modulesDirectory = options.modulesDir as string;
 	}
-	const directory = options.modulesDirectory;
-	const modules = await fileSystem.readdir(directory);
+	const directory = options.modulesDir ?? options.modulesDirectory;
+	const modules = directory ? await fileSystem.readdir(directory) : [];
 
 	const promises = modules.map(async (module) => {
-		const fullPath = path.join(directory, module);
+		const fullPath = path.join(directory ?? process.cwd(), module);
 		const resolved =
 			(await fileSystem.lstat(fullPath)).isDirectory() ?
 				path.join(fullPath, "./index.js")
 			:	fullPath;
 		if (path.extname(resolved) !== ".js") return;
 
-		await import(url.pathToFileURL(path.resolve(directory, resolved)).toString());
+		await import(
+			url.pathToFileURL(path.resolve(directory ?? process.cwd(), resolved)).toString()
+		);
 	});
 	await Promise.all(promises);
 
@@ -303,29 +315,74 @@ export async function login(options: LoginOptions) {
 	}
 }
 
+/** Login options. */
 export type LoginOptions = {
+	/**
+	 * Options to pass to discord.js. As in discord.js, the only required property is `intents`. strife.js has some
+	 * defaults on top of discord.js's, which will be merged with these options, but all are still overridable.
+	 *
+	 * @default {
+	 * 	allowedMentions: { parse: ["users"]; repliedUser: true };
+	 * 	failIfNotExists: false;
+	 * 	partials: [
+	 * 		Partials.User,
+	 * 		Partials.Channel,
+	 * 		Partials.GuildMember,
+	 * 		Partials.Message,
+	 * 		Partials.Reaction,
+	 * 		Partials.GuildScheduledEvent,
+	 * 		Partials.ThreadMember,
+	 * 	];
+	 * }
+	 */
 	clientOptions: ClientOptions;
-	modulesDirectory: string;
+	/** @deprecated Use {@link LoginOptions.modulesDirectory} */
+	modulesDir?: string;
+	/**
+	 * The directory to import modules from. It is recommended to set this to `fileURLToPath(new URL("./modules",
+	 * import.meta.url))`. Omit to not load any modules.
+	 */
+	modulesDirectory?: string;
+	/**
+	 * The token to connect to Discord with.
+	 *
+	 * @default `process.env.BOT_TOKEN`
+	 */
 	botToken?: string;
+	/**
+	 * The message displayed to the user when commands fail. Omit to use Discord's default `❗ The application did not
+	 * respond`.
+	 */
 	commandErrorMessage?: string;
+	/**
+	 * Defines how errors should be handled in discord.js or any event, component, or command handler. Can either be a
+	 * function that will be called on each error, or an object defining how strife.js should handle it. If set to an
+	 * object, strife.js will log the error in the console, then standardize it and format it nicely before sending it
+	 * in a channel of your chosing. You can also optionally specify an emoji to be included in the error log for
+	 * aesthetic purposes. If not set, all errors will only be logged through `console.error`.
+	 */
 	handleError?:
 		| ((error: unknown, event: RepliableInteraction | string) => Awaitable<void>)
-		| {
-				channel: string | (() => Awaitable<SendableChannel>);
-				emoji?: string;
-		  }
+		| { channel: string | (() => Awaitable<SendableChannel>); emoji?: string }
 		| undefined;
+	/**
+	 * Controls the verbosity of debug logs. Set to `false` to disable them entirely, `true` to log most non-spammy
+	 * messages (excuding things like websocket heartbeats), or `"all"` to include everything.
+	 *
+	 * @default process.env.NODE_ENV === "production" ? true : "all"
+	 */
 	debug?: boolean | "all";
 } & (DefaultCommandAccess extends { inGuild: true } ?
-	{ defaultCommandAccess: false | Snowflake | Snowflake[] }
-:	{ defaultCommandAccess?: true });
+	{
+		/** The default value of {@link BaseCommandData.access a command's `access` field}. */
+		defaultCommandAccess: false | Snowflake | Snowflake[];
+	}
+:	{
+		/** The default value of {@link BaseCommandData.access a command's `access` field}. */
+		defaultCommandAccess?: true;
+	});
 async function buildErrorHandler(
-	options:
-		| {
-				channel: string | (() => Awaitable<SendableChannel>);
-				emoji?: string;
-		  }
-		| undefined,
+	options: { channel: string | (() => Awaitable<SendableChannel>); emoji?: string } | undefined,
 ): Promise<(error: unknown, event: RepliableInteraction | string) => Awaitable<void>> {
 	const channel =
 		typeof options?.channel === "string" ?

@@ -81,10 +81,10 @@ jobs:
                   node-version: 18.11.0
                   cache: npm
 
-            - name: Update Discord.js
+            - name: Update discord.js
               run: npm pkg set "devDependencies[discord.js]"=${{ matrix.version }}
 
-            - name: Sync Discord.js dependencies
+            - name: Sync discord.js dependencies
               run: |
                   new_overrides=$(curl -s "https://cdn.jsdelivr.net/npm/discord.js@${{ matrix.version }}/package.json" | jq -c '.dependencies | with_entries(.value |= gsub("\\^|>"; "~"))')
                   new_package=$(jq --tab --argjson newData "$new_overrides" '.overrides = $newData' package.json)

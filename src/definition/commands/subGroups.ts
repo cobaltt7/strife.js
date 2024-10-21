@@ -15,6 +15,12 @@ import {
 import type { BaseChatCommandData, BaseCommandKeys } from "../commands.js";
 import type { RootCommandOptions } from "./root.js";
 
+/**
+ * Define commands in sub groups.
+ *
+ * @param data Sub group configuration data.
+ * @param command The command handler.
+ */
 export function defineSubGroups<
 	InGuild extends true,
 	Options extends SubGroupsOptions<InGuild> = {},
@@ -82,6 +88,7 @@ export function defineSubGroups(
 	});
 }
 
+/** A subgroup command handler. */
 export type SubGroupsHandler = (
 	interaction: ChatInputCommandInteraction,
 	options: {
@@ -91,17 +98,25 @@ export type SubGroupsHandler = (
 	},
 ) => any;
 
+/** Subgroup command configuration data. */
 export type SubGroupsData<InGuild extends boolean, Options extends SubGroupsOptions<InGuild>> = {
 	options?: never;
+	/**
+	 * Key-value pair where the keys are subgroup names and the values are subgroup details. Subgroups must have
+	 * `name`s, `description`s, and `subcommands`.
+	 */
 	subcommands: {
 		[key in keyof Options]: Omit<SubcommandData<InGuild, Options[key]>, BaseCommandKeys>;
 	};
 } & BaseChatCommandData<InGuild> &
 	AugmentedSubGroupsData<InGuild, Options>;
+/** Can be augmented to add custom subgroup command properties (advanced usage) */
 export interface AugmentedSubGroupsData<
 	InGuild extends boolean,
 	_Options extends SubGroupsOptions<InGuild>,
 > {}
+
+/** Options for a subgroup command. */
 export interface SubGroupsOptions<InGuild extends boolean> {
 	[GroupName: string]: SubcommandOptions<InGuild>;
 }

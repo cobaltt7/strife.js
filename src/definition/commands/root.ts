@@ -8,6 +8,12 @@ import { commands, transformOptions } from "../commands.js";
 import type { Option, OptionsToType } from "./options.js";
 import type { BaseChatCommandData } from "../commands.js";
 
+/**
+ * Define a single-level chat command.
+ *
+ * @param data Chat command configuration data.
+ * @param command The command handler.
+ */
 export function defineChatCommand<
 	InGuild extends true,
 	Options extends RootCommandOptions<InGuild> = {},
@@ -34,6 +40,7 @@ export function defineChatCommand(
 	});
 }
 
+/** A single-level chat command handler. */
 export type RootCommandHandler<
 	InGuild extends boolean = boolean,
 	Options extends RootCommandOptions<InGuild> = RootCommandOptions<InGuild>,
@@ -42,15 +49,23 @@ export type RootCommandHandler<
 	options: OptionsToType<InGuild, Options>,
 ) => any;
 
+/** Single-level chat command configuration data. */
 export type RootCommandData<
 	InGuild extends boolean,
 	Options extends RootCommandOptions<InGuild> = {},
-> = { options?: Options; subcommands?: never } & BaseChatCommandData<InGuild> &
+> = {
+	subcommands?: never;
+	/** Key-value pair where the keys are option names and the values are option details. */
+	options?: Options;
+} & BaseChatCommandData<InGuild> &
 	AugmentedRootCommandData<InGuild, Options>;
+/** Can be augmented to add custom single-level chat command properties (advanced usage) */
 export interface AugmentedRootCommandData<
 	InGuild extends boolean,
 	_Options extends RootCommandOptions<InGuild>,
 > {}
+
+/** Options for a single-level chat command. */
 export interface RootCommandOptions<InGuild extends boolean> {
 	[OptionName: string]: Option<InGuild>;
 }

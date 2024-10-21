@@ -42,7 +42,7 @@
 	"devDependencies": {
 		"@redguy12/prettier-config": "3.0.2",
 		"@types/node": "<=18.11",
-		"discord.js": "14.17.0-dev.1728000701-c1b849fa5",
+		"discord.js": "14.17.0-dev.1727784303-b20346f43",
 		"prettier": "3.3.2",
 		"typescript": "5.4.5"
 	},

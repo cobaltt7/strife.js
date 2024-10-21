@@ -11,6 +11,12 @@ import { commands, transformOptions } from "../commands.js";
 import type { RootCommandData, RootCommandOptions } from "./root.js";
 import type { BaseChatCommandData, BaseCommandKeys } from "../commands.js";
 
+/**
+ * Define subcommands.
+ *
+ * @param data Subcommands configuration data.
+ * @param command The command handler.
+ */
 export function defineSubcommands<
 	InGuild extends true,
 	Options extends SubcommandOptions<InGuild> = {},
@@ -53,6 +59,7 @@ export function defineSubcommands(
 	});
 }
 
+/** @internal */
 export function transformSubcommands(
 	subcommands: {
 		[key: string]: Omit<
@@ -73,22 +80,30 @@ export function transformSubcommands(
 	);
 }
 
+/** A subcommand handler. */
 export type SubcommandHandler = (
 	interaction: ChatInputCommandInteraction,
 	options: { subcommand: string; options: OptionsToType<boolean, RootCommandOptions<boolean>> },
 ) => any;
 
+/** Subcommand configuration data. */
 export type SubcommandData<InGuild extends boolean, Options extends SubcommandOptions<InGuild>> = {
 	options?: never;
+	/**
+	 * Key-value pair where the keys are subcommand names and the values are subcommand details. Subcommands must have
+	 * `name`s and `description`s and may have `options`.
+	 */
 	subcommands: {
 		[key in keyof Options]: Omit<RootCommandData<InGuild, Options[key]>, BaseCommandKeys>;
 	};
 } & BaseChatCommandData<InGuild> &
 	AugmentedSubcommandData<InGuild, Options>;
+/** Can be augmented to add custom subcommand properties (advanced usage) */
 export interface AugmentedSubcommandData<
 	InGuild extends boolean,
 	_Options extends SubcommandOptions<InGuild>,
 > {}
+/** Options for subcommands. */
 export interface SubcommandOptions<InGuild extends boolean> {
 	[SubcommandName: string]: RootCommandOptions<InGuild>;
 }

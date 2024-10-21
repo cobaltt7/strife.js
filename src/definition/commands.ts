@@ -16,9 +16,17 @@ import type { MenuCommandHandler } from "./commands/menu.js";
 import type { MenuCommandContext, MenuCommandData } from "./commands/menu.js";
 import type { DEFAULT_GUILDS } from "../util.js";
 import type { AutocompleteHandler, Option } from "./commands/options.js";
+import type { LoginOptions } from "../client.js";
 
+/** An object containing all registered commands. */
 export const commands: Record<string, ApplicationCommandData[]> = {};
+
+/** Placeholder used in {@link autocompleters} when there is no subgroup or subcommand to index by. */
 export const NoSubcommand = Symbol("no subcommand");
+/**
+ * An object containing all registered autocomplete handlers, indexed by the command, subgroup, subcommand, and option.
+ * If there is no subgroup or subcommand, {@link NoSubcommand} is used as a placeholder.
+ */
 export const autocompleters: Record<
 	string,
 	{
@@ -32,6 +40,8 @@ export const autocompleters: Record<
 		};
 	}
 > = {};
+
+/** @internal */
 export function transformOptions(
 	options: { [key: string]: Option<boolean> },
 	metadata:
@@ -94,6 +104,7 @@ export function transformOptions(
 		);
 }
 
+/** The application command data stored internally. */
 export type ApplicationCommandData = {
 	type:
 		| ApplicationCommandType.ChatInput
@@ -105,33 +116,50 @@ export type ApplicationCommandData = {
 	options?: ApplicationCommandOptionData[];
 } & Omit<CommandData<boolean>, "description" | "type" | "options" | "defaultMemberPermissions">;
 
+/** Any command configuration data that can be passed to a `defineXYZ()` function. */
 export type CommandData<InGuild extends boolean> =
 	| MenuCommandData<InGuild, MenuCommandContext>
 	| SubGroupsData<InGuild, SubGroupsOptions<InGuild>>
 	| SubcommandData<InGuild, SubcommandOptions<InGuild>>
 	| RootCommandData<InGuild, RootCommandOptions<InGuild>>;
 
+/** Base chat command configuration data. */
 export type BaseChatCommandData<InGuild extends boolean> = {
 	description: string;
 	type?: never;
 } & BaseCommandData<InGuild> &
 	AugmentedChatCommandData<InGuild>;
+/** Can be augmented to add custom chat command properties (advanced usage) */
 export interface AugmentedChatCommandData<_InGuild extends boolean> {}
 
+/** Base command configuration data. */
 export type BaseCommandData<InGuild extends boolean> = (InGuild extends true ? BaseGuildCommandData
 :	BaseGlobalCommandData) &
 	AugmentedCommandData<InGuild>;
+/** Can be augmented to add custom command properties (advanced usage) */
 export interface AugmentedCommandData<_InGuild extends boolean> {}
+/** Properties allowed in any command confuguration data. */
+export type BaseCommandKeys = keyof BaseCommandData<boolean>;
+
+/** Base guild command configuration data. */
 export type BaseGuildCommandData = {
 	name: string;
+	/**
+	 * Whether to deny members permission to use the command, and require guild admins to explicitly set permissions via
+	 * `Server Settings` -> `Integrations`.
+	 */
 	restricted?: boolean;
 } & (DefaultCommandAccess extends { inGuild: true } ?
 	{ access?: false | Snowflake | (Snowflake | typeof DEFAULT_GUILDS)[] }
 :	{ access: false | Snowflake | (Snowflake | typeof DEFAULT_GUILDS)[] });
+/** Base global command configuration data. */
 export type BaseGlobalCommandData = {
 	name: string;
 	restricted?: never;
 } & (DefaultCommandAccess extends { inGuild: true } ? { access: true } : { access?: true });
-export type BaseCommandKeys = keyof BaseCommandData<boolean>;
-
+/**
+ * Augment this interface when changing {@link LoginOptions.defaultCommandAccess}.
+ *
+ * @property {boolean} inGuild Whether or not commands are restricted to guilds-only by default. Defaults to `false`.
+ */
 export interface DefaultCommandAccess {}

@@ -3,6 +3,12 @@ import type { GuildCacheReducer } from "../../util.js";
 import { commands } from "../commands.js";
 import type { BaseCommandData } from "../commands.js";
 
+/**
+ * Define a menu command.
+ *
+ * @param data Menu command configuration data.
+ * @param command The command handler.
+ */
 export function defineMenuCommand<
 	InGuild extends true,
 	Context extends MenuCommandContext = MenuCommandContext,
@@ -23,7 +29,7 @@ export function defineMenuCommand<
 ): void;
 export function defineMenuCommand(
 	data: MenuCommandData<boolean, MenuCommandContext>,
-	command: (interaction: Extract<Interaction, { commandType: MenuCommandContext }>) => any,
+	command: MenuCommandHandler,
 ): void {
 	const oldCommand = commands[data.name]?.[0];
 	if (oldCommand && oldCommand.command !== command)
@@ -38,10 +44,12 @@ export function defineMenuCommand(
 	});
 }
 
+/** A menu command handler. */
 export type MenuCommandHandler = (
 	interaction: Extract<Interaction, { commandType: MenuCommandContext }>,
 ) => any;
 
+/** Menu command configuration data. */
 export type MenuCommandData<InGuild extends boolean, Context extends MenuCommandContext> = {
 	description?: never;
 	type: Context;
@@ -49,9 +57,11 @@ export type MenuCommandData<InGuild extends boolean, Context extends MenuCommand
 	subcommands?: never;
 } & BaseCommandData<InGuild> &
 	AugmentedMenuCommandData<InGuild, Context>;
-
+/** Can be augmented to add custom menu command properties (advanced usage) */
 export interface AugmentedMenuCommandData<
 	_InGuild extends boolean,
 	_Context extends MenuCommandContext,
 > {}
-export type MenuCommandContext = (typeof ApplicationCommandType)["Message" | "User"];
+
+/** The possible types of menu commands. */
+export type MenuCommandContext = ApplicationCommandType.Message | ApplicationCommandType.User;

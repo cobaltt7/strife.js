@@ -8,6 +8,15 @@ import {
 import { serializeError } from "serialize-error";
 import type { SendableChannel } from "./util.js";
 
+/**
+ * Log an error.
+ *
+ * @param options.error The error to log.
+ * @param options.event The event that caused the error.
+ * @param options.channel The channel to log the error in, or omit to only log in the console.
+ * @param options.emoji The emoji to use.
+ * @returns The log message if one was sent.
+ */
 export async function logError({
 	error,
 	event,
@@ -71,17 +80,24 @@ export async function logError({
 	}
 }
 
+/**
+ * Standardizes an error's properties and stringifies it to JSON, transforming non-JSON values where found.
+ *
+ * @param error The error to stringify.
+ * @returns The stringified error.
+ */
 export function stringifyError(error: unknown): string {
 	return JSON.stringify(
 		error,
 		(_, value) =>
 			typeof value === "bigint" || typeof value === "symbol" ? value.toString()
-			: value instanceof Error ? generateError(value)
+			: value instanceof Error ? standardizeError(value)
 			: value,
 		"  ",
 	);
 }
-function generateError(error: unknown): object {
+
+function standardizeError(error: unknown): object {
 	if (typeof error !== "object" || !error) return { error };
 
 	const serialized = serializeError(error);
@@ -112,16 +128,22 @@ function generateError(error: unknown): object {
 					.split("\n")
 					.slice(Array.isArray(message) ? message.length : 1)
 			:	stack,
-		cause: "cause" in error ? generateError(error.cause) : undefined,
+		cause: "cause" in error ? standardizeError(error.cause) : undefined,
 		errors:
 			"errors" in error ?
 				Array.isArray(error.errors) ?
-					error.errors.map(generateError)
+					error.errors.map(standardizeError)
 				:	error.errors
 			:	undefined,
 	};
 }
 
+/**
+ * Given a chat input command interaction, returns the command mention of the origininating command.
+ *
+ * @param interaction The interaction.
+ * @returns The command mention.
+ */
 export function commandInteractionToString(
 	interaction: ChatInputCommandInteraction,
 ): `</${string}:${string}>` {
@@ -146,6 +168,13 @@ export function commandInteractionToString(
 	return chatInputApplicationCommandMention(interaction.commandName, interaction.commandId);
 }
 
+/**
+ * Sanatize a filepath.
+ *
+ * @param unclean The path to sanitize.
+ * @param relative Whether the resulting path should be relative to the current working directory.
+ * @returns The sanatized path.
+ */
 export function sanitizePath(unclean: string, relative = true): string {
 	let decoded = undefined;
 	try {

@@ -2,6 +2,15 @@
 
 A Discord bot framework built around TypeScript support and ease of setup.
 
+Strife.js has three main goals and purposes:
+
+1. Allow TypeScript to infer types where it couldn't easily before, leading to better code editor intellisense and
+   autocomplete.
+2. Reduce the amount of boilerplate and duplicated code in Discord bots by streamlining as much as possible and
+   exporting many useful utility functions
+3. Make it simpler and cleaner to register multiple commands and options in large multipurpose bots that require
+   listening to the same events for many different things
+
 Support is available in [the Cobots server](https://discord.gg/WaEbDrXKxK).
 
 ## Installation
@@ -12,25 +21,25 @@ Install alongside discord.js:
 npm install discord.js strife.js
 ```
 
-strife.js officially supports discord.js version 14.9 and above.
+strife.js officially supports discord.js versions 14.9-14.16.
 
 ## Login
 
-Login to your Discord bot by calling `login`:
+Call `login()` to connect to Discord and instantiate a discord.js client.
 
 ```js
 import { GatewayIntentBits } from "discord.js";
 import { login } from "strife.js";
-import path from "node:path";
-import url from "node:url";
+import { fileURLToPath } from "node:url";
 
 await login({
 	clientOptions: { intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers] },
-	modulesDirectory: path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "./modules"),
+	modulesDirectory: fileURLToPath(new URL("./modules", import.meta.url)),
 });
 ```
 
-Once `login` has been called, you may import `client` from anywhere in your app:
+Once `login()` has been called, you may import `client` from anywhere in your app to access the client instance it
+created:
 
 ```js
 import { client } from "strife.js";
@@ -39,7 +48,7 @@ import { Client } from "discord.js";
 client instanceof Client; // true
 ```
 
-Note that `client` is `undefined` before `login` is called, and this behavior is not accounted for in the types, so plan
+Note that although `client` is typed as `Client<true>`, it is `undefined` prior to calling `login()`. Please plan
 appropriately.
 
 ### Configuration
@@ -49,26 +58,24 @@ appropriately.
 Type: `ClientOptions`
 
 Options to pass to discord.js. As in discord.js, the only required property is `intents`. strife.js has some defaults on
-top of discord.js's:
+top of discord.js's, which will be merged with these options, but all are still overridable.
 
 -   `allowedMentions` is set to only ping users by default (including replied users) to avoid accidental mass pings
 -   `failIfNotExists` is set to `false` to return `null` instead of erroring in certain cases
 -   `partials` is set to all available partials to avoid missed events
-
-Of course, these are all overridable.
 
 #### `modulesDirectory`
 
 Type: `string`
 
 The directory to import modules from. See [Usage](#usage) for detailed information. It is recommended to set this to
-`path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "./modules")`.
+`fileURLToPath(new URL("./modules", import.meta.url))`. Omit to not load any modules.
 
 #### `botToken`
 
 Type: `string | undefined`
 
-The token to sign in to Discord with. Defaults to `process.env.BOT_TOKEN`
+The token to connect to Discord with. Defaults to `process.env.BOT_TOKEN`.
 
 #### `commandErrorMessage`
 
@@ -79,9 +86,22 @@ The message displayed to the user when commands fail. Omit to use Discord's defa
 
 #### `handleError`
 
-Type: `((error: any, event: ClientEvent | RepliableInteraction) => Awaitable<void>) | undefined`
+Type:
+`((error: any, event: ClientEvent | RepliableInteraction) => Awaitable<void>) | { channel: string | (() => Awaitable<SendableChannel>); emoji?: string } | undefined`
 
-Called when an error occurs in discord.js or any event, component, or command handler. Defaults to `console.error`.
+Defines how errors should be handled in discord.js or any event, component, or command handler. Can either be a function
+that will be called on each error, or an object defining how strife.js should handle it. If set to an object, strife.js
+will log the error in the console, then standardize it and format it nicely before sending it in a channel of your
+chosing. You can also optionally specify an emoji to be included in the error log message for aesthetic purposes. If not
+set, all errors will only be logged through `console.error()`.
+
+#### `debug`
+
+Type: `boolean | "all" | undefined`
+
+Controls the verbosity of debug logs. Set to `false` to disable them entirely, `true` to log most non-spammy messages
+(excuding things like websocket heartbeats), or `"all"` to include everything. Defaults to
+`process.env.NODE_ENV === "production" ? true : "all"`.
 
 #### `defaultCommandAccess`
 
@@ -91,8 +111,7 @@ The default value of [a command's `access` field](#access).
 
 ## Usage
 
-It is strongly recommended to use this framework with TypeScript. In the future, this framework will provide more
-powerful dynamic types for your bots.
+It is recommended, but not required, to use this framework with TypeScript.
 
 Every file in [`modulesDirectory`](#modulesdirectory), and every `index.js` in subdirectories of `modulesDirectory` will
 be automatically imported after logging in, but before commands are registered. It is recommended to only call the below
@@ -155,13 +174,13 @@ Some types of options have additional customization fields:
 -   `Channel` options allow `channelTypes` (`ChannelType[]`) to define allowed channel types for this option. Defaults
     to all supported guild channel types.
 -   `Integer` and `Number` options allow `minValue` and/or `maxValue` to define lower and upper bounds for this option
-    respectively. Defaults to `-2 ** 53` and `2 ** 53` respectively.
+    respectively. Defaults to the Discord defaults of `-2 ** 53` and `2 ** 53` respectively.
 -   `String` commands allow a few additional fields:
     -   `choices` (`Record<string, string>`) to require users to pick values from a predefined list. The keys are the
         values passed to your bot and the values are the descriptions displayed to the users. No other additional fields
         are allowed for this option when using `choices`.
     -   `minLength` (`number`) and/or `maxLength` (`number`) to define lower and upper bounds for this option's length
-        respectively. Defaults to `0` and `6_000` respectively.
+        respectively. Defaults to the Discord defaults of `0` and `6_000` respectively.
     -   `autocomplete` (`(interaction: AutocompleteInteraction) => ApplicationCommandOptionChoiceData<string>[]`) to
         give users dynamic choices.
         -   Use `interaction.options.getFocused()` to get the value of the option so far. You can also use
@@ -169,18 +188,18 @@ Some types of options have additional customization fields:
             option-getters will not work, use `interaction.options.get()` instead.
         -   Return an array of choice objects. It will be truncated to fit the 25-item limit automatically.
         -   Note that Discord does not require users to select values from the options, so handle values appropriately.
-        -   Also note that TypeScript cannot automatically infer the value of the type parameter, however, it will error
-            if you set it incorrectly.
+        -   Also note that TypeScript cannot automatically infer the type of the `interaction` parameter, however, it
+            will error if you set it incorrectly, so make sure you manually specify it as `AutocompleteInteraction`.
 
 To retrieve option values at runtime, you can utilize the second `options` parameter of the command handler. You can
-always use Discord.JS's `interaction.options` API, however, the `options` parameter is a key-value object of options.
+always use discord.js's `interaction.options` API, however, the `options` parameter is a key-value object of options.
 That is often simpler to use and has better types when using TypeScript.
 
 #### Subcommands
 
-You can specify subcommands using the `defineSubcommands` function. Define subcommands using the `subcommands` property,
-which is a key-value pair where the keys are subcommand names and the values are subcommand details. Subcommands must
-have `name`s and `description`s and may have `options`.
+You can specify subcommands using the `defineSubcommands()` function. Define subcommands using the `subcommands`
+property, which is a key-value pair where the keys are subcommand names and the values are subcommand details.
+Subcommands must have `name`s and `description`s and may have `options`.
 
 ```js
 import { defineSubcommands } from "strife.js";
@@ -206,12 +225,12 @@ The root command description is not displayed anywhere in Discord clients, but i
 Subcommands support options in the same way as regular commands.
 
 When using subcommands, the second argument to the handler is an object with the properties `subcommand` (`string`) and
-`options` (key-value pair as in `defineChatCommand`). In order for this parameter to be correctly typed, all subcommands
-must have `options` set, even if just to an empty object.
+`options` (key-value pair as in `defineChatCommand()`). In order for this parameter to be correctly typed, all
+subcommands must have `options` set, even if just to an empty object.
 
 #### Subcommand Groups
 
-You can specify subcommand groups using the `defineSubGroups` function. Define subgroups using the `subcommands`
+You can specify subcommand groups using the `defineSubGroups()` function. Define subgroups using the `subcommands`
 property, which is a key-value pair where the keys are subgroup names and the values are subgroup details. Subgroups
 must have `name`s, `description`s, and `subcommands`. Subcommands must have `name`s and `description`s and may have
 `options`.
@@ -244,14 +263,14 @@ The root command description and subgroup descriptions are not displayed anywher
 required by the Discord API. Subcommands support options in the same way as regular commands.
 
 When using subcommands, the second argument to the handler is an object with the properties `subcommand` (`string`),
-`subGroup` (`string`), and `options` (key-value pair as in `defineChatCommand`). In order for this parameter to be
+`subGroup` (`string`), and `options` (key-value pair as in `defineChatCommand()`). In order for this parameter to be
 correctly typed, all subcommands must have `options` set, even if just to an empty object.
 
 Mixing subgroups and subcommands on the same level is not currently supported.
 
 #### Menu Commands
 
-You can specify menu commands using the `defineMenuCommand` function.
+Use the `defineMenuCommand()` function to define menu commands.
 
 ```js
 import { defineChatCommand } from "strife.js";
@@ -308,7 +327,7 @@ declare module "strife.js" {
 
 ### Events
 
-Use the `defineEvent` function to define an event.
+Use the `defineEvent()` function to define event listeners.
 
 ```js
 import { defineEvent } from "strife.js";
@@ -318,16 +337,16 @@ defineEvent("messageCreate", async (message) => {
 });
 ```
 
-Note that since [all partials are enabled by default](#clientoptions), it is necessary to
-[handle partials accordingly](https://discordjs.guide/popular-topics/partials.html#enabling-partials).
-
 You are allowed to define multiple listeners for the same event. Note that listener execution order is not guaranteed.
+
+Note that since [all partials are enabled by default](#clientoptions), it is necessary to
+[handle partials accordingly](https://discordjs.guide/popular-topics/partials.html#enabling-partials) (or disable them).
 
 #### Pre-Events
 
 Pre-events are a special type of event listener that executes before other listeners. They must return
-`Awaitable<boolean>` that determines if other listeners are executed or not. They are defined with the `defineEvent.pre`
-function:
+`Awaitable<boolean>` that determines if other listeners are executed or not. They are defined with the
+`defineEvent.pre()` function:
 
 ```js
 import { defineEvent } from "strife.js";
@@ -349,8 +368,8 @@ defining normal events.
 
 ### Components
 
-Use the `defineButton`, `defineModal`, and `defineSelect` functions to define a button, a modal, and a select menu
-respectively:
+Use the `defineButton()`, `defineModal()`, and `defineSelect()` functions to define button, modal, and select menu
+listeners respectively:
 
 ```js
 import { defineButton } from "strife.js";
@@ -371,11 +390,10 @@ of `"_foobar"` will result in an `id` of `"foobar"` and the `data` `""`.
 It is not required for all `customId`s to follow this format nor to have an associated handler. You are free to collect
 interactions in any other way you wish alongside or independent of strife.js.
 
-`defineModal` works in the same way as `defineButton` but for modals.
-
-`defineSelect` also works similarly to `defineButton` for select menus with one exception. By default, `defineSelect`
-collects all types of select menus. However, you can specify certain types of select menus to collect for better type
-safety, especially with TypeScript.
+`defineModal()` and `defineSelect()` work in the same way as `defineButton()` but for modals and select menus
+respectfully. For better type safety, `defineSelect()` also allows specifing certain types of select menus to collect.
+By default, all types of select menus are collected. However, you can not specify multiple listeners for the same ID but
+different types.
 
 ```js
 import { defineSelect } from "strife.js";
@@ -386,9 +404,7 @@ defineSelect("foobar", ComponentType.StringSelect, async (interaction, data) => 
 });
 ```
 
-You can specify `SelectMenuType | SelectMenuType[]`. Note that this does not allow you to define multiple callbacks for
-the same ID but for different types. If a non-matching type is encountered, nothing will happen and you are expected to
-handle the interaction yourself.
+You can specify `SelectMenuType | SelectMenuType[]`.
 
 ## Style Guide
 
@@ -423,10 +439,12 @@ import {
 	type AutocompleteInteraction,
 	type Awaitable,
 	type ChannelType,
+	type Client,
 	type ClientOptions,
 	type RepliableInteraction,
 	type Snowflake,
 	type SelectMenuType,
+	type SendableChannel,
 } from "discord.js";
 import {
 	defineButton,
@@ -439,8 +457,7 @@ import {
 	defineSelect,
 	type ClientEvent,
 } from "strife.js";
-import path from "node:path";
-import url from "node:url";
+import { fileURLToPath } from "node:url";
 ```
 
 Values only referenced in multiline code blocks are not listed here as they are imported there.
