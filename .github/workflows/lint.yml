@@ -10,6 +10,7 @@ jobs:
     format:
         name: Format
         runs-on: ubuntu-20.04
+        concurrency: format-group
 
         steps:
             - name: Checkout
@@ -90,9 +91,9 @@ jobs:
                   echo "$new_package" > package.json
 
             - name: Pin discord-api-types
-              run:
-                  npm pkg set overrides.discord-api-types=$(npm pkg get overrides.discord-api-types
-                  | sed "s/~//g") --json
+              run: |
+                  discord_api_types=$(npm pkg get overrides.discord-api-types | sed "s/~//g")
+                  npm pkg set overrides.discord-api-types=discord_api_types --json
 
             - name: Install
               run: npm install

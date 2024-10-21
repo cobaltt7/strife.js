@@ -1,6 +1,26 @@
 {
 	"name": "strife.js",
 	"version": "4.0.1",
+	"description": "Discord bot framework built around TypeScript support and ease of setup",
+	"keywords": [
+		"discord",
+		"discord-bot",
+		"discord.js",
+		"typescript"
+	],
+	"homepage": "https://discord.gg/sDshq5eqUA",
+	"bugs": {
+		"url": "https://github.com/cobaltt7/strife.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/cobaltt7/strife.js"
+	},
+	"license": "MIT",
+	"author": {
+		"name": "cobaltt7",
+		"url": "https://github.com/cobaltt7"
+	},
 	"type": "module",
 	"main": "./dist/index.js",
 	"files": [
@@ -22,7 +42,7 @@
 	"devDependencies": {
 		"@redguy12/prettier-config": "3.0.2",
 		"@types/node": "<=18.17",
-		"discord.js": "15.0.0-dev.1729383186-6cbe2487b",
+		"discord.js": "14.17.0-dev.1728000701-c1b849fa5",
 		"prettier": "3.3.2",
 		"typescript": "5.4.5"
 	},
@@ -35,10 +55,10 @@
 	},
 	"overrides": {
 		"@discordjs/builders": "1.9.1-dev.1727784293-b20346f43",
-		"@discordjs/collection": "1.6.0-dev.1690243885-6307f81.0",
-		"@discordjs/formatters": "0.6.0-dev.1729383195-6cbe2487b",
-		"@discordjs/rest": "2.4.1-dev.1729383193-6cbe2487b",
-		"@discordjs/util": "1.1.2-dev.1729383186-6cbe2487b",
-		"@discordjs/ws": "2.0.1-dev.1729383185-6cbe2487b"
+		"@discordjs/collection": "1.6.0-dev.1699315767-344a3f934",
+		"@discordjs/formatters": "dev",
+		"@discordjs/rest": "dev",
+		"@discordjs/util": "dev",
+		"@discordjs/ws": "1.2.0-dev.1721822666-fcd35ea2e"
 	}
 }

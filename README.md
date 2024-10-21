@@ -1,6 +1,6 @@
 # strife.js
 
-A Discord bot framework.
+A Discord bot framework built around TypeScript support and ease of setup.
 
 Support is available in [the Cobots server](https://discord.gg/WaEbDrXKxK).
 

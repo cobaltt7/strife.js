@@ -17,44 +17,31 @@ jobs:
     bump:
         name: Bump
         runs-on: ubuntu-20.04
+        concurrency: bump-group
 
         steps:
             - name: Checkout
               uses: actions/checkout@v4.2.1
 
+            - name: Setup Node.JS
+              uses: actions/setup-node@v4.0.4
+              with:
+                  node-version: 18.17.0
+                  cache: npm
+
             - name: Bump
               id: sync_types
               uses: RedGuy12/sync-types@v2.1.1
 
-            - name: Setup Node.JS
-              uses: actions/setup-node@v4.0.4
-              with:
-                  node-version: 20.6.0
-                  cache: npm
-
-            - name: Install
-              run: npm ci
-
-            - name: Format
-              run: npm run format
-
-            - name: Attempt build
-              run: npm run build
-
-            - name: Exit on failure
-              if: failure()
-              run: exit 1
-
             - name: Commit
               id: commit
-              uses: stefanzweifel/git-auto-commit-action@v5.0.1
+              uses: peter-evans/create-pull-request@v6.1.0
               with:
-                  commit_message: Bump dependencies
-
-            - name: Comment
-              if: steps.commit.outputs.changes_detected == 'true'
-              run: |
-                  body="$(cat ${{ steps.sync_types.outputs.output-dir }}/changes.md)$(cat ${{ steps.sync_types.outputs.output-dir }}/sync.md)"
-                  gh api "repos/${{ github.repository }}/commits/${{ steps.commit.outputs.commit_hash }}/comments" -F "body=$body"
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  token: ${{ secrets.TOKEN }}
+                  author:
+                      github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+                  commit-message: Bump dependencies
+                  branch: ci-bump-dependencies
+                  delete-branch: true
+                  title: Bump dependencies
+                  body-path: ${{ steps.sync_types.outputs.output-dir }}/output.md

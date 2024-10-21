@@ -12,6 +12,7 @@
 		"forceConsistentCasingInFileNames": true,
 		"incremental": true,
 		"isolatedModules": true,
+		"lib": ["ES2022", "ESNext.Disposable"],
 		"module": "NodeNext",
 		"noEmitOnError": true,
 		"noErrorTruncation": true,
@@ -24,7 +25,6 @@
 		"sourceMap": true,
 		"strict": true,
 		"target": "ES2022",
-		"lib": ["ES2022", "ESNext.Disposable"],
 		"types": ["node"],
 		"verbatimModuleSyntax": true
 	},

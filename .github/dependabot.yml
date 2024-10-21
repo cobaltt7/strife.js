@@ -13,3 +13,5 @@ updates:
           time: "12:45"
       ignore:
           - dependency-name: "@types/*"
+          - dependency-name: "discord.js"
+          - dependency-name: "prettier"
