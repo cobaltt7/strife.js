@@ -8,7 +8,7 @@
 		"discord.js",
 		"typescript"
 	],
-	"homepage": "https://discord.gg/sDshq5eqUA",
+	"homepage": "https://discord.gg/WaEbDrXKxK",
 	"bugs": {
 		"url": "https://github.com/cobaltt7/strife.js"
 	},
@@ -41,7 +41,7 @@
 	},
 	"devDependencies": {
 		"@redguy12/prettier-config": "3.0.2",
-		"@types/node": "<=18.17",
+		"@types/node": "<=18.11",
 		"discord.js": "14.17.0-dev.1728000701-c1b849fa5",
 		"prettier": "3.3.2",
 		"typescript": "5.4.5"
@@ -50,7 +50,7 @@
 		"discord.js": "*"
 	},
 	"engines": {
-		"node": ">=18.17.0",
+		"node": ">=18.11.0",
 		"npm": ">=7.0.0"
 	},
 	"overrides": {
