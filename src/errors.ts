@@ -4,9 +4,9 @@ import {
 	inlineCode,
 	type Message,
 	type RepliableInteraction,
-	type TextBasedChannel,
 } from "discord.js";
 import { serializeError } from "serialize-error";
+import type { SendableChannel } from "./util.js";
 
 export async function logError({
 	error,
@@ -16,7 +16,7 @@ export async function logError({
 }: {
 	error: unknown;
 	event: RepliableInteraction | string;
-	channel?: TextBasedChannel;
+	channel?: SendableChannel;
 	emoji?: string;
 }): Promise<Message | undefined> {
 	console.error(

@@ -23,7 +23,8 @@
 		"resolveJsonModule": true,
 		"sourceMap": true,
 		"strict": true,
-		"target": "es2021",
+		"target": "ES2022",
+		"lib": ["ES2022", "ESNext.Disposable"],
 		"types": ["node"],
 		"verbatimModuleSyntax": true
 	},
