@@ -13,14 +13,13 @@ import {
 	GuildMember,
 	GuildChannel,
 	Role,
-	type TextBasedChannel,
 } from "discord.js";
 import path from "node:path";
 import url from "node:url";
 import fileSystem from "node:fs/promises";
 import { defineEvent, type ClientEvent, type Event, getEvents } from "./definition/events.js";
 import { buttons, modals, selects } from "./definition/components.js";
-import { DEFAULT_GUILDS } from "./util.js";
+import { DEFAULT_GUILDS, type SendableChannel } from "./util.js";
 import {
 	NoSubcommand,
 	autocompleters,
@@ -308,19 +307,27 @@ export type LoginOptions = {
 	commandErrorMessage?: string;
 	handleError?:
 		| ((error: unknown, event: RepliableInteraction | string) => Awaitable<void>)
-		| { channel: string | (() => Awaitable<TextBasedChannel>); emoji?: string }
+		| {
+				channel: string | (() => Awaitable<SendableChannel>);
+				emoji?: string;
+		  }
 		| undefined;
 } & (DefaultCommandAccess extends { inGuild: true } ?
 	{ defaultCommandAccess: false | Snowflake | Snowflake[] }
 :	{ defaultCommandAccess?: true });
 async function buildErrorHandler(
-	options: { channel: string | (() => Awaitable<TextBasedChannel>); emoji?: string } | undefined,
+	options:
+		| {
+				channel: string | (() => Awaitable<SendableChannel>);
+				emoji?: string;
+		  }
+		| undefined,
 ): Promise<(error: unknown, event: RepliableInteraction | string) => Awaitable<void>> {
 	const channel =
 		typeof options?.channel === "string" ?
 			await client.channels.fetch(options.channel)
 		:	await options?.channel();
-	assert(channel?.isTextBased());
+	assert(channel && "send" in channel);
 	return async (error: unknown, event: RepliableInteraction | string) => {
 		await logError({ error, event, channel, emoji: options?.emoji });
 	};
