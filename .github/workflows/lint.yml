@@ -65,8 +65,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                version:
-                    ["14.9", "14.10", "14.11", "14.12", "14.13", "14.14", "14.15", "14.16"]
+                version: ["14.9", "14.10", "14.11", "14.12", "14.13", "14.14", "14.15", "14.16"]
 
         steps:
             - name: Checkout
@@ -91,7 +90,9 @@ jobs:
                   echo "$new_package" > package.json
 
             - name: Pin discord-api-types
-              run: npm pkg set overrides.discord-api-types=$(npm pkg get overrides.discord-api-types | sed "s/~//g") --json
+              run:
+                  npm pkg set overrides.discord-api-types=$(npm pkg get overrides.discord-api-types
+                  | sed "s/~//g") --json
 
             - name: Install
               run: npm install
