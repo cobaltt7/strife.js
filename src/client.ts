@@ -13,6 +13,9 @@ import {
 	GuildMember,
 	GuildChannel,
 	Role,
+	Collection,
+	ApplicationCommand,
+	type GuildResolvable,
 } from "discord.js";
 import path from "node:path";
 import url from "node:url";
@@ -280,14 +283,33 @@ export async function login(options: LoginOptions) {
 	}, {});
 
 	const guilds = await client.guilds.fetch();
+
 	await Promise.all(
 		guilds.map(async (guild) => {
-			await client.application.commands.set(guildCommands[guild.id] ?? [], guild.id);
+			const existingCommands = await client.application.commands.fetch({
+				guildId: guild.id,
+			});
+
+			const newCommands = guildCommands[guild.id] ?? [];
+			const commandsNeedUpdate = !compareCommands(existingCommands, newCommands);
+
+			if (commandsNeedUpdate) {
+				await client.application.commands.set(newCommands, guild.id);
+			}
+
 			guildCommands[guild.id] = [];
 		}),
 	);
 
-	await client.application.commands.set(guildCommands[globalCommandKey] ?? []);
+	const existingGlobalCommands = await client.application.commands.fetch();
+
+	const newGlobalCommands = guildCommands[globalCommandKey] ?? [];
+	const globalCommandsNeedUpdate = !compareCommands(existingGlobalCommands, newGlobalCommands);
+
+	if (globalCommandsNeedUpdate) {
+		await client.application.commands.set(newGlobalCommands);
+	}
+
 	guildCommands[globalCommandKey] = [];
 
 	for (const guildId in guildCommands) {
@@ -300,6 +322,18 @@ export async function login(options: LoginOptions) {
 			new ReferenceError(`Could not register commands in missing guild \`${guildId}\``),
 			"ready",
 		);
+	}
+
+	function compareCommands(
+		existingCommands: Collection<string, ApplicationCommand<{ guild: GuildResolvable }>>,
+		newCommands: string | any[],
+	) {
+		if (existingCommands.size !== newCommands.length) return false;
+
+		return [...existingCommands.values()].every((existingCommand, index) => {
+			const newCommand = newCommands[index];
+			return JSON.stringify(existingCommand) === JSON.stringify(newCommand);
+		});
 	}
 }
 
