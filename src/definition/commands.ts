@@ -95,7 +95,10 @@ export function transformOptions(
 }
 
 export type ApplicationCommandData = {
-	type: ApplicationCommandType;
+	type:
+		| ApplicationCommandType.ChatInput
+		| ApplicationCommandType.Message
+		| ApplicationCommandType.User;
 	description: string;
 	defaultMemberPermissions: PermissionsBitField | null;
 	command: RootCommandHandler | SubcommandHandler | SubGroupsHandler | MenuCommandHandler;

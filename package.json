@@ -20,10 +20,10 @@
 		"serialize-error": "11.0.3"
 	},
 	"devDependencies": {
-		"@redguy12/prettier-config": "3.0.1",
-		"@types/node": "<=18.11",
+		"@redguy12/prettier-config": "3.0.2",
+		"@types/node": "<=18.17",
 		"discord.js": "15.0.0-dev.1729383186-6cbe2487b",
-		"prettier": "3.2.5",
+		"prettier": "3.3.2",
 		"typescript": "5.4.5"
 	},
 	"peerDependencies": {
@@ -31,7 +31,7 @@
 	},
 	"engines": {
 		"node": ">=18.17.0",
-		"npm": ">=8.0.0"
+		"npm": ">=7.0.0"
 	},
 	"overrides": {
 		"@discordjs/builders": "1.9.1-dev.1727784293-b20346f43",
