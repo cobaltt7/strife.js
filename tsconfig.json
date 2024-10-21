@@ -14,13 +14,14 @@
 		"isolatedModules": true,
 		"lib": ["ES2022", "ESNext.Disposable"],
 		"module": "NodeNext",
+		"moduleDetection": "force",
 		"noEmitOnError": true,
 		"noErrorTruncation": true,
 		"noImplicitOverride": true,
 		"noUncheckedIndexedAccess": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
-		"outDir": "dist",
+		"outDir": "./dist",
 		"resolveJsonModule": true,
 		"sourceMap": true,
 		"strict": true,
@@ -28,7 +29,7 @@
 		"types": ["node"],
 		"verbatimModuleSyntax": true
 	},
-	"exclude": ["./node_modules", "./.git", "./dist"],
+	"exclude": ["./.git", "./dist", "./node_modules"],
 	"typeAcquisition": { "enable": true },
-	"include": ["./**/*"]
+	"include": ["**/.*", "**/.*/**/.*", "**/.*/**/*", "**/*"]
 }
