@@ -69,7 +69,7 @@ export function formatAnyEmoji(
 ): string | undefined {
 	if (typeof options === "string") return options;
 	if (typeof options?.id !== "string") return options?.name ?? undefined;
-	return formatEmoji({ name: "emoji", id: options.id, animated: options.animated ?? false });
+	return `<${options.animated ? "a" : ""}:emoji:${options.id}>`;
 }
 
 /** A global regular expression variant of {@link MessageMentions.UsersPattern}. */
