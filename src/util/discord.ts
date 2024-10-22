@@ -14,33 +14,75 @@ import {
 } from "discord.js";
 import { zeroWidthSpace, footerSeperator } from "../util.js";
 import { disableComponents } from "./messages.js";
+import { defineButton, defineSelect } from "../definition/components.js";
 
 type PaginateOptions<Item, U extends User | false = User | false> = {
+	/** The title of the embed. */
 	title: string;
+	/** The name of one item in the array. */
 	singular: string;
+	/** The name of multiple items in the array. Defaults to `singular + "s"`. */
 	plural?: string;
+	/**
+	 * An error message to send if the array is empty. Defaults to `"No " + plural + " found! Try changing any filters
+	 * you may have used."`.
+	 */
 	failMessage?: string;
 
+	/**
+	 * The user who instantiated the pagination menu, and the only person with control over its buttons. Omit to only
+	 * show a single page.
+	 */
 	user: U;
+	/** The index of an item in the input array to jump to. */
 	rawOffset?: number;
+	/** Whether to underscore the item indicated by {@link PaginateOptions.rawOffset}. Defaults to `true`. */
 	highlightOffset?: boolean;
+	/** Override the total count of items in the array and replace the numbered list with a bulleted list. */
 	totalCount?: number;
+	/** The number of items to show on a page. Defaults to 20. */
 	pageLength?: number;
+	/** The number of columns to split the menu into. Defaults to 1 (no columns). */
 	columns?: 1 | 2 | 3;
 
-	timeout: number;
+	/** The number of milliseconds the menu can be idle for before ending. */
+	timeout: U extends false ? undefined | never : number;
+	/** A member or user to format the embed around by setting the embed author field to them. */
 	format?: GuildMember | User;
+	/**
+	 * The color to set the embed border to. Defaults to `format instanceof GuildMember ? format.displayColor :
+	 * undefined`
+	 */
 	color?: number;
 
+	/**
+	 * An optional function to generate custom components given a page of items. Note that {@link paginate} does not
+	 * offer any API to handle them, and it is recommended to use {@link defineButton}/{@link defineSelect}.
+	 */
 	generateComponents?(items: Item[]): Awaitable<MessageActionRowComponentData[] | undefined>;
-	customComponentLocation?: "above" | "below";
+	/**
+	 * Where to place any generated custom components relative to the pagination arrows: above, below, or between. Note
+	 * that when using `"between"`, there is a maximum of 3 buttons and no select menus, since the pagination buttons
+	 * take up 2 slots. Defaults to `"above"`.
+	 */
+	customComponentLocation?: "above" | "below" | "between";
 };
+/**
+ * Generate an incredibly customizable pagination menu for an array using embeds and buttons.
+ *
+ * @param array The array to paginate.
+ * @param stringify A function to stringify each item in the array.
+ * @param editReply A function to end the pagination message, and to update it as needed.
+ * @param options Options to customize the pagination menu.
+ * @returns A promise that resolves with the message data of the first page as soon as it is sent. Listeners are added
+ *   to handle button clicks, but the promise resolves before they do anything, and they work in the background.
+ */
 export async function paginate<Item>(
 	array: Item[],
 	stringify: (value: Item, index: number, array: Item[]) => Awaitable<string>,
 	editReply: (options: InteractionReplyOptions) => Awaitable<void> | Promise<Message>,
 	options: PaginateOptions<Item>,
-): Promise<InteractionReplyOptions | undefined>;
+): Promise<InteractionReplyOptions>;
 export async function paginate<Item>(
 	array: Item[],
 	stringify: (value: Item, index: number, array: Item[]) => Awaitable<string>,
@@ -52,7 +94,7 @@ export async function paginate<Item>(
 	stringify: (value: Item, index: number, array: Item[]) => Awaitable<string>,
 	editReply: (options: InteractionReplyOptions) => Promise<Message>,
 	options: PaginateOptions<Item, User>,
-): Promise<undefined>;
+): Promise<InteractionReplyOptions>;
 export async function paginate<Item>(
 	array: Item[],
 	stringify: (value: Item, index: number, array: Item[]) => Awaitable<string>,
@@ -70,17 +112,17 @@ export async function paginate<Item>(
 		pageLength = 20,
 		columns = 1,
 
-		timeout,
+		timeout = 0,
 		format,
 		color = format instanceof GuildMember ? format.displayColor : undefined,
 
 		generateComponents,
 		customComponentLocation = "above",
 	}: PaginateOptions<Item>,
-): Promise<InteractionReplyOptions | undefined> {
+): Promise<InteractionReplyOptions> {
 	if (!array.length) {
 		await editReply({ content: failMessage });
-		return user ? undefined : { content: failMessage };
+		return { content: failMessage };
 	}
 
 	const pageCount = Math.ceil(array.length / pageLength);
@@ -96,6 +138,7 @@ export async function paginate<Item>(
 			return highlightOffset && rawOffset === index + offset ? `__${line}__` : line;
 		}
 
+		const extraComponents = (generateComponents && (await generateComponents(filtered))) || [];
 		const components: ActionRowData<MessageActionRowComponentData>[] =
 			pageCount > 1 && user ?
 				[
@@ -110,6 +153,7 @@ export async function paginate<Item>(
 								disabled: offset < 1,
 								customId: "previous",
 							},
+							...(customComponentLocation === "between" ? extraComponents : []),
 							{
 								type: ComponentType.Button,
 								label: "Next >>",
@@ -120,15 +164,15 @@ export async function paginate<Item>(
 						],
 					},
 				]
+			: extraComponents?.length && customComponentLocation === "between" ?
+				[{ type: ComponentType.ActionRow, components: extraComponents }]
 			:	[];
 
-		if (generateComponents) {
-			const extraComponents = await generateComponents(filtered);
-			if (extraComponents?.length)
-				components[customComponentLocation === "above" ? "unshift" : "push"]({
-					type: ComponentType.ActionRow,
-					components: extraComponents,
-				});
+		if (extraComponents?.length && customComponentLocation !== "between") {
+			components[customComponentLocation === "above" ? "unshift" : "push"]({
+				type: ComponentType.ActionRow,
+				components: extraComponents,
+			});
 		}
 
 		const lines = await Promise.all(filtered.map(formatLine));
@@ -140,7 +184,7 @@ export async function paginate<Item>(
 				{
 					title,
 					description: columns === 1 ? lines.join("\n") : "",
-					fields: columns === 1 ? [] : columnize(zeroWidthSpace, lines, columns),
+					fields: columns === 1 ? [] : columnize(lines, zeroWidthSpace, columns),
 
 					footer: {
 						text: `Page ${offset / pageLength + 1}/${pageCount}${footerSeperator}${itemCount.toLocaleString()} ${itemCount === 1 ? singular : plural}`,
@@ -165,15 +209,12 @@ export async function paginate<Item>(
 
 	const firstReplyOptions = await generateMessage();
 	const message = await editReply(firstReplyOptions);
-	if (!user || !message) return firstReplyOptions;
-	if (pageCount === 1) return;
+	if (!user || !message || pageCount === 1) return firstReplyOptions;
 
 	const collector = message.createMessageComponentCollector({
 		filter: (buttonInteraction) =>
 			buttonInteraction.message.id === message.id && buttonInteraction.user.id === user.id,
-
-		idle: timeout === 0 ? undefined : timeout,
-		time: message.flags.has("Ephemeral") ? (14 * 60 + 50) * 1000 : undefined,
+		idle: timeout,
 	});
 
 	collector
@@ -191,8 +232,16 @@ export async function paginate<Item>(
 				components: pagination ? [...disableComponents([pagination]), ...rest] : [],
 			});
 		});
+
+	return firstReplyOptions;
 }
 
+/**
+ * Return the parent channel of a possible thread channel, or the channel itself otherwise.
+ *
+ * @param channel The channel to get the base channel of.
+ * @returns The base channel.
+ */
 export function getBaseChannel<TChannel extends Channel | null | undefined>(
 	channel: TChannel,
 ): TChannel extends null ? undefined
@@ -202,7 +251,19 @@ export function getBaseChannel<TChannel extends Channel | null | undefined>(
 	return (channel && (channel.isThread() ? channel.parent : channel)) || undefined;
 }
 
-export function columnize(title: string, array: string[], count: 1 | 2 | 3 = 2): APIEmbedField[] {
+/**
+ * Convert an array into columns using embed fields.
+ *
+ * @param array The data to columnize.
+ * @param title The title of the columns.
+ * @param count The number of columns to create.
+ * @returns The columnized data in embed fields.
+ */
+export function columnize(
+	array: string[],
+	title: string = zeroWidthSpace,
+	count: 1 | 2 | 3 = 2,
+): APIEmbedField[] {
 	const size = Math.ceil(array.length / count);
 	return Array.from({ length: count }, (_, index) => {
 		const start = index * size;

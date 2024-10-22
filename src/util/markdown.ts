@@ -7,10 +7,18 @@ import {
 	chatInputApplicationCommandMention,
 	escapeMarkdown,
 	formatEmoji,
+	lazy,
 	type Snowflake,
 } from "discord.js";
-import { client } from "../client.js";
+const getClient = lazy(async () => (await import("../client.js")).client);
 
+/**
+ * Escape all Markdown in a string. For backwards-compatability reasons, the default {@link escapeMarkdown} options don't
+ * escape everything. This does, and will change as Discord updates.
+ *
+ * @param text The string to escape.
+ * @returns The escaped string.
+ */
 export function escapeAllMarkdown(text: string): string {
 	return escapeMarkdown(text, {
 		heading: true,
@@ -20,6 +28,12 @@ export function escapeAllMarkdown(text: string): string {
 	});
 }
 
+/**
+ * Strip all Markdown from a string.
+ *
+ * @param text The text to escape.
+ * @returns The escaped text.
+ */
 export function stripMarkdown(text: string): string {
 	return text.replace(
 		/(?<!\\)\\|```\S*\s+(.+?)\s*```|(?<!\\)\*\*(.+?)(?<!\\)\*\*|(?<!\\)__(.+?)(?<!\\)__|(?<!\\\*?)\*(.+?)(?<!\\|\*)\*|(?<!\\_?)_(.+?)(?<!\\|_)_|~~(.+?)(?<!\\)~~|`(.+?)(?<!\\|`)`|^> (.+?)/gms,
@@ -27,6 +41,12 @@ export function stripMarkdown(text: string): string {
 	);
 }
 
+/**
+ * Formats an emoji, regardless of how much information about it is available.
+ *
+ * @param options The emoji to format.
+ * @returns The formatted emoji.
+ */
 export function formatAnyEmoji(
 	options:
 		| string
@@ -49,7 +69,7 @@ export function formatAnyEmoji(
 ): string | undefined {
 	if (typeof options === "string") return options;
 	if (typeof options?.id !== "string") return options?.name ?? undefined;
-	return formatEmoji(options.id, options.animated ?? false);
+	return formatEmoji({ name: "emoji", id: options.id, animated: options.animated ?? false });
 }
 
 /** A global regular expression variant of {@link MessageMentions.UsersPattern}. */
@@ -68,6 +88,12 @@ export const GlobalAnimatedEmoji = new RegExp(
 	`g${FormattingPatterns.AnimatedEmoji.flags}`,
 );
 
+/**
+ * Given a chat input command interaction, returns the command mention of the origininating command.
+ *
+ * @param interaction The interaction.
+ * @returns The command mention.
+ */
 export function commandInteractionToString(
 	interaction: ChatInputCommandInteraction,
 ): `</${string}:${string}>` {
@@ -91,6 +117,14 @@ export function commandInteractionToString(
 
 	return chatInputApplicationCommandMention(interaction.commandName, interaction.commandId);
 }
+
+/**
+ * Create a chat command mention from its name.
+ *
+ * @param fullCommand The full name of the command to mention.
+ * @param guild The guild the command may be from.
+ * @returns The chat command mention.
+ */
 export async function mentionChatCommand(
 	fullCommand: string,
 	guild?: Guild,
@@ -98,7 +132,9 @@ export async function mentionChatCommand(
 	const [commandName] = fullCommand.split(" ");
 	const id = (
 		(await guild?.commands.fetch())?.find(({ name }) => name === commandName) ??
-		(await client.application.commands.fetch()).find(({ name }) => name === commandName)
+		(await (await getClient()).application.commands.fetch()).find(
+			({ name }) => name === commandName,
+		)
 	)?.id;
 	return id ? chatInputApplicationCommandMention(fullCommand, id) : bold(`/${fullCommand}`);
 }

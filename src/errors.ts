@@ -1,12 +1,11 @@
 import {
-	ChatInputCommandInteraction,
-	chatInputApplicationCommandMention,
 	inlineCode,
 	type Message,
 	type RepliableInteraction,
 } from "discord.js";
 import { serializeError } from "serialize-error";
 import type { SendableChannel } from "./util.js";
+import { commandInteractionToString } from "./util/markdown.js";
 
 /**
  * Log an error.
@@ -136,36 +135,6 @@ function standardizeError(error: unknown): object {
 				:	error.errors
 			:	undefined,
 	};
-}
-
-/**
- * Given a chat input command interaction, returns the command mention of the origininating command.
- *
- * @param interaction The interaction.
- * @returns The command mention.
- */
-export function commandInteractionToString(
-	interaction: ChatInputCommandInteraction,
-): `</${string}:${string}>` {
-	const subcommandGroup = interaction.options.getSubcommandGroup(false);
-	const subcommand = interaction.options.getSubcommand(false);
-
-	if (subcommandGroup && subcommand)
-		return chatInputApplicationCommandMention(
-			interaction.commandName,
-			subcommandGroup,
-			subcommand,
-			interaction.commandId,
-		);
-
-	if (subcommand)
-		return chatInputApplicationCommandMention(
-			interaction.commandName,
-			subcommand,
-			interaction.commandId,
-		);
-
-	return chatInputApplicationCommandMention(interaction.commandName, interaction.commandId);
 }
 
 /**

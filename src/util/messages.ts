@@ -14,6 +14,12 @@ import {
 	type MessageReaction,
 } from "discord.js";
 
+/**
+ * Remove signatures from any Discord attachment URLs in a string.
+ *
+ * @param content The string to find Discord attachment URLs in.
+ * @returns The string without any Discord attachment signatures.
+ */
 export function unsignFiles(content: string): string {
 	return content.replace(
 		/https:\/\/(?:cdn|media)\.discordapp\.(?:net|com)\/attachments\/(?:[\w!#$&'()*+,./:;=?@~-]|%\d\d)+/gis,
@@ -24,21 +30,39 @@ export function unsignFiles(content: string): string {
 	);
 }
 
-export function isFileExpired(file: { url: string }): boolean {
-	const expirey = new URL(file.url).searchParams.get("ex");
+/**
+ * Given a Discord file URL, check ts signature to see if it is expired.
+ *
+ * @param url The file URL to check.
+ * @returns Whether it is expired.
+ */
+export function isFileExpired(url: string): boolean {
+	const expirey = new URL(url).searchParams.get("ex");
 	return !!expirey && Number.parseInt(expirey, 16) * 1000 < Date.now();
 }
 
+/**
+ * Get all attachments from a Discord message, handling URL expirey.
+ *
+ * @param message The message to get attachments from.
+ * @returns The retrieved attachments.
+ */
 export async function getFilesFromMessage(
 	message: Message,
 ): Promise<Collection<string, Attachment>> {
-	const expired = message.attachments.some(isFileExpired);
+	const expired = message.attachments.some((file) => isFileExpired(file.url));
 	if (!expired) return message.attachments;
 
 	const fetched = await message.fetch(true);
 	return fetched.attachments;
 }
 
+/**
+ * Given a message, extract just enough information to resend it.
+ *
+ * @param message The message to get the JSON of.
+ * @returns The message JSON.
+ */
 export async function getMessageJSON(message: Message): Promise<{
 	components: APIActionRowComponent<APIMessageActionRowComponent>[];
 	content: string;
@@ -53,6 +77,13 @@ export async function getMessageJSON(message: Message): Promise<{
 	} satisfies MessageEditOptions;
 }
 
+/**
+ * React to a message with multiple emojis in order.
+ *
+ * @param message The message to react to.
+ * @param reactions The reactions to add.
+ * @returns The added reactions.
+ */
 export async function reactAll(
 	message: Message,
 	reactions: Readonly<EmojiIdentifierResolvable[]>,
@@ -66,6 +97,12 @@ export async function reactAll(
 	return messageReactions;
 }
 
+/**
+ * Disable all components in action rows, ignoring link buttons.
+ *
+ * @param rows The action rows to disable components in.
+ * @returns The updated action rows with disabled components.
+ */
 export function disableComponents(
 	rows: ActionRow<MessageActionRowComponent>[],
 ): APIActionRowComponent<APIMessageActionRowComponent>[] {
