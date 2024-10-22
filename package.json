@@ -14,7 +14,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/cobaltt7/strife.js"
+		"url": "git+https://github.com/cobaltt7/strife.js.git"
 	},
 	"license": "MIT",
 	"author": {

@@ -6,7 +6,6 @@ import {
 	bold,
 	chatInputApplicationCommandMention,
 	escapeMarkdown,
-	formatEmoji,
 	lazy,
 	type Snowflake,
 } from "discord.js";
@@ -69,7 +68,7 @@ export function formatAnyEmoji(
 ): string | undefined {
 	if (typeof options === "string") return options;
 	if (typeof options?.id !== "string") return options?.name ?? undefined;
-	return `<${options.animated ? "a" : ""}:emoji:${options.id}>`;
+	return `<${options.animated ? "a" : ""}:${options?.name ?? "emoji"}:${options.id}>`;
 }
 
 /** A global regular expression variant of {@link MessageMentions.UsersPattern}. */
