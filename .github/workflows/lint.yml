@@ -20,7 +20,7 @@ jobs:
                   repository: ${{ github.event.pull_request.head.repo.full_name }}
 
             - name: Setup Node.JS
-              uses: actions/setup-node@v4.0.4
+              uses: actions/setup-node@v4.1.0
               with:
                   node-version: 18.11.0
                   cache: npm
@@ -76,7 +76,7 @@ jobs:
                   repository: ${{ github.event.pull_request.head.repo.full_name }}
 
             - name: Setup Node.JS
-              uses: actions/setup-node@v4.0.4
+              uses: actions/setup-node@v4.1.0
               with:
                   node-version: 18.11.0
                   cache: npm
