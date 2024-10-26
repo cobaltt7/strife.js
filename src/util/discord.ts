@@ -112,8 +112,8 @@ export async function paginate<Item>(
 		timeout = 0,
 		format,
 		color = format instanceof GuildMember ? format.displayColor : undefined,
-	
-        // eslint-disable-next-line @typescript-eslint/unbound-method
+
+		// eslint-disable-next-line @typescript-eslint/unbound-method
 		generateComponents,
 		customComponentLocation = "above",
 	}: PaginateOptions<Item>,
