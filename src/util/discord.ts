@@ -8,7 +8,7 @@ import {
 	type AnyThreadChannel,
 	type Awaitable,
 	type Channel,
-	type InteractionReplyOptions,
+	type BaseMessageOptions,
 	type MessageActionRowComponentData,
 	type User,
 } from "discord.js";
@@ -23,10 +23,7 @@ type PaginateOptions<Item, U extends User | false = User | false> = {
 	singular: string;
 	/** The name of multiple items in the array. Defaults to `singular + "s"`. */
 	plural?: string;
-	/**
-	 * An error message to send if the array is empty. Defaults to `"No " + plural + " found! Try changing any filters
-	 * you may have used."`.
-	 */
+	/** An error message to send if the array is empty. Defaults to `"No " + plural + " found!"`. */
 	failMessage?: string;
 
 	/**
@@ -80,30 +77,30 @@ type PaginateOptions<Item, U extends User | false = User | false> = {
 export async function paginate<Item>(
 	array: Item[],
 	stringify: (value: Item, index: number, array: Item[]) => Awaitable<string>,
-	editReply: (options: InteractionReplyOptions) => Awaitable<void> | Promise<Message>,
+	editReply: (options: BaseMessageOptions) => Awaitable<void> | Promise<Message>,
 	options: PaginateOptions<Item>,
-): Promise<InteractionReplyOptions>;
+): Promise<BaseMessageOptions>;
 export async function paginate<Item>(
 	array: Item[],
 	stringify: (value: Item, index: number, array: Item[]) => Awaitable<string>,
-	editReply: (options: InteractionReplyOptions) => Awaitable<void>,
+	editReply: (options: BaseMessageOptions) => Awaitable<void>,
 	options: PaginateOptions<Item, false>,
-): Promise<InteractionReplyOptions>;
+): Promise<BaseMessageOptions>;
 export async function paginate<Item>(
 	array: Item[],
 	stringify: (value: Item, index: number, array: Item[]) => Awaitable<string>,
-	editReply: (options: InteractionReplyOptions) => Promise<Message>,
+	editReply: (options: BaseMessageOptions) => Promise<Message>,
 	options: PaginateOptions<Item, User>,
-): Promise<InteractionReplyOptions>;
+): Promise<BaseMessageOptions>;
 export async function paginate<Item>(
 	array: Item[],
 	stringify: (value: Item, index: number, array: Item[]) => Awaitable<string>,
-	editReply: (options: InteractionReplyOptions) => Awaitable<void> | Promise<Message>,
+	editReply: (options: BaseMessageOptions) => Awaitable<void> | Promise<Message>,
 	{
 		title,
 		singular,
 		plural = `${singular}s`,
-		failMessage = `No ${plural} found! Try changing any filters you may have used.`,
+		failMessage = `No ${plural} found!`,
 
 		user,
 		rawOffset,
@@ -115,11 +112,12 @@ export async function paginate<Item>(
 		timeout = 0,
 		format,
 		color = format instanceof GuildMember ? format.displayColor : undefined,
-
+	
+        // eslint-disable-next-line @typescript-eslint/unbound-method
 		generateComponents,
 		customComponentLocation = "above",
 	}: PaginateOptions<Item>,
-): Promise<InteractionReplyOptions> {
+): Promise<BaseMessageOptions> {
 	if (!array.length) {
 		await editReply({ content: failMessage });
 		return { content: failMessage };
@@ -127,7 +125,7 @@ export async function paginate<Item>(
 
 	const pageCount = Math.ceil(array.length / pageLength);
 	let offset = Math.floor((rawOffset ?? 0) / pageLength) * pageLength;
-	async function generateMessage(): Promise<InteractionReplyOptions> {
+	async function generateMessage(): Promise<BaseMessageOptions> {
 		const filtered = array.filter((_, index) => index >= offset && index < offset + pageLength);
 		async function formatLine(current: Item, index: number): Promise<string> {
 			const line = `${totalCount ? "-" : `${index + 1}.`} ${await stringify(
