@@ -1,7 +1,10 @@
-import { PermissionsBitField, type Interaction, ApplicationCommandType } from "discord.js";
+import type { Interaction } from "discord.js";
 import type { GuildCacheReducer } from "../../util.js";
-import { commands } from "../commands.js";
 import type { BaseCommandData } from "../commands.js";
+
+import { ApplicationCommandType, PermissionsBitField } from "discord.js";
+
+import { commands } from "../commands.js";
 
 /**
  * Define a menu command.

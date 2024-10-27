@@ -1,16 +1,17 @@
-import {
-	ButtonStyle,
-	ComponentType,
-	ActionRow as _ActionRow,
-	type APIActionRowComponent,
-	type APIMessageActionRowComponent,
-	type APITextInputComponent,
-	type ButtonComponent,
-	type MessageActionRowComponent,
-	type TextInputComponent,
+import type {
+	APIActionRowComponent,
+	APIMessageActionRowComponent,
+	APITextInputComponent,
+	ButtonComponent,
+	MessageActionRowComponent,
+	TextInputComponent,
 } from "discord.js";
+
 import { deepStrictEqual } from "node:assert";
 import { describe, it } from "node:test";
+
+import { ActionRow as _ActionRow, ButtonStyle, ComponentType } from "discord.js";
+
 import { disableComponents } from "./messages.js";
 
 // @ts-expect-error TS2675

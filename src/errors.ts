@@ -1,6 +1,9 @@
-import { inlineCode, type Message, type RepliableInteraction } from "discord.js";
-import { serializeError } from "serialize-error";
+import type { Message, RepliableInteraction } from "discord.js";
 import type { SendableChannel } from "./util.js";
+
+import { inlineCode } from "discord.js";
+import { serializeError } from "serialize-error";
+
 import { commandInteractionToString } from "./util/markdown.js";
 
 /**

@@ -1,38 +1,40 @@
-import {
-	type Awaitable,
-	Client,
-	Partials,
-	type Snowflake,
-	BaseInteraction,
-	DiscordAPIError,
-	RESTJSONErrorCodes,
-	version,
-	type RepliableInteraction,
-	type ClientOptions,
-	type ApplicationCommandData,
-	GuildMember,
-	GuildChannel,
-	Role,
+import type {
+	ApplicationCommandData,
+	Awaitable,
+	ClientOptions,
+	RepliableInteraction,
+	Snowflake,
 } from "discord.js";
+import type { BaseCommandData, DefaultCommandAccess } from "./definition/commands.js";
+import type { MenuCommandHandler } from "./definition/commands/menu.js";
+import type { RootCommandHandler } from "./definition/commands/root.js";
+import type { SubcommandHandler } from "./definition/commands/subcommands.js";
+import type { SubGroupsHandler } from "./definition/commands/subGroups.js";
+import type { ClientEvent, Event } from "./definition/events.js";
+import type { SendableChannel } from "./util.js";
+
+import assert from "node:assert";
+import fileSystem from "node:fs/promises";
 import path from "node:path";
 import url from "node:url";
-import fileSystem from "node:fs/promises";
-import { defineEvent, type ClientEvent, type Event, getEvents } from "./definition/events.js";
-import { buttons, modals, selects } from "./definition/components.js";
-import { DEFAULT_GUILDS, type SendableChannel } from "./util.js";
+
 import {
-	NoSubcommand,
-	autocompleters,
-	commands,
-	type BaseCommandData,
-	type DefaultCommandAccess,
-} from "./definition/commands.js";
-import type { MenuCommandHandler } from "./definition/commands/menu.js";
-import type { SubGroupsHandler } from "./definition/commands/subGroups.js";
-import type { SubcommandHandler } from "./definition/commands/subcommands.js";
-import type { RootCommandHandler } from "./definition/commands/root.js";
+	BaseInteraction,
+	Client,
+	DiscordAPIError,
+	GuildChannel,
+	GuildMember,
+	Partials,
+	RESTJSONErrorCodes,
+	Role,
+	version,
+} from "discord.js";
+
+import { autocompleters, commands, NoSubcommand } from "./definition/commands.js";
+import { buttons, modals, selects } from "./definition/components.js";
+import { defineEvent, getEvents } from "./definition/events.js";
 import { logError } from "./errors.js";
-import assert from "node:assert";
+import { DEFAULT_GUILDS } from "./util.js";
 
 const globalCommandKey = Symbol("global");
 

@@ -1,19 +1,18 @@
-import {
-	PermissionsBitField,
-	type ChatInputCommandInteraction,
-	ApplicationCommandType,
-	ApplicationCommandOptionType,
-} from "discord.js";
+import type { ChatInputCommandInteraction } from "discord.js";
 import type { GuildCacheReducer } from "../../util.js";
-import type { OptionsToType } from "./options.js";
-import { commands } from "../commands.js";
-import {
-	transformSubcommands,
-	type SubcommandData,
-	type SubcommandOptions,
-} from "./subcommands.js";
 import type { BaseChatCommandData, BaseCommandKeys } from "../commands.js";
+import type { OptionsToType } from "./options.js";
 import type { RootCommandOptions } from "./root.js";
+import type { SubcommandData, SubcommandOptions } from "./subcommands.js";
+
+import {
+	ApplicationCommandOptionType,
+	ApplicationCommandType,
+	PermissionsBitField,
+} from "discord.js";
+
+import { commands } from "../commands.js";
+import { transformSubcommands } from "./subcommands.js";
 
 /**
  * Define commands in sub groups.

@@ -1,20 +1,19 @@
-import {
-	ButtonStyle,
-	ComponentType,
-	GuildMember,
-	Message,
-	type APIEmbedField,
-	type ActionRowData,
-	type AnyThreadChannel,
-	type Awaitable,
-	type Channel,
-	type BaseMessageOptions,
-	type MessageActionRowComponentData,
-	type User,
+import type {
+	ActionRowData,
+	AnyThreadChannel,
+	APIEmbedField,
+	Awaitable,
+	BaseMessageOptions,
+	Channel,
+	MessageActionRowComponentData,
+	User,
 } from "discord.js";
-import { zeroWidthSpace, footerSeperator } from "../util.js";
-import { disableComponents } from "./messages.js";
+
+import { ButtonStyle, ComponentType, GuildMember, Message } from "discord.js";
+
 import { defineButton, defineSelect } from "../definition/components.js";
+import { footerSeperator, zeroWidthSpace } from "../util.js";
+import { disableComponents } from "./messages.js";
 
 type PaginateOptions<Item, U extends User | false = User | false> = {
 	/** The title of the embed. */

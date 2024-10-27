@@ -40,10 +40,10 @@
 		"serialize-error": "11.0.3"
 	},
 	"devDependencies": {
-		"@redguy12/prettier-config": "3.0.2",
+		"@redguy12/prettier-config": "3.1.1",
 		"@types/node": "<=18.11",
 		"discord.js": "14.17.0-dev.1727784303-b20346f43",
-		"prettier": "3.3.2",
+		"prettier": "3.3.3",
 		"typescript": "5.4.5"
 	},
 	"peerDependencies": {

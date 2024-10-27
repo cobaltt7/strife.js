@@ -1,18 +1,17 @@
-import {
-	ButtonStyle,
-	ComponentType,
-	Message,
-	type APIActionRowComponent,
-	type APIEmbed,
-	type APIMessageActionRowComponent,
-	type ActionRow,
-	type Attachment,
-	type Collection,
-	type EmojiIdentifierResolvable,
-	type MessageActionRowComponent,
-	type MessageEditOptions,
-	type MessageReaction,
+import type {
+	ActionRow,
+	APIActionRowComponent,
+	APIEmbed,
+	APIMessageActionRowComponent,
+	Attachment,
+	Collection,
+	EmojiIdentifierResolvable,
+	MessageActionRowComponent,
+	MessageEditOptions,
+	MessageReaction,
 } from "discord.js";
+
+import { ButtonStyle, ComponentType, Message } from "discord.js";
 
 /**
  * Remove signatures from any Discord attachment URLs in a string.

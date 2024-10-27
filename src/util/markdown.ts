@@ -1,14 +1,16 @@
+import type { Snowflake } from "discord.js";
+
 import {
-	ChatInputCommandInteraction,
-	FormattingPatterns,
-	Guild,
-	MessageMentions,
 	bold,
 	chatInputApplicationCommandMention,
+	ChatInputCommandInteraction,
 	escapeMarkdown,
+	FormattingPatterns,
+	Guild,
 	lazy,
-	type Snowflake,
+	MessageMentions,
 } from "discord.js";
+
 const getClient = lazy(async () => (await import("../client.js")).client);
 
 /**

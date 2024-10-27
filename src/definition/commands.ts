@@ -1,22 +1,24 @@
-import {
-	ApplicationCommandType,
-	PermissionsBitField,
-	type ApplicationCommandOptionData,
-	ChannelType,
-	ApplicationCommandOptionType,
-} from "discord.js";
-import { type Snowflake } from "discord.js";
-import { type RootCommandHandler } from "./commands/root.js";
-import type { RootCommandData, RootCommandOptions } from "./commands/root.js";
-import type { SubcommandHandler } from "./commands/subcommands.js";
-import type { SubcommandData, SubcommandOptions } from "./commands/subcommands.js";
-import type { SubGroupsHandler } from "./commands/subGroups.js";
-import type { SubGroupsData, SubGroupsOptions } from "./commands/subGroups.js";
-import type { MenuCommandHandler } from "./commands/menu.js";
-import type { MenuCommandContext, MenuCommandData } from "./commands/menu.js";
-import type { DEFAULT_GUILDS } from "../util.js";
-import type { AutocompleteHandler, Option } from "./commands/options.js";
+import type { ApplicationCommandOptionData, Snowflake } from "discord.js";
 import type { LoginOptions } from "../client.js";
+import type { DEFAULT_GUILDS } from "../util.js";
+import type { MenuCommandContext, MenuCommandData, MenuCommandHandler } from "./commands/menu.js";
+import type { AutocompleteHandler, Option } from "./commands/options.js";
+import type { RootCommandData, RootCommandOptions } from "./commands/root.js";
+import type {
+	SubcommandData,
+	SubcommandHandler,
+	SubcommandOptions,
+} from "./commands/subcommands.js";
+import type { SubGroupsData, SubGroupsHandler, SubGroupsOptions } from "./commands/subGroups.js";
+
+import {
+	ApplicationCommandOptionType,
+	ApplicationCommandType,
+	ChannelType,
+	PermissionsBitField,
+} from "discord.js";
+
+import { type RootCommandHandler } from "./commands/root.js";
 
 /** An object containing all registered commands. */
 export const commands: Record<string, ApplicationCommandData[]> = {};

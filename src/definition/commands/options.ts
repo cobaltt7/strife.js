@@ -1,16 +1,13 @@
-import {
-	ChannelType,
-	type ApplicationCommandOptionChoiceData,
-	type ApplicationCommandOptionType,
-	type AutocompleteInteraction,
-	Attachment,
-	type GuildBasedChannel,
-	GuildMember,
-	Role,
-	User,
+import type {
+	ApplicationCommandOptionChoiceData,
+	ApplicationCommandOptionType,
+	AutocompleteInteraction,
+	GuildBasedChannel,
 } from "discord.js";
 import type { GuildCacheReducer } from "../../util.js";
 import type { RootCommandOptions } from "./root.js";
+
+import { Attachment, ChannelType, GuildMember, Role, User } from "discord.js";
 
 /** An option. */
 export type Option<InGuild extends boolean> =

@@ -1,6 +1,10 @@
-import { ComponentType, ActionRow as _ActionRow, type InteractionReplyOptions } from "discord.js";
+import type { InteractionReplyOptions } from "discord.js";
+
 import { deepStrictEqual, ok, strictEqual } from "node:assert";
 import { describe, it } from "node:test";
+
+import { ActionRow as _ActionRow, ComponentType } from "discord.js";
+
 import { paginate } from "./discord.js";
 
 await describe("paginate", async () => {

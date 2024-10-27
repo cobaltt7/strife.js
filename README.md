@@ -28,9 +28,10 @@ strife.js officially supports discord.js versions 14.9-14.16.
 Call `login()` to connect to Discord and instantiate a discord.js client.
 
 ```js
+import { fileURLToPath } from "node:url";
+
 import { GatewayIntentBits } from "discord.js";
 import { login } from "strife.js";
-import { fileURLToPath } from "node:url";
 
 await login({
 	clientOptions: { intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers] },
@@ -42,8 +43,8 @@ Once `login()` has been called, you may import `client` from anywhere in your ap
 created:
 
 ```js
-import { client } from "strife.js";
 import { Client } from "discord.js";
+import { client } from "strife.js";
 
 client instanceof Client; // true
 ```
@@ -142,8 +143,8 @@ You can specify options for commands using the `options` property. This is a key
 names and the values are option details.
 
 ```js
-import { defineChatCommand } from "strife.js";
 import { ApplicationCommandOptionType, User } from "discord.js";
+import { defineChatCommand } from "strife.js";
 
 defineChatCommand(
 	{
@@ -273,8 +274,8 @@ Mixing subgroups and subcommands on the same level is not currently supported.
 Use the `defineMenuCommand()` function to define menu commands.
 
 ```js
-import { defineChatCommand } from "strife.js";
 import { ApplicationCommandType } from "discord.js";
+import { defineChatCommand } from "strife.js";
 
 defineMenuCommand(
 	{ name: "User Info", type: ApplicationCommandType.User },
@@ -396,8 +397,8 @@ By default, all types of select menus are collected. However, you can not specif
 different types.
 
 ```js
-import { defineSelect } from "strife.js";
 import { ComponentType } from "discord.js";
+import { defineSelect } from "strife.js";
 
 defineSelect("foobar", ComponentType.StringSelect, async (interaction, data) => {
 	// code here...
