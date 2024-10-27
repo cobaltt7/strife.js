@@ -86,7 +86,7 @@ export async function getMessageJSON(message: Message): Promise<{
  */
 export async function reactAll(
 	message: Message,
-	reactions: Readonly<EmojiIdentifierResolvable[]>,
+	reactions: readonly EmojiIdentifierResolvable[],
 ): Promise<MessageReaction[]> {
 	const messageReactions = [];
 	for (const reaction of reactions) {
