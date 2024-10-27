@@ -31,7 +31,7 @@
 		"LICENSE"
 	],
 	"scripts": {
-		"build": "rm -rf dist && tsc --project tsconfig.json",
+		"build": "rm -rf ./dist && tsc --project tsconfig.json",
 		"dev": "tsc --project tsconfig.json --watch",
 		"format": "prettier --write \"**\" --ignore-path .prettierignore --ignore-unknown --cache"
 	},
