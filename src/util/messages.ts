@@ -4,10 +4,11 @@ import type {
 	APIEmbed,
 	APIMessageActionRowComponent,
 	Attachment,
+	BaseMessageOptions,
 	Collection,
 	EmojiIdentifierResolvable,
 	MessageActionRowComponent,
-	MessageEditOptions,
+	MessageMentionOptions,
 	MessageReaction,
 } from "discord.js";
 
@@ -63,17 +64,24 @@ export async function getFilesFromMessage(
  * @returns The message JSON.
  */
 export async function getMessageJSON(message: Message): Promise<{
-	components: APIActionRowComponent<APIMessageActionRowComponent>[];
 	content: string;
-	embeds: APIEmbed[];
-	files: string[];
+	embeds: readonly APIEmbed[];
+	allowedMentions: MessageMentionOptions;
+	files: readonly string[];
+	components: readonly APIActionRowComponent<APIMessageActionRowComponent>[];
 }> {
 	return {
-		components: message.components.map((component) => component.toJSON()),
 		content: message.content,
 		embeds: message.embeds.map((embed) => embed.toJSON()),
+		allowedMentions: {
+			parse: message.mentions.everyone ? ["everyone"] : undefined,
+			repliedUser: !!message.mentions.repliedUser,
+			roles: [...message.mentions.roles.keys()],
+			users: [...message.mentions.users.keys()],
+		},
 		files: (await getFilesFromMessage(message)).map((attachment) => attachment.url),
-	} satisfies MessageEditOptions;
+		components: message.components.map((component) => component.toJSON()),
+	} satisfies Required<BaseMessageOptions>;
 }
 
 /**

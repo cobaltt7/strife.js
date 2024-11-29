@@ -133,6 +133,7 @@ function standardizeError(error: unknown): object {
 					error.errors.map(standardizeError)
 				:	error.errors
 			:	undefined,
+		...extra,
 	};
 }
 
