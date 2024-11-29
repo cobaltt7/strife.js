@@ -1,7 +1,8 @@
 import type { Awaitable, ClientEvents } from "discord.js";
 
+// TODO: add interactionCreate
 /** Events that are reserved for strife.js to handle and that end-users should not use. */
-export type ReservedClientEvent = "ready" | "debug" | "warn" | "error" | "invalidated"; // TODO: add interactionCreate
+export type ReservedClientEvent = "ready" | "debug" | "warn" | "error" | "invalidated";
 /** All supported client events that can be listened to. */
 export type ClientEvent = Exclude<keyof ClientEvents, ReservedClientEvent>;
 /** An event handler for a client event. */

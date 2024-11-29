@@ -1,6 +1,6 @@
-export * from "./menu.js";
-export * from "./root.js";
-export * from "./subcommands.js";
-export * from "./subGroups.js";
+export * from "./menu.ts";
+export * from "./root.ts";
+export * from "./subcommands.ts";
+export * from "./subGroups.ts";
 
-export * from "./options.js";
+export * from "./options.ts";

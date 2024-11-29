@@ -1,15 +1,15 @@
 import type { ApplicationCommandOptionData, Snowflake } from "discord.js";
-import type { LoginOptions } from "../client.js";
-import type { DEFAULT_GUILDS } from "../util.js";
-import type { MenuCommandContext, MenuCommandData, MenuCommandHandler } from "./commands/menu.js";
-import type { AutocompleteHandler, Option } from "./commands/options.js";
-import type { RootCommandData, RootCommandOptions } from "./commands/root.js";
+import type { LoginOptions } from "../client.ts";
+import type { DEFAULT_GUILDS } from "../util.ts";
+import type { MenuCommandContext, MenuCommandData, MenuCommandHandler } from "./commands/menu.ts";
+import type { AutocompleteHandler, Option } from "./commands/options.ts";
+import type { RootCommandData, RootCommandOptions } from "./commands/root.ts";
 import type {
 	SubcommandData,
 	SubcommandHandler,
 	SubcommandOptions,
-} from "./commands/subcommands.js";
-import type { SubGroupsData, SubGroupsHandler, SubGroupsOptions } from "./commands/subGroups.js";
+} from "./commands/subcommands.ts";
+import type { SubGroupsData, SubGroupsHandler, SubGroupsOptions } from "./commands/subGroups.ts";
 
 import {
 	ApplicationCommandOptionType,
@@ -18,7 +18,7 @@ import {
 	PermissionsBitField,
 } from "discord.js";
 
-import { type RootCommandHandler } from "./commands/root.js";
+import { type RootCommandHandler } from "./commands/root.ts";
 
 /** An object containing all registered commands. */
 export const commands: Record<string, ApplicationCommandData[]> = {};

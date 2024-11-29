@@ -5,13 +5,13 @@ import type {
 	RepliableInteraction,
 	Snowflake,
 } from "discord.js";
-import type { BaseCommandData, DefaultCommandAccess } from "./definition/commands.js";
-import type { MenuCommandHandler } from "./definition/commands/menu.js";
-import type { RootCommandHandler } from "./definition/commands/root.js";
-import type { SubcommandHandler } from "./definition/commands/subcommands.js";
-import type { SubGroupsHandler } from "./definition/commands/subGroups.js";
-import type { ClientEvent, Event } from "./definition/events.js";
-import type { SendableChannel } from "./util.js";
+import type { BaseCommandData, DefaultCommandAccess } from "./definition/commands.ts";
+import type { MenuCommandHandler } from "./definition/commands/menu.ts";
+import type { RootCommandHandler } from "./definition/commands/root.ts";
+import type { SubcommandHandler } from "./definition/commands/subcommands.ts";
+import type { SubGroupsHandler } from "./definition/commands/subGroups.ts";
+import type { ClientEvent, Event } from "./definition/events.ts";
+import type { SendableChannel } from "./util.ts";
 
 import assert from "node:assert";
 import fileSystem from "node:fs/promises";
@@ -30,11 +30,11 @@ import {
 	version,
 } from "discord.js";
 
-import { autocompleters, commands, NoSubcommand } from "./definition/commands.js";
-import { buttons, modals, selects } from "./definition/components.js";
-import { defineEvent, getEvents } from "./definition/events.js";
-import { logError } from "./errors.js";
-import { DEFAULT_GUILDS } from "./util.js";
+import { autocompleters, commands, NoSubcommand } from "./definition/commands.ts";
+import { buttons, modals, selects } from "./definition/components.ts";
+import { defineEvent, getEvents } from "./definition/events.ts";
+import { logError } from "./errors.ts";
+import { DEFAULT_GUILDS } from "./util.ts";
 
 const globalCommandKey = Symbol("global");
 
@@ -55,7 +55,9 @@ export async function login(options: LoginOptions) {
 	const [major, minor = "", patch] = version.split(".");
 	if (major !== "14" || +minor < 9 || patch?.includes("-dev")) {
 		process.emitWarning(
-			`You are using an non-officially-supported version of discord.js (${version}). Please use version ^14.9 for maximum stability.`,
+			`You are using an non-officially-supported version of discord.js (${
+				version
+			}). Please use version ^14.9 for maximum stability.`,
 			"ExperimentalWarning",
 		);
 	}

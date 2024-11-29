@@ -12,7 +12,7 @@ import type {
 	MessageReaction,
 } from "discord.js";
 
-import { ButtonStyle, ComponentType, Message } from "discord.js";
+import { ComponentType, Message } from "discord.js";
 
 /**
  * Remove signatures from any Discord attachment URLs in a string.
@@ -105,7 +105,8 @@ export async function reactAll(
 }
 
 /**
- * Disable all components in action rows, ignoring link buttons.
+ * Disable all components in message action rows, ignoring components that don't require manual handling (link and
+ * premium buttons).
  *
  * @param rows The action rows to disable components in.
  * @returns The updated action rows with disabled components.
@@ -117,8 +118,7 @@ export function disableComponents(
 		components: components.map((component) => ({
 			...component.data,
 
-			disabled:
-				component.type !== ComponentType.Button || component.style !== ButtonStyle.Link,
+			disabled: component.type !== ComponentType.Button || !!component.customId,
 		})),
 
 		type: ComponentType.ActionRow,

@@ -1,10 +1,10 @@
 import type { Interaction } from "discord.js";
-import type { GuildCacheReducer } from "../../util.js";
-import type { BaseCommandData } from "../commands.js";
+import type { GuildCacheReducer } from "../../util.ts";
+import type { BaseCommandData } from "../commands.ts";
 
 import { ApplicationCommandType, PermissionsBitField } from "discord.js";
 
-import { commands } from "../commands.js";
+import { commands } from "../commands.ts";
 
 /**
  * Define a menu command.

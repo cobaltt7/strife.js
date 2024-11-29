@@ -4,8 +4,8 @@ import type {
 	AutocompleteInteraction,
 	GuildBasedChannel,
 } from "discord.js";
-import type { GuildCacheReducer } from "../../util.js";
-import type { RootCommandOptions } from "./root.js";
+import type { GuildCacheReducer } from "../../util.ts";
+import type { RootCommandOptions } from "./root.ts";
 
 import { Attachment, ChannelType, GuildMember, Role, User } from "discord.js";
 
