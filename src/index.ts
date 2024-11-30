@@ -1,14 +1,14 @@
-import { login } from "./client.ts";
+import { login } from "./client.js";
 
 export default login;
 
-export * from "./client.ts";
-export * from "./definition/commands/index.ts";
-export * from "./definition/commands.ts";
-export * from "./definition/components.ts";
-export * from "./definition/events.ts";
-export * from "./util.ts";
-export * from "./errors.ts";
-export * from "./util/discord.ts";
-export * from "./util/markdown.ts";
-export * from "./util/messages.ts";
+export * from "./client.js";
+export * from "./definition/commands/index.js";
+export * from "./definition/commands.js";
+export * from "./definition/components.js";
+export * from "./definition/events.js";
+export * from "./util.js";
+export * from "./errors.js";
+export * from "./util/discord.js";
+export * from "./util/markdown.js";
+export * from "./util/messages.js";

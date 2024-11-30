@@ -5,7 +5,7 @@ import { describe, it } from "node:test";
 
 import { ActionRow as _ActionRow, ComponentType } from "discord.js";
 
-import { paginate } from "./discord.ts";
+import { paginate } from "./discord.js";
 
 await describe("paginate", async () => {
 	await it("should only respond once when `user` is `false` option", async () => {

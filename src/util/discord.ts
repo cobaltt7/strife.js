@@ -11,9 +11,9 @@ import type {
 
 import { ButtonStyle, ComponentType, GuildMember, Message } from "discord.js";
 
-import { defineButton, defineSelect } from "../definition/components.ts";
-import { footerSeperator, zeroWidthSpace } from "../util.ts";
-import { disableComponents } from "./messages.ts";
+import { defineButton, defineSelect } from "../definition/components.js";
+import { footerSeperator, zeroWidthSpace } from "../util.js";
+import { disableComponents } from "./messages.js";
 
 type PaginateOptions<Item, U extends User | false = User | false> = {
 	/** The title of the embed. */

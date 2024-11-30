@@ -30,7 +30,7 @@ jobs:
               run: npm ci
 
             - name: Format
-              run: node --run format
+              run: npm run format
 
             - name: Assert clean
               if: startsWith(github.ref_name, 'dependabot/') == true
@@ -100,7 +100,7 @@ jobs:
               run: npm install
 
             - name: Build
-              run: node --run build
+              run: npm run build
 
     test:
         name: Test
@@ -123,4 +123,4 @@ jobs:
               run: npm ci
 
             - name: Build & Test
-              run: node --run test
+              run: npm run test

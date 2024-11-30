@@ -5,13 +5,13 @@ import type {
 	RepliableInteraction,
 	Snowflake,
 } from "discord.js";
-import type { BaseCommandData, DefaultCommandAccess } from "./definition/commands.ts";
-import type { MenuCommandHandler } from "./definition/commands/menu.ts";
-import type { RootCommandHandler } from "./definition/commands/root.ts";
-import type { SubcommandHandler } from "./definition/commands/subcommands.ts";
-import type { SubGroupsHandler } from "./definition/commands/subGroups.ts";
-import type { ClientEvent, Event } from "./definition/events.ts";
-import type { SendableChannel } from "./util.ts";
+import type { BaseCommandData, DefaultCommandAccess } from "./definition/commands.js";
+import type { MenuCommandHandler } from "./definition/commands/menu.js";
+import type { RootCommandHandler } from "./definition/commands/root.js";
+import type { SubcommandHandler } from "./definition/commands/subcommands.js";
+import type { SubGroupsHandler } from "./definition/commands/subGroups.js";
+import type { ClientEvent, Event } from "./definition/events.js";
+import type { SendableChannel } from "./util.js";
 
 import assert from "node:assert";
 import fileSystem from "node:fs/promises";
@@ -30,11 +30,11 @@ import {
 	version,
 } from "discord.js";
 
-import { autocompleters, commands, NoSubcommand } from "./definition/commands.ts";
-import { buttons, modals, selects } from "./definition/components.ts";
-import { defineEvent, getEvents } from "./definition/events.ts";
-import { logError } from "./errors.ts";
-import { DEFAULT_GUILDS } from "./util.ts";
+import { autocompleters, commands, NoSubcommand } from "./definition/commands.js";
+import { buttons, modals, selects } from "./definition/components.js";
+import { defineEvent, getEvents } from "./definition/events.js";
+import { logError } from "./errors.js";
+import { DEFAULT_GUILDS } from "./util.js";
 
 const globalCommandKey = Symbol("global");
 

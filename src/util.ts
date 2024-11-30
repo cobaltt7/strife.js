@@ -1,6 +1,6 @@
 import type { CacheType, Channel } from "discord.js";
-import type { LoginOptions } from "./client.ts";
-import type { BaseCommandData } from "./definition/commands.ts";
+import type { LoginOptions } from "./client.js";
+import type { BaseCommandData } from "./definition/commands.js";
 
 /** @internal */
 export type GuildCacheReducer<InGuild extends boolean> =

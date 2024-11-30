@@ -34,7 +34,7 @@
 		"build": "rm -rf ./dist && tsc --project tsconfig.json",
 		"dev": "tsc --project tsconfig.json --watch",
 		"format": "prettier --write \"**\" \"!./dist/\" --ignore-unknown --cache",
-		"test": "node --run build && node --enable-source-maps --test"
+		"test": "npm run build && node --enable-source-maps --test"
 	},
 	"prettier": "@redguy12/prettier-config",
 	"dependencies": {
@@ -42,10 +42,10 @@
 	},
 	"devDependencies": {
 		"@redguy12/prettier-config": "3.2.1",
-		"@types/node": "<=20.5",
-		"discord.js": "14.17.0-dev.1727784303-b20346f43",
+		"@types/node": "<=18.11",
+		"discord.js": "14.17.0-dev.1727611463-e1012cc54",
 		"prettier": "3.4.1",
-		"typescript": "5.7.2"
+		"typescript": "5.5.4"
 	},
 	"peerDependencies": {
 		"discord.js": "*"

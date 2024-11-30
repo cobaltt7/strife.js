@@ -12,7 +12,7 @@ import { describe, it } from "node:test";
 
 import { ActionRow as _ActionRow, ButtonStyle, ComponentType } from "discord.js";
 
-import { disableComponents } from "./messages.ts";
+import { disableComponents } from "./messages.js";
 
 // @ts-expect-error TS2675
 class ActionRow<T extends MessageActionRowComponent | TextInputComponent> extends _ActionRow<T> {

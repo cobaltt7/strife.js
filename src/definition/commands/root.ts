@@ -1,11 +1,11 @@
 import type { ChatInputCommandInteraction } from "discord.js";
-import type { GuildCacheReducer } from "../../util.ts";
-import type { BaseChatCommandData } from "../commands.ts";
-import type { Option, OptionsToType } from "./options.ts";
+import type { GuildCacheReducer } from "../../util.js";
+import type { BaseChatCommandData } from "../commands.js";
+import type { Option, OptionsToType } from "./options.js";
 
 import { ApplicationCommandType, PermissionsBitField } from "discord.js";
 
-import { commands, transformOptions } from "../commands.ts";
+import { commands, transformOptions } from "../commands.js";
 
 /**
  * Define a single-level chat command.
