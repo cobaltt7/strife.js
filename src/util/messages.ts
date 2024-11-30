@@ -81,7 +81,7 @@ export async function getMessageJSON(message: Message): Promise<{
 		},
 		files: (await getFilesFromMessage(message)).map((attachment) => attachment.url),
 		components: message.components.map((component) => component.toJSON()),
-	} satisfies Required<BaseMessageOptions>;
+	} satisfies Required<Omit<BaseMessageOptions, "poll">>;
 }
 
 /**
