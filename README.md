@@ -61,9 +61,9 @@ Type: `ClientOptions`
 Options to pass to discord.js. As in discord.js, the only required property is `intents`. strife.js has some defaults on
 top of discord.js's, which will be merged with these options, but all are still overridable.
 
--   `allowedMentions` is set to only ping users by default (including replied users) to avoid accidental mass pings
--   `failIfNotExists` is set to `false` to return `null` instead of erroring in certain cases
--   `partials` is set to all available partials to avoid missed events
+- `allowedMentions` is set to only ping users by default (including replied users) to avoid accidental mass pings
+- `failIfNotExists` is set to `false` to return `null` instead of erroring in certain cases
+- `partials` is set to all available partials to avoid missed events
 
 #### `modulesDirectory`
 
@@ -172,25 +172,25 @@ is optional, defaulting to `false`, but is allowed on all types of options.
 
 Some types of options have additional customization fields:
 
--   `Channel` options allow `channelTypes` (`ChannelType[]`) to define allowed channel types for this option. Defaults
-    to all supported guild channel types.
--   `Integer` and `Number` options allow `minValue` and/or `maxValue` to define lower and upper bounds for this option
-    respectively. Defaults to the Discord defaults of `-2 ** 53` and `2 ** 53` respectively.
--   `String` commands allow a few additional fields:
-    -   `choices` (`Record<string, string>`) to require users to pick values from a predefined list. The keys are the
-        values passed to your bot and the values are the descriptions displayed to the users. No other additional fields
-        are allowed for this option when using `choices`.
-    -   `minLength` (`number`) and/or `maxLength` (`number`) to define lower and upper bounds for this option's length
-        respectively. Defaults to the Discord defaults of `0` and `6_000` respectively.
-    -   `autocomplete` (`(interaction: AutocompleteInteraction) => ApplicationCommandOptionChoiceData<string>[]`) to
-        give users dynamic choices.
-        -   Use `interaction.options.getFocused()` to get the value of the option so far. You can also use
-            `interaction.options.getBoolean()`, `.getInteger()`, `.getNumber()`, and `.getString()`. Other
-            option-getters will not work, use `interaction.options.get()` instead.
-        -   Return an array of choice objects. It will be truncated to fit the 25-item limit automatically.
-        -   Note that Discord does not require users to select values from the options, so handle values appropriately.
-        -   Also note that TypeScript cannot automatically infer the type of the `interaction` parameter, however, it
-            will error if you set it incorrectly, so make sure you manually specify it as `AutocompleteInteraction`.
+- `Channel` options allow `channelTypes` (`ChannelType[]`) to define allowed channel types for this option. Defaults to
+  all supported guild channel types.
+- `Integer` and `Number` options allow `minValue` and/or `maxValue` to define lower and upper bounds for this option
+  respectively. Defaults to the Discord defaults of `-2 ** 53` and `2 ** 53` respectively.
+- `String` commands allow a few additional fields:
+    - `choices` (`Record<string, string>`) to require users to pick values from a predefined list. The keys are the
+      values passed to your bot and the values are the descriptions displayed to the users. No other additional fields
+      are allowed for this option when using `choices`.
+    - `minLength` (`number`) and/or `maxLength` (`number`) to define lower and upper bounds for this option's length
+      respectively. Defaults to the Discord defaults of `0` and `6_000` respectively.
+    - `autocomplete` (`(interaction: AutocompleteInteraction) => ApplicationCommandOptionChoiceData<string>[]`) to give
+      users dynamic choices.
+        - Use `interaction.options.getFocused()` to get the value of the option so far. You can also use
+          `interaction.options.getBoolean()`, `.getInteger()`, `.getNumber()`, and `.getString()`. Other option-getters
+          will not work, use `interaction.options.get()` instead.
+        - Return an array of choice objects. It will be truncated to fit the 25-item limit automatically.
+        - Note that Discord does not require users to select values from the options, so handle values appropriately.
+        - Also note that TypeScript cannot automatically infer the type of the `interaction` parameter, however, it will
+          error if you set it incorrectly, so make sure you manually specify it as `AutocompleteInteraction`.
 
 To retrieve option values at runtime, you can utilize the second `options` parameter of the command handler. You can
 always use discord.js's `interaction.options` API, however, the `options` parameter is a key-value object of options.
