@@ -26,19 +26,23 @@ export async function logError({
 	channel?: SendableChannel;
 	emoji?: string;
 }): Promise<Message | undefined> {
-	console.error(
-		`[${
-			typeof event == "string" ? event
-			: event.isCommand() ? `/${event.command?.name}`
-			: `${event.constructor.name}: ${event.customId}`
-		}]`,
-		error,
-	);
+	const eventString = `[${
+		typeof event === "string" ? event
+		: event.isCommand() ?
+			event.command ?
+				`/${event.command.name}`
+			:	event.constructor.name
+		:	`${event.constructor.name}: ${event.customId}`
+	}]`;
+	console.error(eventString, error);
 	if (!channel) return;
 	try {
 		const name =
-			error && typeof error === "object" && "name" in error ? `${error.name}` : "Error";
-		if ("ExperimentalWarning" == name) return;
+			error && typeof error === "object" && "name" in error && error.name ?
+				// eslint-disable-next-line @typescript-eslint/no-base-to-string
+				error.name.toString()
+			:	"Error";
+		if (name === "ExperimentalWarning") return;
 
 		const errorString = stringifyError(error);
 		const lines = errorString.split("\n");
@@ -48,7 +52,7 @@ export async function logError({
 			lines.some((line) => line.length > 100);
 
 		const trigger =
-			typeof event == "string" ? inlineCode(event)
+			typeof event === "string" ? inlineCode(event)
 			: event.isChatInputCommand() ? commandInteractionToString(event)
 			: inlineCode(
 					event.isCommand() && event.command ?
@@ -57,23 +61,16 @@ export async function logError({
 				);
 
 		return await channel.send({
-			content:
-				`${emoji ? `${emoji} ` : ""}**${name}** occurred in ${trigger}` +
-				(external ? "" : `\n\`\`\`json\n${errorString}\n\`\`\``),
+			content: `${emoji ? `${emoji} ` : ""}**${name}** occurred in ${trigger}${
+				external ? "" : `\n\`\`\`json\n${errorString}\n\`\`\``
+			}`,
 			files:
 				external ?
 					[{ attachment: Buffer.from(errorString, "utf8"), name: "error.json" }]
 				:	[],
 		});
 	} catch (loggingError) {
-		console.error(
-			`[${
-				typeof event == "string" ? event
-				: event.isCommand() ? `/${event.command?.name}`
-				: `${event.constructor.name}: ${event.customId}`
-			}]`,
-			loggingError,
-		);
+		console.error(eventString, loggingError);
 		process.exit(1);
 	}
 }
@@ -88,6 +85,7 @@ export function stringifyError(error: unknown): string {
 	return JSON.stringify(
 		error,
 		(_, value) =>
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 			typeof value === "bigint" || typeof value === "symbol" ? value.toString()
 			: value instanceof Error ? standardizeError(value)
 			: value,
@@ -95,7 +93,7 @@ export function stringifyError(error: unknown): string {
 	);
 }
 
-function standardizeError(error: unknown): object {
+export function standardizeError(error: unknown): object {
 	if (typeof error !== "object" || !error) return { error };
 
 	const serialized = serializeError(error);
@@ -106,6 +104,7 @@ function standardizeError(error: unknown): object {
 				error.message.split("\n")
 			:	error.message
 		:	undefined;
+	// eslint-disable-next-line unicorn/error-message
 	const { stack } = "stack" in error ? error : new Error();
 
 	const extra = { ...error, ...serialized };
@@ -145,7 +144,7 @@ function standardizeError(error: unknown): object {
  * @returns The sanatized path.
  */
 export function sanitizePath(unclean: string, relative = true): string {
-	let decoded = undefined;
+	let decoded;
 	try {
 		decoded = decodeURIComponent(unclean);
 	} catch {

@@ -7,12 +7,13 @@ import type {
 	BaseMessageOptions,
 	Collection,
 	EmojiIdentifierResolvable,
+	Message,
 	MessageActionRowComponent,
 	MessageMentionOptions,
 	MessageReaction,
 } from "discord.js";
 
-import { ComponentType, Message } from "discord.js";
+import { ComponentType } from "discord.js";
 
 /**
  * Remove signatures from any Discord attachment URLs in a string.
@@ -21,7 +22,7 @@ import { ComponentType, Message } from "discord.js";
  * @returns The string without any Discord attachment signatures.
  */
 export function unsignFiles(content: string): string {
-	return content.replace(
+	return content.replaceAll(
 		/https:\/\/(?:cdn|media)\.discordapp\.(?:net|com)\/attachments\/(?:[\w!#$&'()*+,./:;=?@~-]|%\d\d)+/gis,
 		(match) => {
 			const url = new URL(match);

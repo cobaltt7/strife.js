@@ -5,12 +5,12 @@ import type {
 	RepliableInteraction,
 	Snowflake,
 } from "discord.js";
-import type { BaseCommandData, DefaultCommandAccess } from "./definition/commands.js";
+import type { DefaultCommandAccess } from "./definition/commands.js";
+import type { FlatCommandHandler } from "./definition/commands/flat.js";
 import type { MenuCommandHandler } from "./definition/commands/menu.js";
-import type { RootCommandHandler } from "./definition/commands/root.js";
+import type { SubGroupsHandler } from "./definition/commands/sub-groups.js";
 import type { SubcommandHandler } from "./definition/commands/subcommands.js";
-import type { SubGroupsHandler } from "./definition/commands/subGroups.js";
-import type { ClientEvent, Event } from "./definition/events.js";
+import type { EventHandler, StrifeEvents } from "./definition/events.js";
 import type { SendableChannel } from "./util.js";
 
 import assert from "node:assert";
@@ -30,7 +30,8 @@ import {
 	version,
 } from "discord.js";
 
-import { autocompleters, commands, NoSubcommand } from "./definition/commands.js";
+import { commands } from "./definition/commands.js";
+import { autocompleters, NoSubcommand } from "./definition/commands/options.js";
 import { buttons, modals, selects } from "./definition/components.js";
 import { defineEvent, getEvents } from "./definition/events.js";
 import { logError } from "./errors.js";
@@ -44,23 +45,22 @@ const globalCommandKey = Symbol("global");
  * Note that although this is typed as {@link Client<true>}, it is `undefined` prior to calling {@link login()}, contrary
  * to the types. Please plan appropriately.
  */
-export let client: Client<true> = undefined as any;
+export let client: Client<true>;
 
 /**
  * Connect to Discord and instantiate a discord.js client.
  *
- * @param options The options to se when logging in.
+ * @param loginOptions The options to se when logging in.
  */
-export async function login(options: LoginOptions) {
+export async function login(loginOptions: LoginOptions): Promise<void> {
 	const [major, minor = "", patch] = version.split(".");
-	if (major !== "14" || +minor < 9 || patch?.includes("-dev")) {
+	if (major !== "14" || +minor < 9 || patch?.includes("-dev"))
 		process.emitWarning(
 			`You are using an non-officially-supported version of discord.js (${
 				version
 			}). Please use version ^14.9 for maximum stability.`,
 			"ExperimentalWarning",
 		);
-	}
 
 	const Handler = new Client({
 		allowedMentions: { parse: ["users"], repliedUser: true },
@@ -74,12 +74,14 @@ export async function login(options: LoginOptions) {
 			Partials.GuildScheduledEvent,
 			Partials.ThreadMember,
 		],
-		...options.clientOptions,
+		...loginOptions.clientOptions,
 	});
 
-	const debug = options.debug ?? (process.env.NODE_ENV === "production" ? true : "all");
+	const debug = loginOptions.debug ?? (process.env.NODE_ENV === "production" ? true : "all");
 
-	const readyPromise = new Promise<Client<true>>((resolve) => Handler.once("ready", resolve));
+	const readyPromise = new Promise<Client<true>>((resolve) => {
+		Handler.once("ready", resolve);
+	});
 	Handler.on("debug", (message) => {
 		if (
 			debug === "all" ||
@@ -91,16 +93,16 @@ export async function login(options: LoginOptions) {
 	})
 		.on("warn", (warning) => handleError(warning, "warn"))
 		.on("error", (error) => handleError(error, "error"))
-		.on("invalidated", async () => {
+		.on("invalidated", () => {
 			console.error(new ReferenceError("Session is invalid"));
 			process.exit(1);
 		})
-		.on("guildUnavailable", async (guild) =>
-			handleError(
+		.on("guildUnavailable", async (guild) => {
+			await handleError(
 				new ReferenceError(`Guild ${guild.name} (${guild.id}) unavailable`),
 				"guildUnavailable",
-			),
-		)
+			);
+		})
 		.rest.on("invalidRequestWarning", (data) =>
 			handleError(
 				`${data.count} requests; ${data.remainingTime}ms left`,
@@ -112,23 +114,23 @@ export async function login(options: LoginOptions) {
 				console.debug(message);
 		});
 
-	await Handler.login(options.botToken ?? process.env.BOT_TOKEN);
+	await Handler.login(loginOptions.botToken ?? process.env.BOT_TOKEN);
 	client = await readyPromise;
 
-	console.log(`Connected to Discord with tag ${client.user.tag ?? ""}`);
+	console.log(`Connected to Discord with tag ${client.user.tag}`);
 
 	const handleError =
-		typeof options.handleError === "function" ?
-			options.handleError
-		:	await buildErrorHandler(options.handleError);
+		typeof loginOptions.handleError === "function" ?
+			loginOptions.handleError
+		:	await buildErrorHandler(loginOptions.handleError);
 
-	if (options.modulesDir) {
+	if (loginOptions.modulesDir)
 		process.emitWarning(
 			"The `modulesDir` option is deprecated. Please use `modulesDirectory` instead.",
 			"DeprecationWarning",
 		);
-	}
-	const directory = options.modulesDir ?? options.modulesDirectory;
+
+	const directory = loginOptions.modulesDirectory ?? loginOptions.modulesDir;
 	const modules = directory ? await fileSystem.readdir(directory) : [];
 
 	const promises = modules.map(async (module) => {
@@ -157,15 +159,15 @@ export async function login(options: LoginOptions) {
 					option
 				];
 
-			if (!autocomplete) {
+			if (!autocomplete)
 				throw new ReferenceError(
-					`Autocomplete handler for \`/${command}${subGroup ? " " + subGroup : ""}${
-						subcommand ? " " + subcommand : ""
-					}\`'s \`${option}\` option not found`,
+					`Autocomplete handler for \`/${command}${subGroup ? ` ${subGroup}` : ""}${
+						subcommand ? ` ${subcommand}` : ""
+					}\`’s \`${option}\` option not found`,
 				);
-			}
 
-			return interaction.respond(autocomplete(interaction).slice(0, 25));
+			await interaction.respond(autocomplete(interaction).slice(0, 25));
+			return;
 		}
 
 		if (!interaction.isCommand()) {
@@ -179,10 +181,9 @@ export async function login(options: LoginOptions) {
 			return;
 		}
 
-		const { command } = commands[interaction.command?.name ?? ""]?.[0] ?? {};
-
-		if (!command)
-			throw new ReferenceError(`Command \`${interaction.command?.name}\` not found`);
+		if (!interaction.command) throw new ReferenceError("Unknown command run");
+		const { command } = commands[interaction.command.name]?.[0] ?? {};
+		if (!command) throw new ReferenceError(`Command \`${interaction.command.name}\` not found`);
 
 		if (interaction.isContextMenuCommand()) await (command as MenuCommandHandler)(interaction);
 		else {
@@ -195,35 +196,41 @@ export async function login(options: LoginOptions) {
 				async (option) =>
 					[
 						option.name,
-						option.attachment ||
+						(option.attachment ??
 							(!option.channel || option.channel instanceof GuildChannel ?
 								option.channel
-							:	await interaction.guild?.channels.fetch(option.channel.id)) ||
-							(option.member instanceof GuildMember && option.member) ||
-							option.user ||
-							(!option.role || option.role instanceof Role ?
-								option.role
-							:	await interaction.guild?.roles.fetch(option.role.id)) ||
-							option.value,
+							:	await interaction.guild?.channels.fetch(option.channel.id)) ??
+							(option.member instanceof GuildMember && option.member)) ||
+							(option.user ??
+								(!option.role || option.role instanceof Role ?
+									option.role
+								:	await interaction.guild?.roles.fetch(option.role.id)) ??
+								option.value),
 					] as const,
 			);
-			const options = Object.fromEntries(await Promise.all(optionsData));
+			const parsedOptions = Object.fromEntries(await Promise.all(optionsData));
 
 			const subGroup = interaction.options.getSubcommandGroup();
 			const subcommand = interaction.options.getSubcommand(false);
 			if (subGroup && subcommand)
 				await (command as SubGroupsHandler)(interaction, {
 					subcommand,
-					subGroup: subGroup,
-					options,
+					subGroup,
+					options: parsedOptions,
 				});
 			else if (subcommand)
-				await (command as SubcommandHandler)(interaction, { subcommand, options });
-			else await (command as RootCommandHandler)(interaction, options);
+				await (command as SubcommandHandler)(interaction, {
+					subcommand,
+					options: parsedOptions,
+				});
+			else await (command as FlatCommandHandler)(interaction, parsedOptions);
 		}
 	});
 
-	for (const [event, execute] of Object.entries(getEvents()) as [ClientEvent, Event][]) {
+	for (const [event, execute] of Object.entries(getEvents()) as [
+		StrifeEvents,
+		EventHandler<StrifeEvents>,
+	][])
 		client.on(event, async (...args) => {
 			try {
 				await execute(...args);
@@ -232,63 +239,63 @@ export async function login(options: LoginOptions) {
 					args[0] instanceof BaseInteraction && !args[0].isAutocomplete() ?
 						args[0]
 					:	undefined;
-				await handleError(error, interaction ? interaction : event);
+				await handleError(error, interaction ?? event);
 
-				if (!options.commandErrorMessage) return;
+				if (!loginOptions.commandErrorMessage) return;
 
-				if (interaction?.deferred || interaction?.replied) {
+				if (interaction?.deferred || interaction?.replied)
 					await interaction.followUp({
 						ephemeral: true,
-						content: options.commandErrorMessage,
+						content: loginOptions.commandErrorMessage,
 					});
-				} else if (
+				else if (
 					Number(interaction?.createdAt) - Date.now() < 3000 &&
 					!(
 						error instanceof DiscordAPIError &&
 						error.code === RESTJSONErrorCodes.UnknownInteraction
 					)
-				) {
+				)
 					await interaction?.reply({
 						ephemeral: true,
-						content: options.commandErrorMessage,
+						content: loginOptions.commandErrorMessage,
 					});
-				}
 			}
 		});
-	}
 
 	const defaultGuilds =
-		options.defaultCommandAccess !== undefined &&
-		typeof options.defaultCommandAccess !== "boolean" &&
-		[options.defaultCommandAccess].flat();
-	const guildCommands = Object.entries(commands).reduce<{
-		[key: Snowflake]: ApplicationCommandData[];
-		[globalCommandKey]?: ApplicationCommandData[];
-	}>((accumulator, [name, commands]) => {
-		for (const command of commands) {
-			const access = command.access ?? options.defaultCommandAccess ?? true;
+		loginOptions.defaultCommandAccess !== undefined &&
+		typeof loginOptions.defaultCommandAccess !== "boolean" &&
+		[loginOptions.defaultCommandAccess].flat();
+	const commandsByGuild = Object.entries(commands).reduce<
+		Partial<Record<Snowflake | typeof globalCommandKey, ApplicationCommandData[]>>
+	>((accumulator, [commandName, guildCommands]) => {
+		for (const command of guildCommands) {
+			const access = command.access ?? loginOptions.defaultCommandAccess ?? true;
 			if (typeof access === "boolean") {
-				if (commands.length > 1)
+				if (guildCommands.length > 1)
 					throw new TypeError(
 						`Cannot set a boolean access on a command with a duplicate name`,
 					);
 				accumulator[globalCommandKey] ??= [];
-				accumulator[globalCommandKey].push({ ...command, name, dmPermission: access });
+				accumulator[globalCommandKey].push({
+					...command,
+					name: commandName,
+					dmPermission: access,
+				});
 			} else {
 				const guilds = new Set([access].flat());
-				if (guilds.has(DEFAULT_GUILDS)) {
+				if (guilds.has(DEFAULT_GUILDS))
 					if (defaultGuilds) {
-						for (let guild of defaultGuilds) guilds.add(guild);
+						for (const guild of defaultGuilds) guilds.add(guild);
 						guilds.delete(DEFAULT_GUILDS);
-					} else {
+					} else
 						throw new ReferenceError(
 							`Cannot use \`${DEFAULT_GUILDS}\` without explicitly setting default guilds`,
 						);
-					}
-				}
+
 				for (const guild of guilds) {
-					accumulator[guild] ??= [];
-					accumulator[guild]?.push({ ...command, name });
+					accumulator[guild]?.push({ ...command, name: commandName });
+					accumulator[guild] ??= [{ ...command, name: commandName }];
 				}
 			}
 		}
@@ -298,19 +305,19 @@ export async function login(options: LoginOptions) {
 	const guilds = await client.guilds.fetch();
 	await Promise.all(
 		guilds.map(async (guild) => {
-			await client.application.commands.set(guildCommands[guild.id] ?? [], guild.id);
-			guildCommands[guild.id] = [];
+			await client.application.commands.set(commandsByGuild[guild.id] ?? [], guild.id);
+			commandsByGuild[guild.id] = [];
 		}),
 	);
 
-	await client.application.commands.set(guildCommands[globalCommandKey] ?? []);
-	guildCommands[globalCommandKey] = [];
+	await client.application.commands.set(commandsByGuild[globalCommandKey] ?? []);
+	commandsByGuild[globalCommandKey] = [];
 
-	for (const guildId in guildCommands) {
-		if (!Object.prototype.hasOwnProperty.call(guildCommands, guildId)) continue;
+	for (const guildId in commandsByGuild) {
+		if (!Object.hasOwn(commandsByGuild, guildId)) continue;
 
-		const commands = guildCommands[guildId];
-		if (!commands?.length) continue;
+		const guildCommands = commandsByGuild[guildId];
+		if (!guildCommands?.length) continue;
 
 		await handleError(
 			new ReferenceError(`Could not register commands in missing guild \`${guildId}\``),
@@ -360,10 +367,10 @@ export type LoginOptions = {
 	commandErrorMessage?: string;
 	/**
 	 * Defines how errors should be handled in discord.js or any event, component, or command handler. Can either be a
-	 * function that will be called on each error, or an object defining how strife.js should handle it. If set to an
-	 * object, strife.js will log the error in the console, then standardize it and format it nicely before sending it
-	 * in a channel of your chosing. You can also optionally specify an emoji to be included in the error log for
-	 * aesthetic purposes. If not set, all errors will only be logged through `console.error`.
+	 * function that will be called on each error, or an object defining how strife.js should handle it. If not set, all
+	 * errors will only be logged through `console.error`. If set to an object, strife.js will log the error in the
+	 * console, then standardize it and format it nicely before sending it in a channel of your chosing. You can also
+	 * optionally specify an emoji to be included in the error log for aesthetic purposes.
 	 */
 	handleError?:
 		| ((error: unknown, event: RepliableInteraction | string) => Awaitable<void>)
@@ -385,7 +392,7 @@ export type LoginOptions = {
 		/** The default value of {@link BaseCommandData.access a command's `access` field}. */
 		defaultCommandAccess?: true;
 	});
-async function buildErrorHandler(
+export async function buildErrorHandler(
 	options: { channel: string | (() => Awaitable<SendableChannel>); emoji?: string } | undefined,
 ): Promise<(error: unknown, event: RepliableInteraction | string) => Awaitable<void>> {
 	const channel =

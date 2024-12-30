@@ -2,13 +2,23 @@ import type { Awaitable, ClientEvents } from "discord.js";
 
 // TODO: add interactionCreate
 /** Events that are reserved for strife.js to handle and that end-users should not use. */
-export type ReservedClientEvent = "ready" | "debug" | "warn" | "error" | "invalidated";
+export const reservedClientEvents = ["ready", "debug", "warn", "error", "invalidated"] as const;
 /** All supported client events that can be listened to. */
-export type ClientEvent = Exclude<keyof ClientEvents, ReservedClientEvent>;
+export type StrifeEvents = Exclude<keyof ClientEvents, (typeof reservedClientEvents)[number]>;
+
 /** An event handler for a client event. */
-export type Event = (...args: ClientEvents[ClientEvent]) => unknown;
-const allEvents: Record<string, Event[]> = {};
-const preEvents: Record<string, Event> = {};
+export type EventHandler<EventName extends StrifeEvents> = (
+	...args: ClientEvents[EventName]
+) => Awaitable<unknown>;
+/** An event handler for a pre-event. */
+export type PreEventHandler<EventName extends StrifeEvents> = (
+	...args: ClientEvents[EventName]
+) => Awaitable<boolean>;
+
+/** An object containing all registered event handlers. */
+export const allEvents: { [EventName in StrifeEvents]?: EventHandler<EventName>[] } = {};
+/** An object containing all registered pre-event handlers. */
+export const preEvents: { [EventName in StrifeEvents]?: PreEventHandler<EventName> } = {};
 
 /**
  * Define an event listener. You are allowed to define multiple listeners for the same event. Note that listener
@@ -17,12 +27,13 @@ const preEvents: Record<string, Event> = {};
  * @param eventName The event to listen for.
  * @param event The event handler.
  */
-export function defineEvent<EventName extends ClientEvent>(
+export function defineEvent<EventName extends StrifeEvents>(
 	eventName: EventName,
-	event: (...args: ClientEvents[EventName]) => unknown,
-) {
-	allEvents[eventName] ??= [];
-	allEvents[eventName]?.push(event as Event);
+	event: EventHandler<EventName>,
+): void {
+	allEvents[eventName]?.push(event);
+	// @ts-expect-error TS2322
+	allEvents[eventName] ??= [event];
 }
 
 /**
@@ -39,13 +50,14 @@ export function defineEvent<EventName extends ClientEvent>(
  * @param eventName The event to listen for.
  * @param event The event handler. Must return a boolean that determines if other listeners are executed or not.
  */
-defineEvent.pre = function pre<EventName extends ClientEvent>(
+defineEvent.pre = function pre<EventName extends StrifeEvents>(
 	eventName: EventName,
-	event: (...args: ClientEvents[EventName]) => Awaitable<boolean>,
+	event: PreEventHandler<EventName>,
 ) {
 	if (preEvents[eventName])
-		throw new ReferenceError("Pre-handler for event " + eventName + " already exists");
-	preEvents[eventName] = event as Event;
+		throw new ReferenceError(`Pre-event handler for event ${eventName} already exists`);
+	// @ts-expect-error TS2322
+	preEvents[eventName] = event;
 	allEvents[eventName] ??= [];
 };
 
@@ -54,30 +66,28 @@ defineEvent.pre = function pre<EventName extends ClientEvent>(
  *
  * @returns An object of event handlers, indexed by the event name.
  */
-export function getEvents(): { [E in ClientEvent]?: Event } {
-	const parsedEvents: Record<string, Event> = {};
-
-	for (const eventName in allEvents) {
+export function getEvents(): { [key in StrifeEvents]?: EventHandler<key> } {
+	const parsedEvents: { [key in StrifeEvents]?: EventHandler<key> } = {};
+	for (const [eventName, handlers = []] of Object.entries(allEvents) as [
+		StrifeEvents,
+		EventHandler<StrifeEvents>[],
+	][]) {
 		const preEvent = preEvents[eventName];
-		const events = allEvents[eventName] ?? [];
 
-		const event = async (...args: any) => {
-			const results = await Promise.allSettled(events.map((event) => event(...args)));
+		async function handler(...args: ClientEvents[StrifeEvents]): Promise<void> {
+			// @ts-expect-error TS2590
+			if (preEvent && !(await preEvent(...args))) return;
+
+			const results = await Promise.allSettled(handlers.map((event) => event(...args)));
 			const failures = results.filter(
 				(result): result is PromiseRejectedResult => result.status === "rejected",
 			);
 
 			if (failures.length === 1) throw failures[0]?.reason;
-			if (failures.length) throw new AggregateError(failures);
-		};
-
-		parsedEvents[eventName] =
-			preEvent ?
-				async function (...args: any) {
-					if (await preEvent(...args)) await event(...args);
-				}
-			:	event;
+			if (failures.length)
+				throw new AggregateError(failures, `Errors in multiple ${eventName} handlers`);
+		}
+		parsedEvents[eventName] = handler;
 	}
-
 	return parsedEvents;
 }

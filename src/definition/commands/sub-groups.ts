@@ -1,8 +1,8 @@
-import type { ChatInputCommandInteraction } from "discord.js";
+import type { Awaitable, ChatInputCommandInteraction } from "discord.js";
 import type { GuildCacheReducer } from "../../util.js";
 import type { BaseChatCommandData, BaseCommandKeys } from "../commands.js";
+import type { FlatCommandOptions } from "./flat.js";
 import type { OptionsToType } from "./options.js";
-import type { RootCommandOptions } from "./root.js";
 import type { SubcommandData, SubcommandOptions } from "./subcommands.js";
 
 import {
@@ -11,21 +11,20 @@ import {
 	PermissionsBitField,
 } from "discord.js";
 
-import { commands } from "../commands.js";
-import { transformSubcommands } from "./subcommands.js";
+import { commands, transformSubcommands } from "../commands.js";
 
 /**
  * Define commands in sub groups.
  *
  * @param data Sub group configuration data.
- * @param command The command handler.
+ * @param handler The command handler.
  */
 export function defineSubGroups<
 	InGuild extends true,
-	Options extends SubGroupsOptions<InGuild> = {},
+	Options extends SubGroupsOptions<InGuild> = Record<string, never>,
 >(
 	data: SubGroupsData<InGuild, Options>,
-	command: (
+	handler: (
 		interaction: ChatInputCommandInteraction<GuildCacheReducer<InGuild>>,
 		options: {
 			[G in keyof Options]: {
@@ -36,14 +35,14 @@ export function defineSubGroups<
 				};
 			}[keyof Options[G]];
 		}[keyof Options],
-	) => any,
+	) => Awaitable<unknown>,
 ): void;
 export function defineSubGroups<
 	InGuild extends false,
-	Options extends SubGroupsOptions<InGuild> = {},
+	Options extends SubGroupsOptions<InGuild> = Record<string, never>,
 >(
 	data: SubGroupsData<InGuild, Options>,
-	command: (
+	handler: (
 		interaction: ChatInputCommandInteraction<GuildCacheReducer<InGuild>>,
 		options: {
 			[G in keyof Options]: {
@@ -54,22 +53,22 @@ export function defineSubGroups<
 				};
 			}[keyof Options[G]];
 		}[keyof Options],
-	) => any,
+	) => Awaitable<unknown>,
 ): void;
 export function defineSubGroups(
 	data: SubGroupsData<boolean, SubGroupsOptions<boolean>>,
-	command: SubGroupsHandler,
+	handler: SubGroupsHandler,
 ): void {
 	const oldCommand = commands[data.name]?.[0];
-	if (oldCommand && oldCommand.command !== command)
-		throw new ReferenceError("Command " + data.name + " has already been defined");
+	if (oldCommand && oldCommand.command !== handler)
+		throw new ReferenceError(`Command ${data.name} has already been defined`);
 
 	commands[data.name] ??= [];
 	commands[data.name]?.push({
 		defaultMemberPermissions: data.restricted ? new PermissionsBitField() : null,
 		...data,
 		type: ApplicationCommandType.ChatInput,
-		command,
+		command: handler,
 		options: Object.entries(data.subcommands).map(
 			([subcommand, command]: [
 				string,
@@ -87,16 +86,6 @@ export function defineSubGroups(
 	});
 }
 
-/** A subgroup command handler. */
-export type SubGroupsHandler = (
-	interaction: ChatInputCommandInteraction,
-	options: {
-		subcommand: string;
-		subGroup: string;
-		options: OptionsToType<boolean, RootCommandOptions<boolean>>;
-	},
-) => any;
-
 /** Subgroup command configuration data. */
 export type SubGroupsData<InGuild extends boolean, Options extends SubGroupsOptions<InGuild>> = {
 	options?: never;
@@ -109,13 +98,21 @@ export type SubGroupsData<InGuild extends boolean, Options extends SubGroupsOpti
 	};
 } & BaseChatCommandData<InGuild> &
 	AugmentedSubGroupsData<InGuild, Options>;
+/** Options for a subgroup command. */
+export type SubGroupsOptions<InGuild extends boolean> = Record<string, SubcommandOptions<InGuild>>;
+/** A subgroup command handler. */
+export type SubGroupsHandler = (
+	interaction: ChatInputCommandInteraction,
+	options: {
+		subcommand: string;
+		subGroup: string;
+		options: OptionsToType<boolean, FlatCommandOptions<boolean>>;
+	},
+) => Awaitable<unknown>;
 /** Can be augmented to add custom subgroup command properties (advanced usage) */
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export interface AugmentedSubGroupsData<
 	InGuild extends boolean,
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	_Options extends SubGroupsOptions<InGuild>,
 > {}
-
-/** Options for a subgroup command. */
-export interface SubGroupsOptions<InGuild extends boolean> {
-	[GroupName: string]: SubcommandOptions<InGuild>;
-}

@@ -1,13 +1,8 @@
 import type { CacheType, Channel } from "discord.js";
-import type { LoginOptions } from "./client.js";
-import type { BaseCommandData } from "./definition/commands.js";
 
 /** @internal */
 export type GuildCacheReducer<InGuild extends boolean> =
 	InGuild extends true ? "cached" | "raw" : CacheType;
-
-/** @deprecated This is meant to be an internal type. */
-export type CacheReducer<InGuild extends boolean> = GuildCacheReducer<InGuild>;
 
 /** Can be used in {@link BaseCommandData.access} to extend the guilds defined in {@link LoginOptions.defaultCommandAccess} */
 export const DEFAULT_GUILDS = "@defaults";
@@ -22,4 +17,4 @@ export const footerSeperator = " • ";
 export const zeroWidthSpace = "\u200B";
 
 /** @internal */
-export type SendableChannel = Extract<Channel, { send: (...args: any[]) => any }>;
+export type SendableChannel = Extract<Channel, { send(...args: unknown[]): unknown }>;

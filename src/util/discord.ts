@@ -5,17 +5,17 @@ import type {
 	Awaitable,
 	BaseMessageOptions,
 	Channel,
+	Message,
 	MessageActionRowComponentData,
 	User,
 } from "discord.js";
 
-import { ButtonStyle, ComponentType, GuildMember, Message } from "discord.js";
+import { ButtonStyle, ComponentType, GuildMember } from "discord.js";
 
-import { defineButton, defineSelect } from "../definition/components.js";
 import { footerSeperator, zeroWidthSpace } from "../util.js";
 import { disableComponents } from "./messages.js";
 
-type PaginateOptions<Item, U extends User | false = User | false> = {
+export type PaginateOptions<Item, Mode extends User | false = User | false> = {
 	/** The title of the embed. */
 	title: string;
 	/** The name of one item in the array. */
@@ -27,9 +27,9 @@ type PaginateOptions<Item, U extends User | false = User | false> = {
 
 	/**
 	 * The user who instantiated the pagination menu, and the only person with control over its buttons. Omit to only
-	 * show a single page.
+	 * show a single static page.
 	 */
-	user: U;
+	user: Mode;
 	/** The index of an item in the input array to jump to. */
 	rawOffset?: number;
 	/** Whether to underscore the item indicated by {@link PaginateOptions.rawOffset}. Defaults to `true`. */
@@ -42,7 +42,7 @@ type PaginateOptions<Item, U extends User | false = User | false> = {
 	columns?: 1 | 2 | 3;
 
 	/** The number of milliseconds the menu can be idle for before ending. */
-	timeout: U extends false ? undefined | never : number;
+	timeout: Mode extends false ? undefined : number;
 	/** A member or user to format the embed around by setting the embed author field to them. */
 	format?: GuildMember | User;
 	/**
@@ -161,16 +161,15 @@ export async function paginate<Item>(
 						],
 					},
 				]
-			: extraComponents?.length && customComponentLocation === "between" ?
+			: extraComponents.length && customComponentLocation === "between" ?
 				[{ type: ComponentType.ActionRow, components: extraComponents }]
 			:	[];
 
-		if (extraComponents?.length && customComponentLocation !== "between") {
+		if (extraComponents.length && customComponentLocation !== "between")
 			components[customComponentLocation === "above" ? "unshift" : "push"]({
 				type: ComponentType.ActionRow,
 				components: extraComponents,
 			});
-		}
 
 		const lines = await Promise.all(filtered.map(formatLine));
 		const itemCount = totalCount ?? array.length;
@@ -241,11 +240,11 @@ export async function paginate<Item>(
  * @param channel The channel to get the base channel of.
  * @returns The base channel.
  */
-export function getBaseChannel<TChannel extends Channel | null | undefined>(
-	channel: TChannel,
-): TChannel extends null ? undefined
-: TChannel extends AnyThreadChannel ? NonNullable<TChannel["parent"]> | undefined
-: TChannel {
+export function getBaseChannel<Child extends Channel | null | undefined>(
+	channel: Child,
+): Child extends null ? undefined
+: Child extends AnyThreadChannel ? NonNullable<Child["parent"]> | undefined
+: Child {
 	// @ts-expect-error TS2322
 	return (channel && (channel.isThread() ? channel.parent : channel)) || undefined;
 }

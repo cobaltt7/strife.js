@@ -1,12 +1,10 @@
-import type { Snowflake } from "discord.js";
+import type { ChatInputCommandInteraction, Guild, Snowflake } from "discord.js";
 
 import {
 	bold,
 	chatInputApplicationCommandMention,
-	ChatInputCommandInteraction,
 	escapeMarkdown,
 	FormattingPatterns,
-	Guild,
 	lazy,
 	MessageMentions,
 } from "discord.js";
@@ -36,7 +34,8 @@ export function escapeAllMarkdown(text: string): string {
  * @returns The escaped text.
  */
 export function stripMarkdown(text: string): string {
-	return text.replace(
+	return text.replaceAll(
+		// eslint-disable-next-line prefer-named-capture-group
 		/(?<!\\)\\|```\S*\s+(.+?)\s*```|(?<!\\)\*\*(.+?)(?<!\\)\*\*|(?<!\\)__(.+?)(?<!\\)__|(?<!\\\*?)\*(.+?)(?<!\\|\*)\*|(?<!\\_?)_(.+?)(?<!\\|_)_|~~(.+?)(?<!\\)~~|`(.+?)(?<!\\|`)`|^> (.+?)/gms,
 		"$1$2$3$4$5$6$7$8",
 	);
@@ -68,7 +67,7 @@ export function formatAnyEmoji(
 ): string | undefined {
 	if (typeof options === "string") return options;
 	if (typeof options?.id !== "string") return options?.name ?? undefined;
-	return `<${options.animated ? "a" : ""}:${options?.name ?? "emoji"}:${options.id}>`;
+	return `<${options.animated ? "a" : ""}:${options.name ?? "emoji"}:${options.id}>`;
 }
 
 /** A global regular expression variant of {@link MessageMentions.UsersPattern}. */

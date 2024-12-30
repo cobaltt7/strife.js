@@ -1,21 +1,33 @@
 import type {
+	ApplicationCommandOptionAllowedChannelTypes,
 	ApplicationCommandOptionChoiceData,
-	ApplicationCommandOptionType,
+	ApplicationCommandOptionData,
+	Attachment,
 	AutocompleteInteraction,
 	GuildBasedChannel,
+	GuildMember,
+	Role,
+	User,
 } from "discord.js";
 import type { GuildCacheReducer } from "../../util.js";
-import type { RootCommandOptions } from "./root.js";
+import type { FlatCommandOptions } from "./flat.js";
 
-import { Attachment, ChannelType, GuildMember, Role, User } from "discord.js";
+import { ApplicationCommandOptionType, ChannelType } from "discord.js";
+import * as discord from "discord.js";
 
 /** An option. */
-export type Option<InGuild extends boolean> =
+export type CommandOption<InGuild extends boolean> =
 	| BasicOption
 	| NumericalOption
 	| ChannelOption
 	| StringOption<InGuild>
 	| StringChoicesOption;
+
+/** A base option. */
+export type BaseOption = {
+	description: string;
+	required?: boolean;
+};
 
 /**
  * A basic option that doesn't allow for further configuration.
@@ -26,7 +38,7 @@ export type Option<InGuild extends boolean> =
  * - {@link ApplicationCommandOptionType.Role}
  * - {@link ApplicationCommandOptionType.User}
  */
-export interface BasicOption extends BaseOption {
+export type BasicOption = {
 	type:
 		| ApplicationCommandOptionType.Attachment
 		| ApplicationCommandOptionType.Boolean
@@ -40,7 +52,7 @@ export interface BasicOption extends BaseOption {
 	minLength?: never;
 	maxLength?: never;
 	autocomplete?: never;
-}
+} & BaseOption;
 
 /**
  * A numerical option.
@@ -48,7 +60,7 @@ export interface BasicOption extends BaseOption {
  * - {@link ApplicationCommandOptionType.Integer}
  * - {@link ApplicationCommandOptionType.Number}
  */
-export interface NumericalOption extends BaseOption {
+export type NumericalOption = {
 	type: ApplicationCommandOptionType.Integer | ApplicationCommandOptionType.Number;
 	/** Define a lower bound for this option. Defaults to the Discord default of `-2 ** 53`. */
 	minValue?: number;
@@ -59,23 +71,30 @@ export interface NumericalOption extends BaseOption {
 	minLength?: never;
 	maxLength?: never;
 	autocomplete?: never;
-}
+} & BaseOption;
 
 /** A {@link ApplicationCommandOptionType.Channel channel} option. */
-export interface ChannelOption extends BaseOption {
+export type ChannelOption = {
 	type: ApplicationCommandOptionType.Channel;
 	/** Define allowed channel types for this option. Defaults to all supported guild channel types. */
-	channelTypes?: ChannelType[];
+	channelTypes?: ApplicationCommandOptionAllowedChannelTypes[];
 	choices?: never;
 	minValue?: never;
 	maxValue?: never;
 	minLength?: never;
 	maxLength?: never;
 	autocomplete?: never;
-}
+} & BaseOption;
 
+/** A base {@link ApplicationCommandOptionType.String string} option. */
+export type BaseStringOption = {
+	type: ApplicationCommandOptionType.String;
+	channelTypes?: never;
+	minValue?: never;
+	maxValue?: never;
+} & BaseOption;
 /** A {@link ApplicationCommandOptionType.String string} option. */
-export interface StringOption<InGuild extends boolean> extends BaseStringOption {
+export type StringOption<InGuild extends boolean> = {
 	/** Define a lower bound for this option's length. Defaults to the Discord default of `0`. */
 	minLength?: number;
 	/** Define a upper bound for this option's length. Defaults to the Discord default of `6_000`. */
@@ -95,9 +114,9 @@ export interface StringOption<InGuild extends boolean> extends BaseStringOption 
 	 */
 	autocomplete?: AutocompleteHandler<InGuild>;
 	choices?: never;
-}
+} & BaseStringOption;
 /** A {@link ApplicationCommandOptionType.String string} option with specified preset choices. */
-export interface StringChoicesOption extends BaseStringOption {
+export type StringChoicesOption = {
 	/**
 	 * Require users to pick values from this predefined list. The keys are the values passed to your bot and the values
 	 * are the descriptions displayed to the users.
@@ -106,49 +125,132 @@ export interface StringChoicesOption extends BaseStringOption {
 	minLength?: never;
 	maxLength?: never;
 	autocomplete?: never;
-}
-/** A base {@link ApplicationCommandOptionType.String string} option. */
-export interface BaseStringOption extends BaseOption {
-	type: ApplicationCommandOptionType.String;
-	channelTypes?: never;
-	minValue?: never;
-	maxValue?: never;
-}
+} & BaseStringOption;
 
-/** @deprecated Use {@link StringOption}. */
-export interface StringAutocompleteOption<InGuild extends boolean> extends StringOption<InGuild> {}
 /** An autocomplete handler. */
 export type AutocompleteHandler<InGuild extends boolean> = (
 	interaction: AutocompleteInteraction<GuildCacheReducer<InGuild>>,
 ) => ApplicationCommandOptionChoiceData<string>[];
-
-/** A base option. */
-export interface BaseOption {
-	description: string;
-	required?: boolean;
-}
+/**
+ * An object containing all registered autocomplete handlers, indexed by the command, subgroup, subcommand, and option.
+ * If there is no subgroup or subcommand, {@link NoSubcommand} is used as a placeholder.
+ */
+export const autocompleters: Record<
+	string,
+	Partial<
+		Record<
+			string | typeof NoSubcommand,
+			Partial<
+				Record<string | typeof NoSubcommand, Record<string, AutocompleteHandler<boolean>>>
+			>
+		>
+	>
+> = {};
+/** Placeholder used in {@link autocompleters} when there is no subgroup or subcommand to index by. */
+export const NoSubcommand = Symbol("no subcommand");
 
 /** Converts option configuration data to a type representing the chosen options. */
-export type OptionsToType<InGuild extends boolean, Options extends RootCommandOptions<InGuild>> = {
+export type OptionsToType<InGuild extends boolean, Options extends FlatCommandOptions<InGuild>> = {
 	[OptionName in keyof Options]: Options[OptionName]["required"] extends true ?
 		OptionToType<InGuild, Options[OptionName]>
 	:	OptionToType<InGuild, Options[OptionName]> | undefined;
 };
-
 /** Converts an option's configuration to the type the option will ouput. */
-export type OptionToType<InGuild extends boolean, O extends Option<InGuild>> = {
+export type OptionToType<InGuild extends boolean, Option extends CommandOption<InGuild>> = {
 	[ApplicationCommandOptionType.Attachment]: Attachment;
 	[ApplicationCommandOptionType.Mentionable]: GuildMember | Role | User;
 	[ApplicationCommandOptionType.Role]: Role | (InGuild extends true ? never : undefined);
 	[ApplicationCommandOptionType.Boolean]: boolean;
 	[ApplicationCommandOptionType.User]: GuildMember | User;
 	[ApplicationCommandOptionType.Channel]:
-		| (O["channelTypes"] extends ChannelType[] ?
-				Exclude<GuildBasedChannel, { type: O["channelTypes"] }>
+		| (Option["channelTypes"] extends ChannelType[] ?
+				Exclude<GuildBasedChannel, { type: Option["channelTypes"] }>
 		  :	GuildBasedChannel)
 		| (InGuild extends true ? never : undefined);
 	[ApplicationCommandOptionType.Integer]: number;
 	[ApplicationCommandOptionType.Number]: number;
-	[ApplicationCommandOptionType.String]: O extends StringOption<InGuild> ? string
-	:	O["choices"][keyof O["choices"]];
-}[O["type"]];
+	[ApplicationCommandOptionType.String]: Option extends StringOption<InGuild> ? string
+	:	Option["choices"][keyof Option["choices"]];
+}[Option["type"]];
+
+/** @internal */
+export function transformOptions(
+	options: Record<string, CommandOption<boolean>>,
+	metadata:
+		| { command: string; subcommand?: string }
+		| { command: string; subcommand: string; subGroup?: string },
+): Exclude<
+	ApplicationCommandOptionData,
+	{
+		type:
+			| ApplicationCommandOptionType.SubcommandGroup
+			| ApplicationCommandOptionType.Subcommand;
+	}
+>[] {
+	return Object.entries(options)
+		.map(([name, option]) => {
+			const transformed = {
+				name,
+				description: option.description,
+				type: option.type,
+				required: option.required ?? false,
+			} as Exclude<
+				ApplicationCommandOptionData,
+				{
+					type:
+						| ApplicationCommandOptionType.SubcommandGroup
+						| ApplicationCommandOptionType.Subcommand;
+				}
+			>;
+
+			if (option.autocomplete) {
+				(((autocompleters[metadata.command] ??= {})[
+					("subGroup" in metadata && metadata.subGroup) || NoSubcommand
+				] ??= {})[metadata.subcommand || NoSubcommand] ??= {})[name] = option.autocomplete;
+
+				transformed.autocomplete = true;
+			}
+
+			if (transformed.type === ApplicationCommandOptionType.Channel)
+				transformed.channelTypes =
+					option.channelTypes ??
+					([
+						ChannelType.GuildText,
+						ChannelType.GuildVoice,
+						ChannelType.GuildCategory,
+						ChannelType.GuildAnnouncement,
+						ChannelType.AnnouncementThread,
+						ChannelType.PublicThread,
+						ChannelType.PrivateThread,
+						ChannelType.GuildStageVoice,
+						ChannelType.GuildForum,
+						...("MediaChannel" in discord && "GuildMedia" in ChannelType ?
+							([ChannelType.GuildMedia] as const)
+						:	[]),
+					] as const);
+
+			if (transformed.type === ApplicationCommandOptionType.String) {
+				if (option.choices && !transformed.autocomplete)
+					transformed.choices = Object.entries(option.choices)
+						.map(([value, label]) => ({ value, name: label }))
+						.sort((one, two) => one.name.localeCompare(two.name));
+				if (option.maxLength !== undefined) transformed.maxLength = option.maxLength;
+				if (option.minLength !== undefined) transformed.minLength = option.minLength;
+			}
+
+			if (
+				transformed.type === ApplicationCommandOptionType.Number ||
+				transformed.type === ApplicationCommandOptionType.Integer
+			) {
+				if (option.maxValue !== undefined) transformed.maxValue = option.maxValue;
+				if (option.minValue !== undefined) transformed.minValue = option.minValue;
+			}
+
+			return transformed;
+		})
+		.sort((one, two) =>
+			one.required === two.required ? one.name.localeCompare(two.name)
+			: one.required ? -1
+			: 1,
+		);
+}

@@ -3,12 +3,12 @@ import type { InteractionReplyOptions } from "discord.js";
 import { deepStrictEqual, ok, strictEqual } from "node:assert";
 import { describe, it } from "node:test";
 
-import { ActionRow as _ActionRow, ComponentType } from "discord.js";
+import { ComponentType } from "discord.js";
 
 import { paginate } from "./discord.js";
 
-await describe("paginate", async () => {
-	await it("should only respond once when `user` is `false` option", async () => {
+describe("paginate", () => {
+	it("should only respond once when `user` is `false` option", async () => {
 		const messages: InteractionReplyOptions[] = [];
 		await paginate(
 			[1, 2, 3],
@@ -20,7 +20,7 @@ await describe("paginate", async () => {
 		);
 		strictEqual(messages.length, 1);
 	});
-	await it("should generate the proper first page", async () => {
+	it("should generate the proper first page", async () => {
 		const messages: InteractionReplyOptions[] = [];
 		await paginate(
 			[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
@@ -46,7 +46,7 @@ await describe("paginate", async () => {
 			},
 		]);
 	});
-	await it("should respect the `pageLength` option", async () => {
+	it("should respect the `pageLength` option", async () => {
 		await paginate(
 			[1, 2, 3, 4, 5, 6],
 			(value) => value.toString(),
@@ -65,7 +65,7 @@ await describe("paginate", async () => {
 			},
 		);
 	});
-	await it("should respect the `rawOffset` option", async () => {
+	it("should respect the `rawOffset` option", async () => {
 		await paginate(
 			[
 				1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
@@ -87,7 +87,7 @@ await describe("paginate", async () => {
 			},
 		);
 	});
-	await it("should respect the `generateComponents` option", async () => {
+	it("should respect the `generateComponents` option", async () => {
 		await paginate(
 			[1, 2, 3, 4, 5, 6],
 			(value) => value.toString(),
@@ -132,7 +132,7 @@ await describe("paginate", async () => {
 			},
 		);
 	});
-	await it("should respect the `customComponentLocation` option", async () => {
+	it("should respect the `customComponentLocation` option", async () => {
 		await paginate(
 			[1, 2, 3, 4, 5, 6],
 			(value) => value.toString(),
@@ -170,7 +170,7 @@ await describe("paginate", async () => {
 			},
 		);
 	});
-	await it("should respect the `failMessage` option", async () => {
+	it("should respect the `failMessage` option", async () => {
 		const messages: InteractionReplyOptions[] = [];
 		await paginate(
 			[],

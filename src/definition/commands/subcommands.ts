@@ -1,16 +1,12 @@
-import type { ApplicationCommandSubCommandData, ChatInputCommandInteraction } from "discord.js";
+import type { Awaitable, ChatInputCommandInteraction } from "discord.js";
+import type { GuildCacheReducer } from "../../util.js";
 import type { BaseChatCommandData, BaseCommandKeys } from "../commands.js";
+import type { FlatCommandData, FlatCommandOptions } from "./flat.js";
 import type { OptionsToType } from "./options.js";
-import type { RootCommandData, RootCommandOptions } from "./root.js";
 
-import {
-	ApplicationCommandOptionType,
-	ApplicationCommandType,
-	PermissionsBitField,
-} from "discord.js";
+import { ApplicationCommandType, PermissionsBitField } from "discord.js";
 
-import { type GuildCacheReducer } from "../../util.js";
-import { commands, transformOptions } from "../commands.js";
+import { commands, transformSubcommands } from "../commands.js";
 
 /**
  * Define subcommands.
@@ -20,7 +16,7 @@ import { commands, transformOptions } from "../commands.js";
  */
 export function defineSubcommands<
 	InGuild extends true,
-	Options extends SubcommandOptions<InGuild> = {},
+	Options extends SubcommandOptions<InGuild> = Record<string, never>,
 >(
 	data: SubcommandData<InGuild, Options>,
 	command: (
@@ -28,11 +24,11 @@ export function defineSubcommands<
 		options: {
 			[S in keyof Options]: { subcommand: S; options: OptionsToType<InGuild, Options[S]> };
 		}[keyof Options],
-	) => any,
+	) => Awaitable<unknown>,
 ): void;
 export function defineSubcommands<
 	InGuild extends false,
-	Options extends SubcommandOptions<InGuild> = {},
+	Options extends SubcommandOptions<InGuild> = Record<string, never>,
 >(
 	data: SubcommandData<InGuild, Options>,
 	command: (
@@ -40,7 +36,7 @@ export function defineSubcommands<
 		options: {
 			[S in keyof Options]: { subcommand: S; options: OptionsToType<InGuild, Options[S]> };
 		}[keyof Options],
-	) => any,
+	) => Awaitable<unknown>,
 ): void;
 export function defineSubcommands(
 	data: SubcommandData<boolean, SubcommandOptions<boolean>>,
@@ -48,7 +44,7 @@ export function defineSubcommands(
 ): void {
 	const oldCommand = commands[data.name]?.[0];
 	if (oldCommand && oldCommand.command !== command)
-		throw new ReferenceError("Command " + data.name + " has already been defined");
+		throw new ReferenceError(`Command ${data.name} has already been defined`);
 
 	commands[data.name] ??= [];
 	commands[data.name]?.push({
@@ -60,33 +56,6 @@ export function defineSubcommands(
 	});
 }
 
-/** @internal */
-export function transformSubcommands(
-	subcommands: {
-		[key: string]: Omit<
-			RootCommandData<boolean, SubcommandOptions<boolean>[string]>,
-			BaseCommandKeys
-		>;
-	},
-	metadata: { command: string; subGroup?: string },
-): ApplicationCommandSubCommandData[] {
-	return Object.entries(subcommands).map(
-		([subcommand, command]: [string, (typeof subcommands)[string]]) => ({
-			name: subcommand,
-			description: command.description,
-			type: ApplicationCommandOptionType.Subcommand,
-			options:
-				command.options && transformOptions(command.options, { ...metadata, subcommand }),
-		}),
-	);
-}
-
-/** A subcommand handler. */
-export type SubcommandHandler = (
-	interaction: ChatInputCommandInteraction,
-	options: { subcommand: string; options: OptionsToType<boolean, RootCommandOptions<boolean>> },
-) => any;
-
 /** Subcommand configuration data. */
 export type SubcommandData<InGuild extends boolean, Options extends SubcommandOptions<InGuild>> = {
 	options?: never;
@@ -95,16 +64,24 @@ export type SubcommandData<InGuild extends boolean, Options extends SubcommandOp
 	 * `name`s and `description`s and may have `options`.
 	 */
 	subcommands: {
-		[key in keyof Options]: Omit<RootCommandData<InGuild, Options[key]>, BaseCommandKeys>;
+		[key in keyof Options]: Omit<FlatCommandData<InGuild, Options[key]>, BaseCommandKeys>;
 	};
 } & BaseChatCommandData<InGuild> &
 	AugmentedSubcommandData<InGuild, Options>;
+/** Options for subcommands. */
+export type SubcommandOptions<InGuild extends boolean> = Record<
+	string,
+	FlatCommandOptions<InGuild>
+>;
+/** A subcommand handler. */
+export type SubcommandHandler = (
+	interaction: ChatInputCommandInteraction,
+	options: { subcommand: string; options: OptionsToType<boolean, FlatCommandOptions<boolean>> },
+) => Awaitable<unknown>;
 /** Can be augmented to add custom subcommand properties (advanced usage) */
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export interface AugmentedSubcommandData<
 	InGuild extends boolean,
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	_Options extends SubcommandOptions<InGuild>,
 > {}
-/** Options for subcommands. */
-export interface SubcommandOptions<InGuild extends boolean> {
-	[SubcommandName: string]: RootCommandOptions<InGuild>;
-}

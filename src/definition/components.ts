@@ -1,67 +1,79 @@
 import type {
 	AnySelectMenuInteraction,
+	Awaitable,
 	ButtonInteraction,
 	ModalSubmitInteraction,
 	SelectMenuType,
 } from "discord.js";
 
 /** An object containing all registered button handlers. */
-export const buttons: Record<string, (interaction: ButtonInteraction, data: string) => any> = {};
+export const buttons: Record<string, ButtonHandler> = {};
+/** An event handler for a button click. */
+export type ButtonHandler = (interaction: ButtonInteraction, data: string) => Awaitable<unknown>;
 /**
  * Define a button listener.
  *
- * The button ID and the `data` parameter of the callback function are both taken from the button's `customId`. For
+ * The button id and the `data` parameter of the callback function are both taken from the button's `customId`. For
  * example, if the `customId` is `"abcd_foobar"`, then the callback for the `foobar` button will be called and the
  * `data` parameter will have a value of `"abcd"`.
  *
- * @param buttonID The button ID.
+ * @param buttonId The button id.
  * @param handler The button handler.
  */
 export function defineButton(
-	buttonID: string,
-	handler: (interaction: ButtonInteraction, data: string) => any,
-) {
-	if (buttons[buttonID])
-		throw new ReferenceError(`Handler for button ${buttonID} already exists`);
-	buttons[buttonID] = handler;
+	buttonId: string,
+	handler: (interaction: ButtonInteraction, data: string) => Awaitable<unknown>,
+): void {
+	if (buttons[buttonId])
+		throw new ReferenceError(`Handler for button ${buttonId} already exists`);
+	buttons[buttonId] = handler;
 }
 
 /** An object containing all registered modal handlers. */
-export const modals: Record<string, (interaction: ModalSubmitInteraction, data: string) => any> =
-	{};
+export const modals: Record<string, ModalHandler> = {};
+/** An event handler for a modal submission. */
+export type ModalHandler = (
+	interaction: ModalSubmitInteraction,
+	data: string,
+) => Awaitable<unknown>;
 /**
  * Define a modal listener.
  *
- * The modal ID and the `data` parameter of the callback function are both taken from the modal's `customId`. For
+ * The modal id and the `data` parameter of the callback function are both taken from the modal's `customId`. For
  * example, if the `customId` is `"abcd_foobar"`, then the callback for the `foobar` modal will be called and the `data`
  * parameter will have a value of `"abcd"`.
  *
- * @param modalID The modal ID.
+ * @param modalId The modal id.
  * @param handler The modal handler.
  */
 export function defineModal(
-	modalID: string,
-	handler: (interaction: ModalSubmitInteraction, data: string) => any,
-) {
-	if (modals[modalID]) throw new ReferenceError(`Handler for modal ${modalID} already exists`);
-	modals[modalID] = handler;
+	modalId: string,
+	handler: (interaction: ModalSubmitInteraction, data: string) => Awaitable<unknown>,
+): void {
+	if (modals[modalId]) throw new ReferenceError(`Handler for modal ${modalId} already exists`);
+	modals[modalId] = handler;
 }
 
 /** An object containing all registered select menu handlers. */
 export const selects: Record<string, SelectHandler> = {};
+/** An event handler for a select menu defocus. */
+export type SelectHandler<Type extends SelectMenuType = SelectMenuType> = (
+	interaction: AnySelectMenuInteraction & { componentType: Type },
+	id: string,
+) => Awaitable<unknown>;
 /**
  * Define a select menu listener.
  *
- * The select menu ID and the `data` parameter of the callback function are both taken from the select menu's
+ * The select menu id and the `data` parameter of the callback function are both taken from the select menu's
  * `customId`. For example, if the `customId` is `"abcd_foobar"`, then the callback for the `foobar` select menu will be
  * called and the `data` parameter will have a value of `"abcd"`.
  *
- * @param selectMenuID The select menu ID.
+ * @param selectMenuId The select menu id.
  * @param type The types of select menus to collect. By default, all types of select menus are collected. However, you
- *   can not specify multiple listeners for the same ID but different types.
+ *   can not specify multiple listeners for the same id but different types.
  * @param handler The select menu handler.
  */
-export function defineSelect(selectMenuID: string, select: SelectHandler): void;
+export function defineSelect(selectMenuId: string, select: SelectHandler): void;
 export function defineSelect<Type extends SelectMenuType>(
 	selectName: string,
 	type: Type | Type[],
@@ -73,11 +85,11 @@ export function defineSelect(
 	optionalHandler?: SelectHandler,
 ): void {
 	if (selects[selectName])
-		throw new ReferenceError("Handler for select menu " + selectName + " already exists");
+		throw new ReferenceError(`Handler for select menu ${selectName} already exists`);
 
 	const types = typeof typesOrHandler === "function" || [typesOrHandler].flat();
 	const handler = typeof typesOrHandler === "function" ? typesOrHandler : optionalHandler;
-	if (!handler) throw new TypeError("No handler passed in for select menu " + selectName);
+	if (!handler) throw new TypeError(`No handler passed in for select menu ${selectName}`);
 
 	selects[selectName] =
 		types === true ? handler : (
@@ -85,8 +97,3 @@ export function defineSelect(
 				types.includes(interaction.componentType) && handler(interaction, id)
 		);
 }
-
-type SelectHandler<type extends SelectMenuType = SelectMenuType> = (
-	interaction: AnySelectMenuInteraction & { componentType: type },
-	id: string,
-) => any;

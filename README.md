@@ -34,7 +34,7 @@ import { GatewayIntentBits } from "discord.js";
 import { login } from "strife.js";
 
 await login({
-	clientOptions: { intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers] },
+	clientOptions: { intents: GatewayIntentBits.Guilds | GatewayIntentBits.GuildMembers },
 	modulesDirectory: fileURLToPath(new URL("./modules", import.meta.url)),
 });
 ```
@@ -88,13 +88,13 @@ The message displayed to the user when commands fail. Omit to use Discord's defa
 #### `handleError`
 
 Type:
-`((error: any, event: ClientEvent | RepliableInteraction) => Awaitable<void>) | { channel: string | (() => Awaitable<SendableChannel>); emoji?: string } | undefined`
+`((error: unknown, event: RepliableInteraction | string) => Awaitable<void>) | { channel: string | (() => Awaitable<SendableChannel>); emoji?: string } | undefined`
 
 Defines how errors should be handled in discord.js or any event, component, or command handler. Can either be a function
-that will be called on each error, or an object defining how strife.js should handle it. If set to an object, strife.js
-will log the error in the console, then standardize it and format it nicely before sending it in a channel of your
-chosing. You can also optionally specify an emoji to be included in the error log message for aesthetic purposes. If not
-set, all errors will only be logged through `console.error()`.
+that will be called on each error, or an object defining how strife.js should handle it. If not set, all errors will
+only be logged through `console.error()`. If set to an object, strife.js will log the error in the console, then
+standardize it and format it nicely before sending it in a channel of your chosing. You can also optionally specify an
+emoji to be included in the error log message for aesthetic purposes.
 
 #### `debug`
 
@@ -106,7 +106,7 @@ Controls the verbosity of debug logs. Set to `false` to disable them entirely, `
 
 #### `defaultCommandAccess`
 
-Type: `boolean | Snowflake | Snowflake[]`
+Type: `boolean | Snowflake | Snowflake[] | undefined`
 
 The default value of [a command's `access` field](#access).
 
@@ -143,7 +143,7 @@ You can specify options for commands using the `options` property. This is a key
 names and the values are option details.
 
 ```js
-import { ApplicationCommandOptionType, User } from "discord.js";
+import { ApplicationCommandOptionType } from "discord.js";
 import { defineChatCommand } from "strife.js";
 
 defineChatCommand(
@@ -167,13 +167,15 @@ defineChatCommand(
 );
 ```
 
-`type` (`ApplicationCommandOptionType`) and `description` (`string`) are required on all options. `required` (`boolean`)
-is optional, defaulting to `false`, but is allowed on all types of options.
+`type`
+(`Exclude<ApplicationCommandOptionType, ApplicationCommandOptionType.Subcommand | ApplicationCommandOptionType.SubcommandGroup>`)
+and `description` (`string`) are required on all options. `required` (`boolean`) is optional, defaulting to `false`, but
+is allowed on all types of options.
 
 Some types of options have additional customization fields:
 
-- `Channel` options allow `channelTypes` (`ChannelType[]`) to define allowed channel types for this option. Defaults to
-  all supported guild channel types.
+- `Channel` options allow `channelTypes` (`ApplicationCommandOptionAllowedChannelTypes[]`) to define allowed channel
+  types for this option. Defaults to all supported guild channel types.
 - `Integer` and `Number` options allow `minValue` and/or `maxValue` to define lower and upper bounds for this option
   respectively. Defaults to the Discord defaults of `-2 ** 53` and `2 ** 53` respectively.
 - `String` commands allow a few additional fields:
@@ -182,15 +184,15 @@ Some types of options have additional customization fields:
       are allowed for this option when using `choices`.
     - `minLength` (`number`) and/or `maxLength` (`number`) to define lower and upper bounds for this option's length
       respectively. Defaults to the Discord defaults of `0` and `6_000` respectively.
-    - `autocomplete` (`(interaction: AutocompleteInteraction) => ApplicationCommandOptionChoiceData<string>[]`) to give
-      users dynamic choices.
+    - `autocomplete` (`AutocompleteHandler<InGuild>`) to give users dynamic choices.
         - Use `interaction.options.getFocused()` to get the value of the option so far. You can also use
           `interaction.options.getBoolean()`, `.getInteger()`, `.getNumber()`, and `.getString()`. Other option-getters
           will not work, use `interaction.options.get()` instead.
         - Return an array of choice objects. It will be truncated to fit the 25-item limit automatically.
         - Note that Discord does not require users to select values from the options, so handle values appropriately.
         - Also note that TypeScript cannot automatically infer the type of the `interaction` parameter, however, it will
-          error if you set it incorrectly, so make sure you manually specify it as `AutocompleteInteraction`.
+          error if you set it incorrectly, so make sure you manually specify it as `AutocompleteInteraction` (or
+          `AutocompleteInteraction<"cached" | "raw">` for guild-only commands).
 
 To retrieve option values at runtime, you can utilize the second `options` parameter of the command handler. You can
 always use discord.js's `interaction.options` API, however, the `options` parameter is a key-value object of options.
@@ -275,7 +277,7 @@ Use the `defineMenuCommand()` function to define menu commands.
 
 ```js
 import { ApplicationCommandType } from "discord.js";
-import { defineChatCommand } from "strife.js";
+import { defineMenuCommand } from "strife.js";
 
 defineMenuCommand(
 	{ name: "User Info", type: ApplicationCommandType.User },
@@ -294,8 +296,8 @@ By default, commands are allowed in all guilds plus DMs.
 
 To change this behavior, you can set `defaultCommandAccess` when logging in. Pass in `Snowflake | Snowflake[]` to only
 define commands in specified guilds, `false` to define them in every guild but no DMs, or `true` to use the default
-configuration. When using TypeScript, it is necessary to augment the `DefaultCommandAccess` interface when changing
-this. To do that, add the following in a new `.d.ts` file:
+settings. When using TypeScript, it is necessary to augment the `DefaultCommandAccess` interface when changing this. To
+do that, add the following in a new `.d.ts` file:
 
 ```ts
 declare module "strife.js" {
@@ -306,23 +308,25 @@ declare module "strife.js" {
 ```
 
 Commands also support a root-level `access` option to override this on a per-command basis. It supports the same
-options, with the addition of `@defaults` in the array of `Snowflake`s to extend the default guilds. `@defaults` is not
-available if `defaultCommandAccess` is unset or is set to a boolean.
+options, with the addition of `"@defaults"` in the array of `Snowflake`s to extend the default guilds. `"@defaults"` is
+not available if `defaultCommandAccess` is unset or is set to a boolean.
 
 #### Augments
 
 You can define custom command properties by using augments (advanced usage):
 
 ```ts
+import type { FlatCommandOptions, MenuCommandContext, SubcommandOptions, SubGroupsOptions } from "strife.js";
+
 declare module "strife.js" {
-	export interface AugmentedMenuCommandData<InGuild extends boolean, Context extends MenuCommandContext> {}
+	export interface AugmentedMenuCommandData<_InGuild extends boolean, _Context extends MenuCommandContext> {}
 
-	export interface AugmentedRootCommandData<InGuild extends boolean, Options extends RootCommandOptions<InGuild>> {}
-	export interface AugmentedSubcommandData<InGuild extends boolean, Options extends SubcommandOptions<InGuild>> {}
-	export interface AugmentedSubGroupsData<InGuild extends boolean, Options extends SubGroupsOptions<InGuild>> {}
+	export interface AugmentedFlatCommandData<InGuild extends boolean, _Options extends FlatCommandOptions<InGuild>> {}
+	export interface AugmentedSubcommandData<InGuild extends boolean, _Options extends SubcommandOptions<InGuild>> {}
+	export interface AugmentedSubGroupsData<InGuild extends boolean, _Options extends SubGroupsOptions<InGuild>> {}
 
-	export interface AugmentedChatCommandData<InGuild extends boolean> {}
-	export interface AugmentedCommandData<InGuild extends boolean> {}
+	export interface AugmentedChatCommandData<_InGuild extends boolean> {}
+	export interface AugmentedCommandData<_InGuild extends boolean> {}
 }
 ```
 
@@ -341,7 +345,8 @@ defineEvent("messageCreate", async (message) => {
 You are allowed to define multiple listeners for the same event. Note that listener execution order is not guaranteed.
 
 Note that since [all partials are enabled by default](#clientoptions), it is necessary to
-[handle partials accordingly](https://discordjs.guide/popular-topics/partials.html#enabling-partials) (or disable them).
+[handle partial structures accordingly](https://discordjs.guide/popular-topics/partials.html), or manually disable them
+if you really don't want to receive partial data.
 
 #### Pre-Events
 
@@ -364,8 +369,8 @@ A use case for this would be an automoderation system working alongside an XP sy
 define a pre-event to delete rule-breaking messages and return `false` so users do not receive XP for rule-breaking
 messages.
 
-You are only allowed to define one pre-event for every `ClientEvent`. You can define a pre-event with or without
-defining normal events.
+You are only allowed to define one pre-event per event. You can define a pre-event with or without defining normal
+events.
 
 ### Components
 
@@ -380,7 +385,7 @@ defineButton("foobar", async (interaction, data) => {
 });
 ```
 
-The button ID (`"foobar"` in this example) and the `data` parameter of the callback function are both taken from the
+The button id (`"foobar"` in this example) and the `data` parameter of the callback function are both taken from the
 button's `customId`. For example, if the `customId` is `"abcd_foobar"`, then the callback for the `foobar` button will
 be called and the `data` parameter will have a value of `"abcd"`.
 
@@ -392,9 +397,9 @@ It is not required for all `customId`s to follow this format nor to have an asso
 interactions in any other way you wish alongside or independent of strife.js.
 
 `defineModal()` and `defineSelect()` work in the same way as `defineButton()` but for modals and select menus
-respectfully. For better type safety, `defineSelect()` also allows specifing certain types of select menus to collect.
-By default, all types of select menus are collected. However, you can not specify multiple listeners for the same ID but
-different types.
+respectfully. For better type safety, `defineSelect()` also optionally allows specifing certain types of select menus to
+collect. By default, all types of select menus are collected. However, you can not specify multiple listeners for the
+same id but different types.
 
 ```js
 import { ComponentType } from "discord.js";
@@ -427,38 +432,26 @@ any longer, make them [directory modules](#directory-modules) instead.
 Subdirectories of `modulesDirectory` _must_ have an `index.js` file. This file should contain all the definitions for
 the module. In other words, `defineChatCommand`, `defineEvent`, etc. should only be used in the `index.js` of directory
 modules. If any callback is more than a few dozen lines long, it should instead be imported from another file in the
-same directory. If multiple files use the same values, i.e. constants, they should go into `misc.js` in that directory.
+same directory. Functions and values that depend on the `client` being initialized belong in `util.js` in that
+directory. All other utilities and constants should go in `misc.js` in that directory.
 
 ## Imports
 
 This guide references the following imported values in inline code blocks:
 
-```js
-import {
-	ApplicationCommandType,
-	type ApplicationCommandOptionType
-	type AutocompleteInteraction,
-	type Awaitable,
-	type ChannelType,
-	type Client,
-	type ClientOptions,
-	type RepliableInteraction,
-	type Snowflake,
-	type SelectMenuType,
-	type SendableChannel,
+```ts
+import type {
+	ApplicationCommandOptionAllowedChannelTypes,
+	AutocompleteInteraction,
+	Awaitable,
+	ClientOptions,
+	RepliableInteraction,
+	SelectMenuType,
+	Snowflake,
 } from "discord.js";
-import {
-	defineButton,
-	defineChatCommand,
-	defineSubcommands,
-	defineSubGroups,
-	defineMenuCommand,
-	defineEvent,
-	defineModal,
-	defineSelect,
-	type ClientEvent,
-} from "strife.js";
-import { fileURLToPath } from "node:url";
+import type { DefaultCommandAccess, SendableChannel } from "strife.js";
+
+import { defineModal } from "strife.js";
 ```
 
 Values only referenced in multiline code blocks are not listed here as they are imported there.

@@ -1,6 +1,5 @@
+export * from "./flat.js";
 export * from "./menu.js";
-export * from "./root.js";
-export * from "./subcommands.js";
-export * from "./subGroups.js";
-
 export * from "./options.js";
+export * from "./sub-groups.js";
+export * from "./subcommands.js";
