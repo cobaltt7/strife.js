@@ -4,6 +4,8 @@ import type {
 	ApplicationCommandOptionData,
 	Attachment,
 	AutocompleteInteraction,
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	CommandInteractionOptionResolver,
 	GuildBasedChannel,
 	GuildMember,
 	Role,
@@ -100,17 +102,21 @@ export type StringOption<InGuild extends boolean> = {
 	/** Define a upper bound for this option's length. Defaults to the Discord default of `6_000`. */
 	maxLength?: number;
 	/**
-	 * Give users dynamic choices.
+	 * Define a callback to give users dynamic choices.
 	 *
-	 * In the callback, use `interaction.options.getFocused()` to get the value of the option so far. You can also use
-	 * `interaction.options.getBoolean()`, `.getInteger()`, `.getNumber()`, and `.getString()`. Other option-getters
-	 * will not work, use `interaction.options.get()` instead. Return an array of choice objects. It will be truncated
-	 * to fit the 25-item limit automatically.
+	 * In the callback, use {@link CommandInteractionOptionResolver.getFocused()} to get the value of the option so far.
+	 * You can also use {@link CommandInteractionOptionResolver.getBoolean() .getBoolean()},
+	 * {@link CommandInteractionOptionResolver.getInteger() .getInteger()},
+	 * {@link CommandInteractionOptionResolver.getNumber() .getNumber()}, and
+	 * {@link CommandInteractionOptionResolver.getString() .getString()}. Other option-getters will not work, use
+	 * {@link CommandInteractionOptionResolver.get() .get()} instead. Return an array of choice objects. It will be
+	 * truncated to fit the 25-item limit automatically.
 	 *
 	 * Note that Discord does not require users to select values from the options, so handle values appropriately.
 	 *
 	 * Also note that TypeScript cannot automatically infer the type of the `interaction` parameter, however, it will
-	 * error if you set it incorrectly, so make sure you manually specify it as `AutocompleteInteraction`.
+	 * error if you set it incorrectly, so make sure you manually specify it as {@link AutocompleteInteraction} (or
+	 * {@link AutocompleteInteraction<"cached" | "raw">} for guild-only commands).
 	 */
 	autocomplete?: AutocompleteHandler<InGuild>;
 	choices?: never;
@@ -118,7 +124,7 @@ export type StringOption<InGuild extends boolean> = {
 /** A {@link ApplicationCommandOptionType.String string} option with specified preset choices. */
 export type StringChoicesOption = {
 	/**
-	 * Require users to pick values from this predefined list. The keys are the values passed to your bot and the values
+	 * Require users to pick values from a predefined list. The keys are the values passed to your bot and the values
 	 * are the descriptions displayed to the users.
 	 */
 	choices: Record<string, string>;

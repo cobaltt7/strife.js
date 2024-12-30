@@ -3,7 +3,7 @@ import type { Awaitable, ClientEvents } from "discord.js";
 // TODO: add interactionCreate
 /** Events that are reserved for strife.js to handle and that end-users should not use. */
 export const reservedClientEvents = ["ready", "debug", "warn", "error", "invalidated"] as const;
-/** All supported client events that can be listened to. */
+/** All supported client events that can be handled. */
 export type StrifeEvents = Exclude<keyof ClientEvents, (typeof reservedClientEvents)[number]>;
 
 /** An event handler for a client event. */
@@ -21,10 +21,10 @@ export const allEvents: { [EventName in StrifeEvents]?: EventHandler<EventName>[
 export const preEvents: { [EventName in StrifeEvents]?: PreEventHandler<EventName> } = {};
 
 /**
- * Define an event listener. You are allowed to define multiple listeners for the same event. Note that listener
- * execution order is not guaranteed.
+ * Define an event handler. You are allowed to define multiple handlers for the same event. Note that handler execution
+ * order is not guaranteed.
  *
- * @param eventName The event to listen for.
+ * @param eventName The event to handle.
  * @param event The event handler.
  */
 export function defineEvent<EventName extends StrifeEvents>(
@@ -37,18 +37,18 @@ export function defineEvent<EventName extends StrifeEvents>(
 }
 
 /**
- * Define an pre-event listener. Pre-events are a special type of event listener that executes before other listeners.
- * to return a boolean to explicitly say whether execution should continue.
+ * Define a pre-event handler. Pre-events are a special type of event handler that executes before other handlers. They
+ * determine if other handlers are executed or not.
  *
  * A use case for this would be an automoderation system working alongside an XP system. The automoderation system could
- * define a pre-event to delete rule-breaking messages and return `false` so users do not receive XP for rule-breaking
- * messages.
+ * define a pre-event handler to delete rule-breaking messages and return `false` so users do not receive XP for
+ * rule-breaking messages.
  *
- * You are only allowed to define one pre-event for every `ClientEvent`. You can define a pre-event with or without
- * defining normal events.
+ * You are only allowed to define one pre-event handler per event. You can define a pre-event handler with or without
+ * defining normal event handlers for that event.
  *
- * @param eventName The event to listen for.
- * @param event The event handler. Must return a boolean that determines if other listeners are executed or not.
+ * @param eventName The event to handle.
+ * @param event The event handler. Must return whether other handlers should be executed or not.
  */
 defineEvent.pre = function pre<EventName extends StrifeEvents>(
 	eventName: EventName,

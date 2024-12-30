@@ -11,7 +11,7 @@ export const buttons: Record<string, ButtonHandler> = {};
 /** An event handler for a button click. */
 export type ButtonHandler = (interaction: ButtonInteraction, data: string) => Awaitable<unknown>;
 /**
- * Define a button listener.
+ * Define a button handler.
  *
  * The button id and the `data` parameter of the callback function are both taken from the button's `customId`. For
  * example, if the `customId` is `"abcd_foobar"`, then the callback for the `foobar` button will be called and the
@@ -37,7 +37,7 @@ export type ModalHandler = (
 	data: string,
 ) => Awaitable<unknown>;
 /**
- * Define a modal listener.
+ * Define a modal handler.
  *
  * The modal id and the `data` parameter of the callback function are both taken from the modal's `customId`. For
  * example, if the `customId` is `"abcd_foobar"`, then the callback for the `foobar` modal will be called and the `data`
@@ -62,7 +62,7 @@ export type SelectHandler<Type extends SelectMenuType = SelectMenuType> = (
 	id: string,
 ) => Awaitable<unknown>;
 /**
- * Define a select menu listener.
+ * Define a select menu handler.
  *
  * The select menu id and the `data` parameter of the callback function are both taken from the select menu's
  * `customId`. For example, if the `customId` is `"abcd_foobar"`, then the callback for the `foobar` select menu will be
@@ -70,7 +70,7 @@ export type SelectHandler<Type extends SelectMenuType = SelectMenuType> = (
  *
  * @param selectMenuId The select menu id.
  * @param type The types of select menus to collect. By default, all types of select menus are collected. However, you
- *   can not specify multiple listeners for the same id but different types.
+ *   can not specify multiple handlers for the same id but different types.
  * @param handler The select menu handler.
  */
 export function defineSelect(selectMenuId: string, select: SelectHandler): void;

@@ -10,7 +10,7 @@ import { commands } from "../commands.js";
 import { transformOptions } from "./options.js";
 
 /**
- * Define a single-level chat command.
+ * Define a basic, flat chat command.
  *
  * @param data Chat command configuration data.
  * @param handler The command handler.
@@ -61,6 +61,10 @@ export type FlatCommandHandler<
 	Options extends FlatCommandOptions<InGuild> = FlatCommandOptions<InGuild>,
 > = (
 	interaction: ChatInputCommandInteraction<GuildCacheReducer<InGuild>>,
+	/**
+	 * Utilize to retrieve option values at runtime. You can always use {@link interaction.options}, however, this is a
+	 * key-value object of options. That is often simpler to use and has better types when using TypeScript.
+	 */
 	options: OptionsToType<InGuild, Options>,
 ) => Awaitable<unknown>;
 

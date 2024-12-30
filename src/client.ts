@@ -5,7 +5,8 @@ import type {
 	RepliableInteraction,
 	Snowflake,
 } from "discord.js";
-import type { DefaultCommandAccess } from "./definition/commands.js";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import type { BaseCommandData, DefaultCommandAccess } from "./definition/commands.js";
 import type { FlatCommandHandler } from "./definition/commands/flat.js";
 import type { MenuCommandHandler } from "./definition/commands/menu.js";
 import type { SubGroupsHandler } from "./definition/commands/sub-groups.js";
@@ -40,17 +41,18 @@ import { DEFAULT_GUILDS } from "./util.js";
 const globalCommandKey = Symbol("global");
 
 /**
- * The client instance created by {@link login()}.
+ * Once {@link login()} has been called, you may import this from anywhere in your app to access the client instance it
+ * created.
  *
- * Note that although this is typed as {@link Client<true>}, it is `undefined` prior to calling {@link login()}, contrary
- * to the types. Please plan appropriately.
+ * Note that although this is typed as {@link Client<true>}, it is `undefined` prior to calling {@link login()}. Please
+ * plan appropriately.
  */
 export let client: Client<true>;
 
 /**
  * Connect to Discord and instantiate a discord.js client.
  *
- * @param loginOptions The options to se when logging in.
+ * @param loginOptions Configuration.
  */
 export async function login(loginOptions: LoginOptions): Promise<void> {
 	const [major, minor = "", patch] = version.split(".");
@@ -326,11 +328,15 @@ export async function login(loginOptions: LoginOptions): Promise<void> {
 	}
 }
 
-/** Login options. */
+/** Configuration. */
 export type LoginOptions = {
 	/**
 	 * Options to pass to discord.js. As in discord.js, the only required property is `intents`. strife.js has some
 	 * defaults on top of discord.js's, which will be merged with these options, but all are still overridable.
+	 *
+	 * - `allowedMentions` is set to only ping users by default (including replied users) to avoid accidental mass pings.
+	 * - `failIfNotExists` is set to `false` to return `null` instead of erroring in certain cases.
+	 * - `partials` is set to all available partials to avoid missed events.
 	 *
 	 * @default {
 	 * 	allowedMentions: { parse: ["users"]; repliedUser: true };
@@ -368,9 +374,9 @@ export type LoginOptions = {
 	/**
 	 * Defines how errors should be handled in discord.js or any event, component, or command handler. Can either be a
 	 * function that will be called on each error, or an object defining how strife.js should handle it. If not set, all
-	 * errors will only be logged through `console.error`. If set to an object, strife.js will log the error in the
-	 * console, then standardize it and format it nicely before sending it in a channel of your chosing. You can also
-	 * optionally specify an emoji to be included in the error log for aesthetic purposes.
+	 * errors will only be logged through {@link console.error()}. If set to an object, strife.js will log the error in
+	 * the console, then standardize it and format it nicely before sending it in a channel of your chosing. You can
+	 * also optionally specify an emoji to be included in the error log message for aesthetic purposes.
 	 */
 	handleError?:
 		| ((error: unknown, event: RepliableInteraction | string) => Awaitable<void>)
@@ -392,7 +398,7 @@ export type LoginOptions = {
 		/** The default value of {@link BaseCommandData.access a command's `access` field}. */
 		defaultCommandAccess?: true;
 	});
-export async function buildErrorHandler(
+async function buildErrorHandler(
 	options: { channel: string | (() => Awaitable<SendableChannel>); emoji?: string } | undefined,
 ): Promise<(error: unknown, event: RepliableInteraction | string) => Awaitable<void>> {
 	const channel =

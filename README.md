@@ -9,7 +9,7 @@ Strife.js has three main goals and purposes:
 2. Reduce the amount of boilerplate and duplicated code in Discord bots by streamlining as much as possible and
    exporting many useful utility functions
 3. Make it simpler and cleaner to register multiple commands and options in large multipurpose bots that require
-   listening to the same events for many different things
+   handling the same events for many different things
 
 Support is available in [the Cobots server](https://discord.gg/WaEbDrXKxK).
 
@@ -120,7 +120,7 @@ functions in those files.
 
 ### Commands
 
-Use the `defineChatCommand` function to define a basic chat command.
+Use the `defineChatCommand` function to define a basic, flat chat command.
 
 ```js
 import { defineChatCommand } from "strife.js";
@@ -135,7 +135,8 @@ defineChatCommand(
 ```
 
 Use the `restricted: true` option to deny members permission to use the command, and require guild admins to explicitly
-set permissions via `Server Settings` -> `Integrations`.
+set permissions via `Server Settings` -> `Integrations`. `restricted` is only available on guild-only commands - see
+[Access](#access).
 
 #### Options
 
@@ -184,7 +185,7 @@ Some types of options have additional customization fields:
       are allowed for this option when using `choices`.
     - `minLength` (`number`) and/or `maxLength` (`number`) to define lower and upper bounds for this option's length
       respectively. Defaults to the Discord defaults of `0` and `6_000` respectively.
-    - `autocomplete` (`AutocompleteHandler<InGuild>`) to give users dynamic choices.
+    - `autocomplete` (`AutocompleteHandler<InGuild>`) to define a callback to give users dynamic choices.
         - Use `interaction.options.getFocused()` to get the value of the option so far. You can also use
           `interaction.options.getBoolean()`, `.getInteger()`, `.getNumber()`, and `.getString()`. Other option-getters
           will not work, use `interaction.options.get()` instead.
@@ -224,7 +225,6 @@ defineSubcommands(
 );
 ```
 
-The root command description is not displayed anywhere in Discord clients, but it is still required by the Discord API.
 Subcommands support options in the same way as regular commands.
 
 When using subcommands, the second argument to the handler is an object with the properties `subcommand` (`string`) and
@@ -262,8 +262,7 @@ defineSubGroups(
 );
 ```
 
-The root command description and subgroup descriptions are not displayed anywhere in Discord clients, but they are still
-required by the Discord API. Subcommands support options in the same way as regular commands.
+Subcommands support options in the same way as regular commands.
 
 When using subcommands, the second argument to the handler is an object with the properties `subcommand` (`string`),
 `subGroup` (`string`), and `options` (key-value pair as in `defineChatCommand()`). In order for this parameter to be
@@ -273,7 +272,7 @@ Mixing subgroups and subcommands on the same level is not currently supported.
 
 #### Menu Commands
 
-Use the `defineMenuCommand()` function to define menu commands.
+Use the `defineMenuCommand()` function to define a menu command.
 
 ```js
 import { ApplicationCommandType } from "discord.js";
@@ -332,7 +331,7 @@ declare module "strife.js" {
 
 ### Events
 
-Use the `defineEvent()` function to define event listeners.
+Use the `defineEvent()` function to define an event handler.
 
 ```js
 import { defineEvent } from "strife.js";
@@ -342,7 +341,7 @@ defineEvent("messageCreate", async (message) => {
 });
 ```
 
-You are allowed to define multiple listeners for the same event. Note that listener execution order is not guaranteed.
+You are allowed to define multiple handler for the same event. Note that handler execution order is not guaranteed.
 
 Note that since [all partials are enabled by default](#clientoptions), it is necessary to
 [handle partial structures accordingly](https://discordjs.guide/popular-topics/partials.html), or manually disable them
@@ -350,8 +349,8 @@ if you really don't want to receive partial data.
 
 #### Pre-Events
 
-Pre-events are a special type of event listener that executes before other listeners. They must return
-`Awaitable<boolean>` that determines if other listeners are executed or not. They are defined with the
+Pre-events are a special type of event handler that executes before other handlers. They must return
+`Awaitable<boolean>` that determines if other handlers are executed or not. They are defined with the
 `defineEvent.pre()` function:
 
 ```js
@@ -366,16 +365,16 @@ defineEvent.pre("messageCreate", async (message) => {
 Remember to return a boolean to explicitly say whether execution should continue.
 
 A use case for this would be an automoderation system working alongside an XP system. The automoderation system could
-define a pre-event to delete rule-breaking messages and return `false` so users do not receive XP for rule-breaking
+define a pre-event handler to delete rule-breaking messages and return `false` so users do not receive XP for rule-breaking
 messages.
 
-You are only allowed to define one pre-event per event. You can define a pre-event with or without defining normal
-events.
+You are only allowed to define one pre-event handler per event. You can define a pre-event handler with or without defining
+normal event handlers for that event.
 
 ### Components
 
 Use the `defineButton()`, `defineModal()`, and `defineSelect()` functions to define button, modal, and select menu
-listeners respectively:
+handler respectively:
 
 ```js
 import { defineButton } from "strife.js";
@@ -398,7 +397,7 @@ interactions in any other way you wish alongside or independent of strife.js.
 
 `defineModal()` and `defineSelect()` work in the same way as `defineButton()` but for modals and select menus
 respectfully. For better type safety, `defineSelect()` also optionally allows specifing certain types of select menus to
-collect. By default, all types of select menus are collected. However, you can not specify multiple listeners for the
+collect. By default, all types of select menus are collected. However, you can not specify multiple handlers for the
 same id but different types.
 
 ```js

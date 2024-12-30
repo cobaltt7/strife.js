@@ -60,8 +60,9 @@ export function defineSubcommands(
 export type SubcommandData<InGuild extends boolean, Options extends SubcommandOptions<InGuild>> = {
 	options?: never;
 	/**
-	 * Key-value pair where the keys are subcommand names and the values are subcommand details. Subcommands must have
-	 * `name`s and `description`s and may have `options`.
+	 * Key-value pair where the keys are subcommand names and the values are subcommand details. In order for the
+	 * handler to be correctly typed, all subcommands must have {@link FlatCommandData.options} set, even if just to an
+	 * empty object.
 	 */
 	subcommands: {
 		[key in keyof Options]: Omit<FlatCommandData<InGuild, Options[key]>, BaseCommandKeys>;

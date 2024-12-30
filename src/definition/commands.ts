@@ -5,6 +5,8 @@ import type {
 	PermissionsBitField,
 	Snowflake,
 } from "discord.js";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import type { LoginOptions } from "../client.js";
 import type { DEFAULT_GUILDS } from "../util.js";
 import type { FlatCommandData, FlatCommandHandler, FlatCommandOptions } from "./commands/flat.js";
 import type { MenuCommandContext, MenuCommandData, MenuCommandHandler } from "./commands/menu.js";
@@ -70,7 +72,10 @@ export type BaseGlobalCommandData = {
 	restricted?: never;
 } & (DefaultCommandAccess extends { inGuild: true } ? { access: true } : { access?: true });
 /**
- * Augment this interface when changing {@link LoginOptions.defaultCommandAccess}.
+ * By default, commands are allowed in all guilds plus DMs.
+ *
+ * To change this behavior, you can set {@link LoginOptions.defaultCommandAccess} when logging in. When using TypeScript,
+ * it is necessary to augment the `DefaultCommandAccess` interface when changing this.
  *
  * @property {boolean} inGuild Whether or not commands are restricted to guilds-only by default. Defaults to `false`.
  */
