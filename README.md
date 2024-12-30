@@ -365,11 +365,11 @@ defineEvent.pre("messageCreate", async (message) => {
 Remember to return a boolean to explicitly say whether execution should continue.
 
 A use case for this would be an automoderation system working alongside an XP system. The automoderation system could
-define a pre-event handler to delete rule-breaking messages and return `false` so users do not receive XP for rule-breaking
-messages.
+define a pre-event handler to delete rule-breaking messages and return `false` so users do not receive XP for
+rule-breaking messages.
 
-You are only allowed to define one pre-event handler per event. You can define a pre-event handler with or without defining
-normal event handlers for that event.
+You are only allowed to define one pre-event handler per event. You can define a pre-event handler with or without
+defining normal event handlers for that event.
 
 ### Components
 
