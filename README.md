@@ -199,6 +199,24 @@ To retrieve option values at runtime, you can utilize the second `options` param
 always use discord.js's `interaction.options` API, however, the `options` parameter is a key-value object of options.
 That is often simpler to use and has better types when using TypeScript.
 
+When using TypeScript, it is strongly recommended, and, in some cases, required, to type the entire command object
+`as const` in order to correctly resolve the option types.
+
+```ts
+import { defineChatCommand } from "strife.js";
+
+defineChatCommand(
+	{ name: "ping", description: "Ping!" } as const,
+
+	async (interaction) => {
+		await interaction.reply("Pong!");
+	},
+);
+```
+
+It is unnecessary to type it `as const` in this example, however it is strongly encourgaed to add it to all commands for
+consistency.
+
 #### Subcommands
 
 You can specify subcommands using the `defineSubcommands()` function. Define subcommands using the `subcommands`
@@ -431,8 +449,9 @@ any longer, make them [directory modules](#directory-modules) instead.
 Subdirectories of `modulesDirectory` _must_ have an `index.js` file. This file should contain all the definitions for
 the module. In other words, `defineChatCommand`, `defineEvent`, etc. should only be used in the `index.js` of directory
 modules. If any callback is more than a few dozen lines long, it should instead be imported from another file in the
-same directory. Functions and values that depend on the `client` being initialized belong in `util.js` in that
-directory. All other utilities and constants should go in `misc.js` in that directory.
+same directory. Functions and values that depend on the `client` being initialized belong in `misc.js` in that
+directory. All other utilities and constants should go in `util.js` in that directory. There should also be a
+`index.text.js` file to test all functions in `util.js`.
 
 ## Imports
 
