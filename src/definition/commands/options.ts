@@ -169,15 +169,16 @@ export type OptionToType<InGuild extends boolean, Option extends CommandOption<I
 	[ApplicationCommandOptionType.Boolean]: boolean;
 	[ApplicationCommandOptionType.User]: GuildMember | User;
 	[ApplicationCommandOptionType.Channel]:
-		| (Option["channelTypes"] extends ChannelType[] ?
-				Exclude<GuildBasedChannel, { type: Option["channelTypes"] }>
-		  :	GuildBasedChannel)
+		| Extract<GuildBasedChannel, { type: OptionChannelTypes<Option["channelTypes"]> }>
 		| (InGuild extends true ? never : undefined);
 	[ApplicationCommandOptionType.Integer]: number;
 	[ApplicationCommandOptionType.Number]: number;
 	[ApplicationCommandOptionType.String]: Option extends StringOption<InGuild> ? string
-	:	Option["choices"][keyof Option["choices"]];
+	:	keyof Option["choices"];
 }[Option["type"]];
+
+export type OptionChannelTypes<Types> =
+	Types extends ChannelType[] ? Types[number] : ApplicationCommandOptionAllowedChannelTypes;
 
 /** @internal */
 export function transformOptions(
