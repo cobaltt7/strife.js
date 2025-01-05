@@ -104,8 +104,10 @@ export function standardizeError(error: unknown): object {
 				error.message.split("\n")
 			:	error.message
 		:	undefined;
-	// eslint-disable-next-line unicorn/error-message
-	const { stack } = "stack" in error ? error : new Error();
+	const stack =
+		("stack" in error && typeof error.stack === "string" && error.stack) ||
+		// eslint-disable-next-line unicorn/error-message
+		new Error().stack;
 
 	const extra = { ...error, ...serialized };
 	delete extra.name;
@@ -120,11 +122,10 @@ export function standardizeError(error: unknown): object {
 		code: "code" in error ? error.code : undefined,
 		message,
 		stack:
-			typeof stack === "string" ?
-				sanitizePath(stack)
-					.split("\n")
-					.slice(Array.isArray(message) ? message.length : 1)
-			:	stack,
+			stack &&
+			sanitizePath(stack)
+				.split("\n")
+				.slice(Array.isArray(message) ? message.length : 1),
 		cause: "cause" in error ? standardizeError(error.cause) : undefined,
 		errors:
 			"errors" in error ?
