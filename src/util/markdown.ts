@@ -5,6 +5,8 @@ import {
 	chatInputApplicationCommandMention,
 	escapeMarkdown,
 	FormattingPatterns,
+	GuildTemplate,
+	Invite,
 	lazy,
 	MessageMentions,
 } from "discord.js";
@@ -70,20 +72,60 @@ export function formatAnyEmoji(
 	return `<${options.animated ? "a" : ""}:${options.name ?? "emoji"}:${options.id}>`;
 }
 
+/** A global regular expression variant of {@link GuildTemplate.GuildTemplatesPattern}. */
+export const GlobalGuildTemplatesPattern = new RegExp(
+	GuildTemplate.GuildTemplatesPattern,
+	`g${GuildTemplate.GuildTemplatesPattern.flags}`,
+);
+/** A global regular expression variant of {@link Invite.InvitesPattern}. */
+export const GlobalInvitesPattern = new RegExp(
+	Invite.InvitesPattern,
+	`g${Invite.InvitesPattern.flags}`,
+);
 /** A global regular expression variant of {@link MessageMentions.UsersPattern}. */
 export const GlobalUsersPattern = new RegExp(
 	MessageMentions.UsersPattern,
 	`g${MessageMentions.UsersPattern.flags}`,
 );
-
-/** An enhanced variant of {@link Invite.InvitesPattern}. */
-export const InvitesPattern =
-	/discord(?:(?:(?:app)?\.com|:\/(?:\/-?)?)\/invite|\.gg(?:\/invite)?)\/(?<code>[\w-]{2,255})/gi;
-
-/** A global regular expression variant of {@link FormattingPatterns.AnimatedEmoji}. */
-export const GlobalAnimatedEmoji = new RegExp(
-	FormattingPatterns.AnimatedEmoji,
-	`g${FormattingPatterns.AnimatedEmoji.flags}`,
+/** A global regular expression variant of {@link MessageMentions.RolesPattern}. */
+export const GlobalRolesPattern = new RegExp(
+	MessageMentions.RolesPattern,
+	`g${MessageMentions.RolesPattern.flags}`,
+);
+/** A global regular expression variant of {@link MessageMentions.EveryonePattern}. */
+export const GlobalEveryonePattern = new RegExp(
+	MessageMentions.EveryonePattern,
+	`g${MessageMentions.EveryonePattern.flags}`,
+);
+/** A global regular expression variant of {@link MessageMentions.ChannelsPattern}. */
+export const GlobalChannelsPattern = new RegExp(
+	MessageMentions.ChannelsPattern,
+	`g${MessageMentions.ChannelsPattern.flags}`,
+);
+/** A global regular expression variant of {@link FormattingPatterns.SlashCommand}. */
+export const GlobalSlashCommandPattern = new RegExp(
+	FormattingPatterns.SlashCommand,
+	`g${FormattingPatterns.SlashCommand.flags}`,
+);
+/** A global regular expression variant of {@link FormattingPatterns.Emoji}. */
+export const GlobalEmojiPattern = new RegExp(
+	FormattingPatterns.Emoji,
+	`g${FormattingPatterns.Emoji.flags}`,
+);
+/** A global regular expression variant of {@link FormattingPatterns.Timestamp}. */
+export const GlobalTimestampPattern = new RegExp(
+	FormattingPatterns.Timestamp,
+	`g${FormattingPatterns.Timestamp.flags}`,
+);
+/** A global regular expression variant of {@link FormattingPatterns.GuildNavigation}. */
+export const GlobalGuildNavigationPattern = new RegExp(
+	FormattingPatterns.GuildNavigation,
+	`g${FormattingPatterns.GuildNavigation.flags}`,
+);
+/** A global regular expression variant of {@link FormattingPatterns.LinkedRole}. */
+export const GlobalLinkedRolePattern = new RegExp(
+	FormattingPatterns.LinkedRole,
+	`g${FormattingPatterns.LinkedRole.flags}`,
 );
 
 /**
@@ -126,7 +168,7 @@ export function commandInteractionToString(
 export async function mentionChatCommand(
 	fullCommand: string,
 	guild?: Guild,
-): Promise<`**/${string}**` | `</${string}:${string}>`> {
+): Promise<`**/${string}**` | `</${string}:${Snowflake}>`> {
 	const [commandName] = fullCommand.split(" ");
 	const id = (
 		(await guild?.commands.fetch())?.find(({ name }) => name === commandName) ??

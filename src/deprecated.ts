@@ -9,6 +9,11 @@ import type { CommandOption, StringOption } from "./definition/commands/options.
 import type { EventHandler, reservedClientEvents, StrifeEvents } from "./definition/events.js";
 import type { GuildCacheReducer } from "./util.js";
 
+import { FormattingPatterns } from "discord.js";
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { GlobalEmojiPattern, GlobalInvitesPattern } from "./util/markdown.js";
+
 /** @deprecated This is meant to be an internal type. */
 export type CacheReducer<InGuild extends boolean> = GuildCacheReducer<InGuild>;
 
@@ -43,3 +48,11 @@ export interface AugmentedRootCommandData<
 export type Option<InGuild extends boolean> = CommandOption<InGuild>;
 /** @deprecated Use {@link StringOption}. */
 export type StringAutocompleteOption<InGuild extends boolean> = StringOption<InGuild>;
+
+/** @deprecated Use {@link GlobalEmojiPattern}. */
+export const GlobalAnimatedEmoji = new RegExp(
+	FormattingPatterns.AnimatedEmoji,
+	`g${FormattingPatterns.AnimatedEmoji.flags}`,
+);
+/** @deprecated Use {@link GlobalInvitesPattern}. */
+export const InvitesPattern = GlobalInvitesPattern;
