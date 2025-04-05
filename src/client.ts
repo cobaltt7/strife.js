@@ -131,23 +131,32 @@ export async function login(loginOptions: LoginOptions): Promise<void> {
 			"The `modulesDir` option is deprecated. Please use `modulesDirectory` instead.",
 			"DeprecationWarning",
 		);
+	const multipleDirectories = Array.isArray(
+		loginOptions.modulesDirectory ?? loginOptions.modulesDir,
+	);
+	const directories =
+		multipleDirectories ?
+			(loginOptions.modulesDirectory as string[])
+		:	([loginOptions.modulesDirectory ?? loginOptions.modulesDir] as string[]);
 
-	const directory = loginOptions.modulesDirectory ?? loginOptions.modulesDir;
-	const modules = directory ? await fileSystem.readdir(directory) : [];
+	const allModules = await Promise.all(
+		directories.map(async (dir) => {
+			if (!dir) return [];
 
-	const promises = modules.map(async (module) => {
-		const fullPath = path.join(directory ?? process.cwd(), module);
-		const resolved =
-			(await fileSystem.lstat(fullPath)).isDirectory() ?
-				path.join(fullPath, "./index.js")
-			:	fullPath;
-		if (path.extname(resolved) !== ".js") return;
+			const modules = await fileSystem.readdir(dir);
+			return modules.map(async (module) => {
+				const fullPath = path.join(dir, module);
+				const stats = await fileSystem.lstat(fullPath);
+				const resolved = stats.isDirectory() ? path.join(fullPath, "index.js") : fullPath;
 
-		await import(
-			url.pathToFileURL(path.resolve(directory ?? process.cwd(), resolved)).toString()
-		);
-	});
-	await Promise.all(promises);
+				if (path.extname(resolved) !== ".js") return;
+
+				await import(url.pathToFileURL(path.resolve(dir, resolved)).toString());
+			});
+		}),
+	);
+
+	await Promise.all(allModules.flat().filter(Boolean));
 
 	defineEvent("interactionCreate", async (interaction) => {
 		if (interaction.isAutocomplete()) {
@@ -354,12 +363,12 @@ export type LoginOptions = {
 	 */
 	clientOptions: ClientOptions;
 	/** @deprecated Use {@link LoginOptions.modulesDirectory} */
-	modulesDir?: string;
+	modulesDir?: string | string[];
 	/**
 	 * The directory to import modules from. It is recommended to set this to `fileURLToPath(new URL("./modules",
 	 * import.meta.url))`. Omit to not load any modules.
 	 */
-	modulesDirectory?: string;
+	modulesDirectory?: string | string[];
 	/**
 	 * The token to connect to Discord with.
 	 *
