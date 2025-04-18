@@ -44,8 +44,8 @@ export type CommandData<InGuild extends boolean> =
 
 /** Base command configuration data. */
 export type BaseCommandData<InGuild extends boolean> = (InGuild extends true ? BaseGuildCommandData
-:	BaseGlobalCommandData) &
-	AugmentedCommandData<InGuild>;
+:	BaseGlobalCommandData)
+	& AugmentedCommandData<InGuild>;
 /** Can be augmented to add custom command properties (advanced usage) */
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions, @typescript-eslint/no-unused-vars
 export interface AugmentedCommandData<_InGuild extends boolean> {}
@@ -86,8 +86,8 @@ export interface DefaultCommandAccess {}
 export type BaseChatCommandData<InGuild extends boolean> = {
 	description: string;
 	type?: never;
-} & BaseCommandData<InGuild> &
-	AugmentedChatCommandData<InGuild>;
+} & BaseCommandData<InGuild>
+	& AugmentedChatCommandData<InGuild>;
 /** Can be augmented to add custom chat command properties (advanced usage) */
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions, @typescript-eslint/no-unused-vars
 export interface AugmentedChatCommandData<_InGuild extends boolean> {}

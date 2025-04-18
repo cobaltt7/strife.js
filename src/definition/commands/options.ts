@@ -26,10 +26,7 @@ export type CommandOption<InGuild extends boolean> =
 	| StringChoicesOption;
 
 /** A base option. */
-export type BaseOption = {
-	description: string;
-	required?: boolean;
-};
+export type BaseOption = { description: string; required?: boolean };
 
 /**
  * A basic option that doesn't allow for further configuration.
@@ -188,11 +185,7 @@ export function transformOptions(
 		| { command: string; subcommand: string; subGroup?: string },
 ): Exclude<
 	ApplicationCommandOptionData,
-	{
-		type:
-			| ApplicationCommandOptionType.SubcommandGroup
-			| ApplicationCommandOptionType.Subcommand;
-	}
+	{ type: ApplicationCommandOptionType.SubcommandGroup | ApplicationCommandOptionType.Subcommand }
 >[] {
 	return Object.entries(options)
 		.map(([name, option]) => {
@@ -220,8 +213,8 @@ export function transformOptions(
 
 			if (transformed.type === ApplicationCommandOptionType.Channel)
 				transformed.channelTypes =
-					option.channelTypes ??
-					([
+					option.channelTypes
+					?? ([
 						ChannelType.GuildText,
 						ChannelType.GuildVoice,
 						ChannelType.GuildCategory,
@@ -246,8 +239,8 @@ export function transformOptions(
 			}
 
 			if (
-				transformed.type === ApplicationCommandOptionType.Number ||
-				transformed.type === ApplicationCommandOptionType.Integer
+				transformed.type === ApplicationCommandOptionType.Number
+				|| transformed.type === ApplicationCommandOptionType.Integer
 			) {
 				if (option.maxValue !== undefined) transformed.maxValue = option.maxValue;
 				if (option.minValue !== undefined) transformed.minValue = option.minValue;

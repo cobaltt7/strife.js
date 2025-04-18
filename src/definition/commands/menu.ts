@@ -53,8 +53,8 @@ export type MenuCommandData<InGuild extends boolean, Context extends MenuCommand
 	type: Context;
 	options?: never;
 	subcommands?: never;
-} & BaseCommandData<InGuild> &
-	AugmentedMenuCommandData<InGuild, Context>;
+} & BaseCommandData<InGuild>
+	& AugmentedMenuCommandData<InGuild, Context>;
 /** The possible types of menu commands. */
 export type MenuCommandContext = ApplicationCommandType.Message | ApplicationCommandType.User;
 /** A menu command handler. */

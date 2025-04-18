@@ -171,8 +171,8 @@ export async function mentionChatCommand(
 ): Promise<`**/${string}**` | `</${string}:${Snowflake}>`> {
 	const [commandName] = fullCommand.split(" ");
 	const id = (
-		(await guild?.commands.fetch())?.find(({ name }) => name === commandName) ??
-		(await (await getClient()).application.commands.fetch()).find(
+		(await guild?.commands.fetch())?.find(({ name }) => name === commandName)
+		?? (await (await getClient()).application.commands.fetch()).find(
 			({ name }) => name === commandName,
 		)
 	)?.id;

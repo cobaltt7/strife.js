@@ -64,7 +64,9 @@ export async function getFilesFromMessage(
  * @param message The message to get the JSON of.
  * @returns The message JSON.
  */
-export async function getMessageJSON(message: Message): Promise<{
+export async function getMessageJSON(
+	message: Message,
+): Promise<{
 	content: string;
 	embeds: readonly APIEmbed[];
 	allowedMentions: MessageMentionOptions;
