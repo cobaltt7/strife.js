@@ -100,8 +100,8 @@ export type SubGroupsData<InGuild extends boolean, Options extends SubGroupsOpti
 	subcommands: {
 		[key in keyof Options]: Omit<SubcommandData<InGuild, Options[key]>, BaseCommandKeys>;
 	};
-} & BaseChatCommandData<InGuild> &
-	AugmentedSubGroupsData<InGuild, Options>;
+} & BaseChatCommandData<InGuild>
+	& AugmentedSubGroupsData<InGuild, Options>;
 /** Options for a subgroup command. */
 export type SubGroupsOptions<InGuild extends boolean> = Record<string, SubcommandOptions<InGuild>>;
 /** A subgroup command handler. */

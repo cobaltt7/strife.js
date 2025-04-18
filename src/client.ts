@@ -86,10 +86,10 @@ export async function login(loginOptions: LoginOptions): Promise<void> {
 	});
 	Handler.on("debug", (message) => {
 		if (
-			debug === "all" ||
-			(debug &&
-				!message.includes("Sending a heartbeat") &&
-				!message.includes("Heartbeat acknowledged"))
+			debug === "all"
+			|| (debug
+				&& !message.includes("Sending a heartbeat")
+				&& !message.includes("Heartbeat acknowledged"))
 		)
 			console.debug(message);
 	})
@@ -190,24 +190,24 @@ export async function login(loginOptions: LoginOptions): Promise<void> {
 		if (interaction.isContextMenuCommand()) await (command as MenuCommandHandler)(interaction);
 		else {
 			const rawOptions =
-				interaction.options.data[0]?.options?.[0]?.options ??
-				interaction.options.data[0]?.options ??
-				interaction.options.data;
+				interaction.options.data[0]?.options?.[0]?.options
+				?? interaction.options.data[0]?.options
+				?? interaction.options.data;
 
 			const optionsData = rawOptions.map(
 				async (option) =>
 					[
 						option.name,
-						(option.attachment ??
-							(!option.channel || option.channel instanceof GuildChannel ?
+						(option.attachment
+							?? (!option.channel || option.channel instanceof GuildChannel ?
 								option.channel
-							:	await interaction.guild?.channels.fetch(option.channel.id)) ??
-							(option.member instanceof GuildMember && option.member)) ||
-							(option.user ??
-								(!option.role || option.role instanceof Role ?
+							:	await interaction.guild?.channels.fetch(option.channel.id))
+							?? (option.member instanceof GuildMember && option.member))
+							|| (option.user
+								?? (!option.role || option.role instanceof Role ?
 									option.role
-								:	await interaction.guild?.roles.fetch(option.role.id)) ??
-								option.value),
+								:	await interaction.guild?.roles.fetch(option.role.id))
+								?? option.value),
 					] as const,
 			);
 			const parsedOptions = Object.fromEntries(await Promise.all(optionsData));
@@ -251,10 +251,10 @@ export async function login(loginOptions: LoginOptions): Promise<void> {
 						content: loginOptions.commandErrorMessage,
 					});
 				else if (
-					Number(interaction?.createdAt) - Date.now() < 3000 &&
-					!(
-						error instanceof DiscordAPIError &&
-						error.code === RESTJSONErrorCodes.UnknownInteraction
+					Number(interaction?.createdAt) - Date.now() < 3000
+					&& !(
+						error instanceof DiscordAPIError
+						&& error.code === RESTJSONErrorCodes.UnknownInteraction
 					)
 				)
 					await interaction?.reply({
@@ -265,9 +265,9 @@ export async function login(loginOptions: LoginOptions): Promise<void> {
 		});
 
 	const defaultGuilds =
-		loginOptions.defaultCommandAccess !== undefined &&
-		typeof loginOptions.defaultCommandAccess !== "boolean" &&
-		[loginOptions.defaultCommandAccess].flat();
+		loginOptions.defaultCommandAccess !== undefined
+		&& typeof loginOptions.defaultCommandAccess !== "boolean"
+		&& [loginOptions.defaultCommandAccess].flat();
 	const commandsByGuild = Object.entries(commands).reduce<
 		Partial<Record<Snowflake | typeof globalCommandKey, ApplicationCommandData[]>>
 	>((accumulator, [commandName, guildCommands]) => {

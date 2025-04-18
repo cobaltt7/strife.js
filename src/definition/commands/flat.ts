@@ -49,9 +49,9 @@ export type FlatCommandData<
 	subcommands?: never;
 	/** Key-value pair where the keys are option names and the values are option details. */
 	options?: Options;
-} & BaseChatCommandData<InGuild> &
-	AugmentedFlatCommandData<InGuild, Options> &
-	AugmentedRootCommandData<InGuild, Options>;
+} & BaseChatCommandData<InGuild>
+	& AugmentedFlatCommandData<InGuild, Options>
+	& AugmentedRootCommandData<InGuild, Options>;
 /** Options for a single-level chat command. */
 export type FlatCommandOptions<InGuild extends boolean> = Record<string, CommandOption<InGuild>>;
 

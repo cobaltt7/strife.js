@@ -67,8 +67,8 @@ export type SubcommandData<InGuild extends boolean, Options extends SubcommandOp
 	subcommands: {
 		[key in keyof Options]: Omit<FlatCommandData<InGuild, Options[key]>, BaseCommandKeys>;
 	};
-} & BaseChatCommandData<InGuild> &
-	AugmentedSubcommandData<InGuild, Options>;
+} & BaseChatCommandData<InGuild>
+	& AugmentedSubcommandData<InGuild, Options>;
 /** Options for subcommands. */
 export type SubcommandOptions<InGuild extends boolean> = Record<
 	string,
