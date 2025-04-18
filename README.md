@@ -264,7 +264,15 @@ defineSubGroups(
 		name: "foo",
 		description: "...",
 
-		subcommands: { bar: { description: "...", subcommands: { baz: { description: "...", options: {} } } } },
+		subcommands: {
+			foobar: {
+				description: "...",
+				subcommands: {
+					foobarbaz: { description: "...", options: {} },
+				},
+			},
+		},
+	},
 	},
 
 	async (interaction, { subcommand, subGroup, options }) => {
