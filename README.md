@@ -273,7 +273,6 @@ defineSubGroups(
 			},
 		},
 	},
-	},
 
 	async (interaction, { subcommand, subGroup, options }) => {
 		// code here...
