@@ -265,12 +265,7 @@ defineSubGroups(
 		description: "...",
 
 		subcommands: {
-			foobar: {
-				description: "...",
-				subcommands: {
-					foobarbaz: { description: "...", options: {} },
-				},
-			},
+			foobar: { description: "...", subcommands: { foobarbaz: { description: "...", options: {} } } },
 		},
 	},
 
