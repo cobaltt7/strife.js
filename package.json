@@ -39,7 +39,7 @@
 	},
 	"prettier": "@redguy12/prettier-config",
 	"dependencies": {
-		"serialize-error": "11.0.3"
+		"serialize-error": "12.0.0"
 	},
 	"devDependencies": {
 		"@redguy12/prettier-config": "3.2.1",
