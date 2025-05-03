@@ -2,14 +2,14 @@
 
 A Discord bot framework built around TypeScript support and ease of setup.
 
-Strife.js has three main goals and purposes:
+strife.js has three main goals and purposes:
 
 1. Allow TypeScript to infer types where it couldn't easily before, leading to better code editor intellisense and
    autocomplete.
 2. Reduce the amount of boilerplate and duplicated code in Discord bots by streamlining as much as possible and
-   exporting many useful utility functions
+   exporting many useful utility functions.
 3. Make it simpler and cleaner to register multiple commands and options in large multipurpose bots that require
-   handling the same events for many different things
+   handling the same events for many different things.
 
 Support is available in [the Cobots server](https://discord.gg/WaEbDrXKxK).
 
@@ -264,14 +264,7 @@ defineSubGroups(
 		name: "foo",
 		description: "...",
 
-		subcommands: {
-			bar: {
-				description: "...",
-				subcommands: {
-					baz: { description: "...", options: {} },
-				},
-			},
-		},
+		subcommands: { bar: { description: "...", subcommands: { baz: { description: "...", options: {} } } } },
 	},
 
 	async (interaction, { subcommand, subGroup, options }) => {
