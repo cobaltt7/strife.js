@@ -64,7 +64,9 @@ export async function getFilesFromMessage(
  * @param message The message to get the JSON of.
  * @returns The message JSON.
  */
-export async function getMessageJSON(message: Message): Promise<{
+export async function getMessageJSON(
+	message: Message,
+): Promise<{
 	content: string;
 	embeds: readonly APIEmbed[];
 	allowedMentions: MessageMentionOptions;
@@ -106,8 +108,8 @@ export async function reactAll(
 }
 
 /**
- * Disable all components in message action rows, ignoring components that don't require manual handling (link and
- * premium buttons).
+ * Disable all components in message action rows, ignoring components that don't require manual
+ * handling (link and premium buttons).
  *
  * @param rows The action rows to disable components in.
  * @returns The updated action rows with disabled components.

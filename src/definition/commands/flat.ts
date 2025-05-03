@@ -49,9 +49,9 @@ export type FlatCommandData<
 	subcommands?: never;
 	/** Key-value pair where the keys are option names and the values are option details. */
 	options?: Options;
-} & BaseChatCommandData<InGuild> &
-	AugmentedFlatCommandData<InGuild, Options> &
-	AugmentedRootCommandData<InGuild, Options>;
+} & BaseChatCommandData<InGuild>
+	& AugmentedFlatCommandData<InGuild, Options>
+	& AugmentedRootCommandData<InGuild, Options>;
 /** Options for a single-level chat command. */
 export type FlatCommandOptions<InGuild extends boolean> = Record<string, CommandOption<InGuild>>;
 
@@ -62,8 +62,9 @@ export type FlatCommandHandler<
 > = (
 	interaction: ChatInputCommandInteraction<GuildCacheReducer<InGuild>>,
 	/**
-	 * Utilize to retrieve option values at runtime. You can always use {@link interaction.options}, however, this is a
-	 * key-value object of options. That is often simpler to use and has better types when using TypeScript.
+	 * Utilize to retrieve option values at runtime. You can always use {@link interaction.options},
+	 * however, this is a key-value object of options. That is often simpler to use and has better
+	 * types when using TypeScript.
 	 */
 	options: OptionsToType<InGuild, Options>,
 ) => Awaitable<unknown>;
