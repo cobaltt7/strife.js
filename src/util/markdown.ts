@@ -14,8 +14,9 @@ import {
 const getClient = lazy(async () => (await import("../client.js")).client);
 
 /**
- * Escape all Markdown in a string. For backwards-compatability reasons, the default {@link escapeMarkdown} options don't
- * escape everything. This does, and will change as Discord updates.
+ * Escape all Markdown in a string. For backwards-compatability reasons, the default
+ * {@link escapeMarkdown} options don't escape everything. This does, and will change as Discord
+ * updates.
  *
  * @param text The string to escape.
  * @returns The escaped string.
@@ -171,8 +172,8 @@ export async function mentionChatCommand(
 ): Promise<`**/${string}**` | `</${string}:${Snowflake}>`> {
 	const [commandName] = fullCommand.split(" ");
 	const id = (
-		(await guild?.commands.fetch())?.find(({ name }) => name === commandName) ??
-		(await (await getClient()).application.commands.fetch()).find(
+		(await guild?.commands.fetch())?.find(({ name }) => name === commandName)
+		?? (await (await getClient()).application.commands.fetch()).find(
 			({ name }) => name === commandName,
 		)
 	)?.id;

@@ -47,9 +47,9 @@ export async function logError({
 		const errorString = stringifyError(error);
 		const lines = errorString.split("\n");
 		const external =
-			lines.length > 10 ||
-			errorString.includes("```") ||
-			lines.some((line) => line.length > 100);
+			lines.length > 10
+			|| errorString.includes("```")
+			|| lines.some((line) => line.length > 100);
 
 		const trigger =
 			typeof event === "string" ? inlineCode(event)
@@ -76,7 +76,8 @@ export async function logError({
 }
 
 /**
- * Standardizes an error's properties and stringifies it to JSON, transforming non-JSON values where found.
+ * Standardizes an error's properties and stringifies it to JSON, transforming non-JSON values where
+ * found.
  *
  * @param error The error to stringify.
  * @returns The stringified error.
@@ -105,9 +106,9 @@ export function standardizeError(error: unknown): object {
 			:	error.message
 		:	undefined;
 	const stack =
-		("stack" in error && typeof error.stack === "string" && error.stack) ||
+		("stack" in error && typeof error.stack === "string" && error.stack)
 		// eslint-disable-next-line unicorn/error-message
-		new Error().stack;
+		|| new Error().stack;
 
 	const extra = { ...error, ...serialized };
 	delete extra.name;
@@ -122,8 +123,8 @@ export function standardizeError(error: unknown): object {
 		code: "code" in error ? error.code : undefined,
 		message,
 		stack:
-			stack &&
-			sanitizePath(stack)
+			stack
+			&& sanitizePath(stack)
 				.split("\n")
 				.slice(Array.isArray(message) ? message.length : 1),
 		cause: "cause" in error ? standardizeError(error.cause) : undefined,

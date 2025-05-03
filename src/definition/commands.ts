@@ -44,8 +44,8 @@ export type CommandData<InGuild extends boolean> =
 
 /** Base command configuration data. */
 export type BaseCommandData<InGuild extends boolean> = (InGuild extends true ? BaseGuildCommandData
-:	BaseGlobalCommandData) &
-	AugmentedCommandData<InGuild>;
+:	BaseGlobalCommandData)
+	& AugmentedCommandData<InGuild>;
 /** Can be augmented to add custom command properties (advanced usage) */
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions, @typescript-eslint/no-unused-vars
 export interface AugmentedCommandData<_InGuild extends boolean> {}
@@ -57,8 +57,8 @@ export type BaseCommandKeys = keyof BaseCommandData<boolean>;
 export type BaseGuildCommandData = {
 	name: string;
 	/**
-	 * Whether to deny members permission to use the command, and require guild admins to explicitly set permissions via
-	 * `Server Settings` -> `Integrations`.
+	 * Whether to deny members permission to use the command, and require guild admins to explicitly
+	 * set permissions via `Server Settings` -> `Integrations`.
 	 */
 	restricted?: boolean;
 } & (DefaultCommandAccess extends { inGuild: true } ?
@@ -74,10 +74,12 @@ export type BaseGlobalCommandData = {
 /**
  * By default, commands are allowed in all guilds plus DMs.
  *
- * To change this behavior, you can set {@link LoginOptions.defaultCommandAccess} when logging in. When using TypeScript,
- * it is necessary to augment the `DefaultCommandAccess` interface when changing this.
+ * To change this behavior, you can set {@link LoginOptions.defaultCommandAccess} when logging in.
+ * When using TypeScript, it is necessary to augment the `DefaultCommandAccess` interface when
+ * changing this.
  *
- * @property {boolean} inGuild Whether or not commands are restricted to guilds-only by default. Defaults to `false`.
+ * @property {boolean} inGuild Whether or not commands are restricted to guilds-only by default.
+ *   Defaults to `false`.
  */
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export interface DefaultCommandAccess {}
@@ -86,8 +88,8 @@ export interface DefaultCommandAccess {}
 export type BaseChatCommandData<InGuild extends boolean> = {
 	description: string;
 	type?: never;
-} & BaseCommandData<InGuild> &
-	AugmentedChatCommandData<InGuild>;
+} & BaseCommandData<InGuild>
+	& AugmentedChatCommandData<InGuild>;
 /** Can be augmented to add custom chat command properties (advanced usage) */
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions, @typescript-eslint/no-unused-vars
 export interface AugmentedChatCommandData<_InGuild extends boolean> {}
