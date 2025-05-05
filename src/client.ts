@@ -80,7 +80,7 @@ export async function login(loginOptions: LoginOptions): Promise<void> {
 	});
 
 	const debug = loginOptions.debug ?? (process.env.NODE_ENV === "production" ? true : "all");
-	let handleError = console.error
+	let handleError = console.error;
 
 	const readyPromise = new Promise<Client<true>>((resolve) => {
 		Handler.once("ready", resolve);
@@ -411,7 +411,8 @@ async function buildErrorHandler(
 		typeof options?.channel === "string" ?
 			await client.channels.fetch(options.channel)
 		:	await options?.channel();
-	if (options) assert(channel && "send" in channel, "Cannot send messages in provided error log channel");
+	if (options)
+		assert(channel && "send" in channel, "Cannot send messages in provided error log channel");
 	return async (error: unknown, event: RepliableInteraction | string) => {
 		await logError({ error, event, channel, emoji: options?.emoji });
 	};
