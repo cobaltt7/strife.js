@@ -80,7 +80,7 @@ export async function login(loginOptions: LoginOptions): Promise<void> {
 	});
 
 	const debug = loginOptions.debug ?? (process.env.NODE_ENV === "production" ? true : "all");
-	let handleError = console.error;
+	let handleError = await buildErrorHandler();
 
 	const readyPromise = new Promise<Client<true>>((resolve) => {
 		Handler.once("ready", resolve);
@@ -97,7 +97,7 @@ export async function login(loginOptions: LoginOptions): Promise<void> {
 		.on("warn", (warning) => handleError(warning, "warn"))
 		.on("error", (error) => handleError(error, "error"))
 		.on("invalidated", () => {
-			console.error(new ReferenceError("Session is invalid"));
+			console.error("[ReferenceError]", new ReferenceError("Session is invalid"));
 			process.exit(1);
 		})
 		.rest.on("invalidRequestWarning", (data) =>
@@ -116,10 +116,11 @@ export async function login(loginOptions: LoginOptions): Promise<void> {
 
 	console.log(`Connected to Discord with tag ${client.user.tag}`);
 
-	handleError =
-		typeof loginOptions.handleError === "function" ?
-			loginOptions.handleError
-		:	await buildErrorHandler(loginOptions.handleError);
+	if (loginOptions.handleError)
+		handleError =
+			typeof loginOptions.handleError === "function" ?
+				loginOptions.handleError
+			:	await buildErrorHandler(loginOptions.handleError);
 
 	if (loginOptions.modulesDir)
 		process.emitWarning(
@@ -398,15 +399,16 @@ export type LoginOptions = {
 		/** The default value of {@link BaseCommandData.access a command's `access` field}. */
 		defaultCommandAccess?: true;
 	});
-async function buildErrorHandler(
-	options: { channel: string | (() => Awaitable<SendableChannel>); emoji?: string } | undefined,
-): Promise<(error: unknown, event: RepliableInteraction | string) => Awaitable<void>> {
+async function buildErrorHandler(options?: {
+	channel: string | (() => Awaitable<SendableChannel>);
+	emoji?: string;
+}): Promise<(error: unknown, event: RepliableInteraction | string) => Awaitable<void>> {
 	const channel =
 		typeof options?.channel === "string" ?
-			await client.channels.fetch(options.channel)
+			((await client.channels.fetch(options.channel)) ?? undefined)
 		:	await options?.channel();
-	if (options)
-		assert(channel && "send" in channel, "Cannot send messages in provided error log channel");
+	if (options) assert(channel, "Could not find provided error log channel");
+	if (channel) assert("send" in channel, "Provided error log channel is not a sendable channel");
 	return async (error: unknown, event: RepliableInteraction | string) => {
 		await logError({ error, event, channel, emoji: options?.emoji });
 	};
