@@ -5,8 +5,7 @@ import type {
 	RepliableInteraction,
 	Snowflake,
 } from "discord.js";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { BaseCommandData, DefaultCommandAccess } from "./definition/commands.js";
+import type { DefaultCommandAccess } from "./definition/commands.js";
 import type { FlatCommandHandler } from "./definition/commands/flat.js";
 import type { MenuCommandHandler } from "./definition/commands/menu.js";
 import type { SubGroupsHandler } from "./definition/commands/sub-groups.js";

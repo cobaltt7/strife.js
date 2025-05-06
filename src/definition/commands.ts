@@ -5,8 +5,6 @@ import type {
 	PermissionsBitField,
 	Snowflake,
 } from "discord.js";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { LoginOptions } from "../client.js";
 import type { DEFAULT_GUILDS } from "../util.js";
 import type { FlatCommandData, FlatCommandHandler, FlatCommandOptions } from "./commands/flat.js";
 import type { MenuCommandContext, MenuCommandData, MenuCommandHandler } from "./commands/menu.js";

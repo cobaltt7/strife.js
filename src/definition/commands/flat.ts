@@ -1,5 +1,4 @@
 import type { Awaitable, ChatInputCommandInteraction } from "discord.js";
-import type { AugmentedRootCommandData } from "../../deprecated.js";
 import type { GuildCacheReducer } from "../../util.js";
 import type { BaseChatCommandData } from "../commands.js";
 import type { CommandOption, OptionsToType } from "./options.js";
@@ -50,8 +49,7 @@ export type FlatCommandData<
 	/** Key-value pair where the keys are option names and the values are option details. */
 	options?: Options;
 } & BaseChatCommandData<InGuild>
-	& AugmentedFlatCommandData<InGuild, Options>
-	& AugmentedRootCommandData<InGuild, Options>;
+	& AugmentedFlatCommandData<InGuild, Options>;
 /** Options for a single-level chat command. */
 export type FlatCommandOptions<InGuild extends boolean> = Record<string, CommandOption<InGuild>>;
 

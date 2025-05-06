@@ -1,8 +1,7 @@
 import type { Awaitable, ChatInputCommandInteraction } from "discord.js";
 import type { GuildCacheReducer } from "../../util.js";
 import type { BaseChatCommandData, BaseCommandKeys } from "../commands.js";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { FlatCommandData, FlatCommandOptions } from "./flat.js";
+import type { FlatCommandOptions } from "./flat.js";
 import type { OptionsToType } from "./options.js";
 import type { SubcommandData, SubcommandOptions } from "./subcommands.js";
 

@@ -4,8 +4,6 @@ import type {
 	ApplicationCommandOptionData,
 	Attachment,
 	AutocompleteInteraction,
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	CommandInteractionOptionResolver,
 	GuildBasedChannel,
 	GuildMember,
 	Role,
