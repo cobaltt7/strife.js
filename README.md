@@ -18,7 +18,7 @@ Install alongside discord.js:
 npm install discord.js strife.js
 ```
 
-strife.js officially supports discord.js versions 14.9-14.16.
+strife.js officially supports discord.js versions 14.9-14.19.
 
 ## Login
 
