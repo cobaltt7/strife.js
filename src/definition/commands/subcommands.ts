@@ -14,10 +14,7 @@ import { commands, transformSubcommands } from "../commands.js";
  * @param data Subcommands configuration data.
  * @param command The command handler.
  */
-export function defineSubcommands<
-	InGuild extends true,
-	Options extends SubcommandOptions<InGuild> = Record<string, never>,
->(
+export function defineSubcommands<InGuild extends true, Options extends SubcommandOptions<InGuild>>(
 	data: SubcommandData<InGuild, Options>,
 	command: (
 		interaction: ChatInputCommandInteraction<GuildCacheReducer<InGuild>>,
@@ -28,7 +25,7 @@ export function defineSubcommands<
 ): void;
 export function defineSubcommands<
 	InGuild extends false,
-	Options extends SubcommandOptions<InGuild> = Record<string, never>,
+	Options extends SubcommandOptions<InGuild>,
 >(
 	data: SubcommandData<InGuild, Options>,
 	command: (

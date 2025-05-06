@@ -187,7 +187,6 @@ Some types of options have additional customization fields:
         - Return an array of choice objects.
           It will be truncated to fit the 25-item limit automatically.
         - Note that Discord does not require users to select values from the options, so handle values appropriately.
-        - Also note that TypeScript cannot automatically infer the type of the `interaction` parameter, however, it will error if you set it incorrectly, so make sure you manually specify it as `AutocompleteInteraction` (or `AutocompleteInteraction<"cached" | "raw">` for guild-only commands).
 
 To retrieve option values at runtime, you can utilize the second `options` parameter of the command handler.
 You can always use discord.js's `interaction.options` API, however, the `options` parameter is a key-value object of options.
@@ -409,7 +408,7 @@ For example, a `customId` of `"foo_bar_baz"` will result in an `id` of `"bar_baz
 You can also omit the data from the `customId` altogether - a `customId` of `"_foobar"` will result in an `id` of `"foobar"` and the `data` `""`.
 
 It is not required for all `customId`s to follow this format nor to have an associated handler.
-You are free to collect interactions in any other way you wish alongside or independent of strife.js.
+It's discouraged to set your own listeners, but you are free to handle interactions via Discord.js collectors instead of through strife.js.
 
 `defineModal()` and `defineSelect()` work in the same way as `defineButton()` but for modals and select menus respectfully.
 For better type safety, `defineSelect()` also optionally allows specifing certain types of select menus to collect.
@@ -460,7 +459,6 @@ This guide references the following imported values in inline code blocks:
 ```ts
 import type {
 	ApplicationCommandOptionAllowedChannelTypes,
-	AutocompleteInteraction,
 	Awaitable,
 	ClientOptions,
 	RepliableInteraction,

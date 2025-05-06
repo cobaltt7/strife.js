@@ -20,10 +20,7 @@ import { commands, transformSubcommands } from "../commands.js";
  * @param data Sub group configuration data.
  * @param handler The command handler.
  */
-export function defineSubGroups<
-	InGuild extends true,
-	Options extends SubGroupsOptions<InGuild> = Record<string, never>,
->(
+export function defineSubGroups<InGuild extends true, Options extends SubGroupsOptions<InGuild>>(
 	data: SubGroupsData<InGuild, Options>,
 	handler: (
 		interaction: ChatInputCommandInteraction<GuildCacheReducer<InGuild>>,
@@ -38,10 +35,7 @@ export function defineSubGroups<
 		}[keyof Options],
 	) => Awaitable<unknown>,
 ): void;
-export function defineSubGroups<
-	InGuild extends false,
-	Options extends SubGroupsOptions<InGuild> = Record<string, never>,
->(
+export function defineSubGroups<InGuild extends false, Options extends SubGroupsOptions<InGuild>>(
 	data: SubGroupsData<InGuild, Options>,
 	handler: (
 		interaction: ChatInputCommandInteraction<GuildCacheReducer<InGuild>>,

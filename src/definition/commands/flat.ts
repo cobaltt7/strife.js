@@ -17,11 +17,11 @@ import { transformOptions } from "./options.js";
  */
 export function defineChatCommand<
 	InGuild extends true,
-	Options extends FlatCommandOptions<InGuild> = Record<string, never>,
+	Options extends FlatCommandOptions<InGuild>,
 >(data: FlatCommandData<InGuild, Options>, handler: FlatCommandHandler<InGuild, Options>): void;
 export function defineChatCommand<
 	InGuild extends false,
-	Options extends FlatCommandOptions<InGuild> = Record<string, never>,
+	Options extends FlatCommandOptions<InGuild>,
 >(data: FlatCommandData<InGuild, Options>, handler: FlatCommandHandler<InGuild, Options>): void;
 export function defineChatCommand(
 	data: FlatCommandData<boolean, FlatCommandOptions<boolean>>,
@@ -44,7 +44,7 @@ export function defineChatCommand(
 /** Single-level chat command configuration data. */
 export type FlatCommandData<
 	InGuild extends boolean,
-	Options extends FlatCommandOptions<InGuild> = Record<string, never>,
+	Options extends FlatCommandOptions<InGuild>,
 > = {
 	subcommands?: never;
 	/** Key-value pair where the keys are option names and the values are option details. */

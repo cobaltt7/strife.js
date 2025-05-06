@@ -112,11 +112,6 @@ export type StringOption<InGuild extends boolean> = {
 	 *
 	 * Note that Discord does not require users to select values from the options, so handle values
 	 * appropriately.
-	 *
-	 * Also note that TypeScript cannot automatically infer the type of the `interaction` parameter,
-	 * however, it will error if you set it incorrectly, so make sure you manually specify it as
-	 * {@link AutocompleteInteraction} (or {@link AutocompleteInteraction<"cached" | "raw">} for
-	 * guild-only commands).
 	 */
 	autocomplete?: AutocompleteHandler<InGuild>;
 	choices?: never;
