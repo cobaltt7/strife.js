@@ -100,12 +100,6 @@ export async function login(loginOptions: LoginOptions): Promise<void> {
 			console.error(new ReferenceError("Session is invalid"));
 			process.exit(1);
 		})
-		.on("guildUnavailable", async (guild) => {
-			await handleError(
-				new ReferenceError(`Guild ${guild.name} (${guild.id}) unavailable`),
-				"guildUnavailable",
-			);
-		})
 		.rest.on("invalidRequestWarning", (data) =>
 			handleError(
 				`${data.count} requests; ${data.remainingTime}ms left`,
