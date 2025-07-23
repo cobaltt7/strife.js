@@ -78,6 +78,7 @@ jobs:
                     - "14.17"
                     - "14.18"
                     - "14.19"
+                    # - "dev"
 
         steps:
             - name: Checkout
@@ -87,17 +88,22 @@ jobs:
                   repository: ${{github.event.pull_request.head.repo.full_name}}
                   path: "./strife.js"
 
+            - name: Checkout
+              uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+              with:
+                  repository: "cobaltt7/bot-template"
+                  path: "./sample-bot"
+
             - name: Setup Node.JS
               uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
               with:
-                  node-version-file: ./strife.js/package.json
-                  cache-dependency-path: ./strife.js/package-lock.json
+                  node-version-file: ./sample-bot/package.json
+                  cache-dependency-path: ./sample-bot/package-lock.json
                   cache: npm
 
             - name: Set up & build
               run: |
-                  echo ##### MOVE FILES #####
-                  mv ./strife.js/.github/sample-bot ./sample-bot
+                  echo ##### MOVE CWD #####
                   cd ./sample-bot
 
                   echo ##### SYNC DEPENDENCIES #####
