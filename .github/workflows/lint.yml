@@ -85,6 +85,7 @@ jobs:
               with:
                   ref: ${{github.head_ref}}
                   repository: ${{github.event.pull_request.head.repo.full_name}}
+                  path: './strife.js'
 
             - name: Setup Node.JS
               uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
@@ -92,8 +93,11 @@ jobs:
                   node-version-file: package.json
                   cache: npm
 
-            - name: Update discord.js
-              run: npm pkg set "devDependencies[discord.js]"=${{matrix.version}}
+            - name: Initialize NPM
+              run: |
+                  mvdir ./strife.js/.github/sample-bot ./sample-bot
+                  cd ./sample-bot
+                  npm pkg set "dependencies[discord.js]"=${{matrix.version}}
 
             - name: Sync discord.js dependencies
               run: |
