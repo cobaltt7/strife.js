@@ -85,7 +85,7 @@ jobs:
               with:
                   ref: ${{github.head_ref}}
                   repository: ${{github.event.pull_request.head.repo.full_name}}
-                  path: './strife.js'
+                  path: "./strife.js"
 
             - name: Setup Node.JS
               uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
