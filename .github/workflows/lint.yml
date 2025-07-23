@@ -94,28 +94,27 @@ jobs:
                   cache-dependency-path: ./strife.js/package-lock.json
                   cache: npm
 
-            - name: Initialize NPM
+            - name: Set up & build
               run: |
+                  echo ##### MOVE FILES #####
                   mv ./strife.js/.github/sample-bot ./sample-bot
                   cd ./sample-bot
+
+                  echo ##### SYNC DEPENDENCIES #####
                   npm pkg set "dependencies[discord.js]"=${{matrix.version}}
 
-            - name: Sync discord.js dependencies
-              run: |
                   new_overrides=$(curl -s "https://cdn.jsdelivr.net/npm/discord.js@${{matrix.version}}/package.json" | jq -c '.dependencies | with_entries(.value |= gsub("\\^|>"; "~"))')
                   new_package=$(jq --tab --argjson newData "$new_overrides" '.overrides = $newData' package.json)
                   echo "$new_package" > package.json
 
-            - name: Pin discord-api-types
-              run: |
                   discord_api_types=$(npm pkg get overrides.discord-api-types | sed "s/~//g")
                   npm pkg set overrides.discord-api-types="$discord_api_types" --json
 
-            - name: Install
-              run: npm install
+                  echo ##### INSTALL #####
+                  npm install
 
-            - name: Build
-              run: npm run build
+                  echo ##### BUILD #####
+                  npm run build
 
     test:
         name: Build on @dev and Test
