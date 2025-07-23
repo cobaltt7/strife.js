@@ -96,7 +96,7 @@ jobs:
 
             - name: Initialize NPM
               run: |
-                  mvdir ./strife.js/.github/sample-bot ./sample-bot
+                  mv ./strife.js/.github/sample-bot ./sample-bot
                   cd ./sample-bot
                   npm pkg set "dependencies[discord.js]"=${{matrix.version}}
 
