@@ -1,8 +1,17 @@
 {
-	"name": "discord-bot",
-	"version": "1.0.0",
+	"name": "TODO",
+	"version": "0.0.1",
+	"private": true,
+	"type": "module",
+	"main": "./dist/index.js",
 	"dependencies": {
-		"strife.js": "../strife.js"
+		"discord.js": "TODO",
+		"strife.js": "./strife.js"
 	},
-	"overrides": {}
+	"engines": {
+		"node": ">=18.11.0",
+		"npm": ">=7.0.0"
+	},
+	"overrides": {
+	}
 }
