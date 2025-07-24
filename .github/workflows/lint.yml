@@ -108,6 +108,9 @@ jobs:
 
                   echo ##### SYNC DEPENDENCIES #####
                   npm pkg set "dependencies[discord.js]"=${{matrix.version}}
+                  if dpkg --compare-versions "${{ matrix.version }}" le 14.15; then
+                    npm pkg set "devDependencies.typescript=~5.4"
+                  fi
 
                   new_overrides=$(curl -s "https://cdn.jsdelivr.net/npm/discord.js@${{matrix.version}}/package.json" | jq -c '.dependencies | with_entries(.value |= gsub("\\^|>"; "~"))')
                   new_package=$(jq --tab --argjson newData "$new_overrides" '.overrides = $newData' package.json)
