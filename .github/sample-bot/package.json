@@ -4,6 +4,9 @@
 	"private": true,
 	"type": "module",
 	"main": "./dist/index.js",
+	"scripts": {
+		"build": "rm -rf ./dist && tsc --project tsconfig.json"
+	},
 	"dependencies": {
 		"discord.js": "TODO",
 		"strife.js": "./strife.js"
