@@ -22,7 +22,7 @@
 		"outDir": "./dist",
 		"resolveJsonModule": true,
 		"strict": true,
-		"target": "ES2023",
+		"target": "ES2022",
 		"types": ["node"],
 		"verbatimModuleSyntax": true
 	},

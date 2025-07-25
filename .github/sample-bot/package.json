@@ -9,7 +9,7 @@
 	},
 	"dependencies": {
 		"discord.js": "TODO",
-		"strife.js": "./strife.js"
+		"strife.js": "../strife.js"
 	},
 	"engines": {
 		"node": ">=18.11.0",
