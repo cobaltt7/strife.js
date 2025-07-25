@@ -60,8 +60,8 @@ jobs:
             - name: Analyze
               uses: github/codeql-action/analyze@4e828ff8d448a8a6e532957b1811f387a63867e8 # v3.29.4
 
-    build:
-        name: Build
+    test:
+        name: Test
         runs-on: ubuntu-24.04
         strategy:
             fail-fast: false
@@ -78,7 +78,7 @@ jobs:
                     - "14.17"
                     - "14.18"
                     - "14.19"
-                    # - "dev"
+                    - "dev"
 
         steps:
             - name: Checkout
@@ -95,17 +95,11 @@ jobs:
                   cache-dependency-path: ./strife.js/package-lock.json
                   cache: npm
 
-            - name: Set up & build
+            - name: Set up
+              working-directory: ./strife.js
+              if: matrix.version != 'dev'
               run: |
-                  echo ##### MOVE FILES #####
-                  mv ./strife.js/.github/sample-bot ./sample-bot
-                  cd ./sample-bot
-
-                  echo ##### SYNC DEPENDENCIES #####
                   npm pkg set "dependencies[discord.js]"=${{matrix.version}}
-                  if dpkg --compare-versions "${{ matrix.version }}" le 14.15; then
-                    npm pkg set "devDependencies.typescript=~5.4"
-                  fi
 
                   new_overrides=$(curl -s "https://cdn.jsdelivr.net/npm/discord.js@${{matrix.version}}/package.json" | jq -c '.dependencies | with_entries(.value |= gsub("\\^|>"; "~"))')
                   new_package=$(jq --tab --argjson newData "$new_overrides" '.overrides = $newData' package.json)
@@ -114,34 +108,38 @@ jobs:
                   discord_api_types=$(npm pkg get overrides.discord-api-types | sed "s/~//g")
                   npm pkg set overrides.discord-api-types="$discord_api_types" --json
 
-                  echo ##### INSTALL #####
-                  npm install
-
-                  echo ##### BUILD #####
-                  npm run build
-
-    test:
-        name: Build on @dev and Test
-        runs-on: ubuntu-24.04
-
-        steps:
-            - name: Checkout
-              uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-              with:
-                  ref: ${{github.head_ref}}
-                  repository: ${{github.event.pull_request.head.repo.full_name}}
-
-            - name: Setup Node.JS
-              uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-              with:
-                  node-version-file: package.json
-                  cache: npm
-
             - name: Install
+              working-directory: ./strife.js
+              if: matrix.version != 'dev'
+              run: npm install
+
+            - name: Install From Lockfile
+              working-directory: ./strife.js
+              if: matrix.version == 'dev'
               run: npm ci
 
             - name: Build & Test
+              working-directory: ./strife.js
               run: npm run test
+
+            - name: Setup Sample
+              run: |
+                  mkdir ./sample-bot
+                  cp ./strife.js/package.json ./sample-bot/package.json
+                  cp -r ./strife.js/node_modules ./sample-bot/node_modules
+                  cp ./strife.js/tsconfig.json ./sample-bot/tsconfig.json
+
+            - name: Install Strife
+              working-directory: ./sample-bot
+              run: |
+                  npm pkg set "name"=sample-bot
+                  npm pkg set "dependencies[strife.js]"=file:../strife.js
+                  echo 'import "discord.js";\nimport "strife.js";' > ./index.ts
+                  npm i
+
+            - name: Test Compatibility
+              working-directory: ./sample-bot
+              run: npm run build
 
     lint:
         name: Lint
