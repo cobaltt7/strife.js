@@ -99,6 +99,8 @@ jobs:
               working-directory: ./strife.js
               if: matrix.version != 'dev'
               run: |
+                  npm pkg delete "peerDependencies[discord.js]"
+                  npm pkg delete "devDependencies[discord.js]"
                   npm pkg set "dependencies[discord.js]"=${{matrix.version}}
 
                   new_overrides=$(curl -s "https://cdn.jsdelivr.net/npm/discord.js@${{matrix.version}}/package.json" | jq -c '.dependencies | with_entries(.value |= gsub("\\^|>"; "~"))')
