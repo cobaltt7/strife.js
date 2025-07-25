@@ -109,7 +109,6 @@ jobs:
 
                   discord_api_types=$(npm pkg get overrides.discord-api-types | sed "s/~//g")
                   npm pkg set overrides.discord-api-types="$discord_api_types" --json
-                  cat package.json
 
             - name: Install
               working-directory: ./strife.js
@@ -137,7 +136,7 @@ jobs:
               run: |
                   npm pkg set "name"=sample-bot
                   npm pkg set "dependencies[strife.js]"=file:../strife.js
-                  echo 'import "discord.js";\nimport "strife.js";' > ./index.ts
+                  echo -e 'import "discord.js";\nimport "strife.js";' > ./index.ts
                   npm i
 
             - name: Test Compatibility
