@@ -20,13 +20,14 @@
 		"noUncheckedIndexedAccess": true,
 		"noUnusedLocals": false,
 		"noUnusedParameters": false,
+		"outDir": "./dist",
 		"resolveJsonModule": true,
 		"strict": true,
 		"target": "ES2022",
 		"types": ["node"],
 		"verbatimModuleSyntax": true
 	},
-	"exclude": ["./.git", "./dist", "./node_modules", "./.github/sample-bot"],
+	"exclude": ["./.git", "./dist", "./node_modules"],
 	"typeAcquisition": { "enable": true },
 	"include": ["**/.*", "**/.*/**/.*", "**/.*/**/*", "**/*"]
 }
