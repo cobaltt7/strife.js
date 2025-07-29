@@ -9,10 +9,11 @@ import type {
 	Role,
 	User,
 } from "discord.js";
+import type { Awaitable } from "discord.js";
 import type { GuildCacheReducer } from "../../util.js";
 import type { FlatCommandOptions } from "./flat.js";
 
-import { ApplicationCommandOptionType, ChannelType, type Awaitable } from "discord.js";
+import { ApplicationCommandOptionType, ChannelType } from "discord.js";
 import * as discord from "discord.js";
 
 /** An option. */
