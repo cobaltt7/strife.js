@@ -12,7 +12,7 @@ import type {
 import type { GuildCacheReducer } from "../../util.js";
 import type { FlatCommandOptions } from "./flat.js";
 
-import { ApplicationCommandOptionType, ChannelType } from "discord.js";
+import { ApplicationCommandOptionType, ChannelType, type Awaitable } from "discord.js";
 import * as discord from "discord.js";
 
 /** An option. */
@@ -129,7 +129,7 @@ export type StringChoicesOption = {
 /** An autocomplete handler. */
 export type AutocompleteHandler<InGuild extends boolean> = (
 	interaction: AutocompleteInteraction<GuildCacheReducer<InGuild>>,
-) => ApplicationCommandOptionChoiceData<string>[];
+) => Awaitable<ApplicationCommandOptionChoiceData<string>[]>;
 /**
  * An object containing all registered autocomplete handlers, indexed by the command, subgroup,
  * subcommand, and option. If there is no subgroup or subcommand, {@link NoSubcommand} is used as a

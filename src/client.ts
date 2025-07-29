@@ -163,7 +163,7 @@ export async function login(loginOptions: LoginOptions): Promise<void> {
 					}\`’s \`${option}\` option not found`,
 				);
 
-			await interaction.respond(autocomplete(interaction).slice(0, 25));
+			await interaction.respond((await autocomplete(interaction)).slice(0, 25));
 			return;
 		}
 
