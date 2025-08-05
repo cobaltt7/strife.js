@@ -60,7 +60,7 @@ export async function login(loginOptions: LoginOptions): Promise<void> {
 		process.emitWarning(
 			`You are using an non-officially-supported version of discord.js (${
 				version
-			}). Please use version ^14.9 for maximum stability.`,
+			}). Please use version 14.9-14.21 for maximum stability.`,
 			"ExperimentalWarning",
 		);
 
