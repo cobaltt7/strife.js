@@ -1,6 +1,7 @@
 import type {
 	APIActionRowComponent,
-	APIMessageActionRowComponent,
+	APIButtonComponent,
+	APISelectMenuComponent,
 	APITextInputComponent,
 	ButtonComponent,
 	MessageActionRowComponent,
@@ -18,7 +19,11 @@ class TestActionRow<
 	ComponentType extends MessageActionRowComponent | TextInputComponent,
 	// @ts-expect-error TS2675
 > extends ActionRow<ComponentType> {
-	constructor(data: APIActionRowComponent<APIMessageActionRowComponent | APITextInputComponent>) {
+	constructor(
+		data: APIActionRowComponent<
+			APIButtonComponent | APISelectMenuComponent | APITextInputComponent
+		>,
+	) {
 		super(data);
 		this.testing = true;
 	}

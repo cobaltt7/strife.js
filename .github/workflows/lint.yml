@@ -26,7 +26,7 @@ jobs:
                   cache: npm
 
             - name: Install
-              run: npm install # ci
+              run: npm ci
 
             - name: Format
               run: npm run format
@@ -120,7 +120,7 @@ jobs:
             - name: Install From Lockfile
               working-directory: ./strife.js
               if: matrix.version == 'dev'
-              run: npm install # ci
+              run: npm ci
 
             - name: Build & Test
               working-directory: ./strife.js
@@ -163,7 +163,7 @@ jobs:
                   cache: npm
 
             - name: Install
-              run: npm install # ci
+              run: npm ci
 
             - name: Lint
               run: node --run lint

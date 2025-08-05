@@ -184,7 +184,7 @@ export async function login(loginOptions: LoginOptions): Promise<void> {
 		if (!command) throw new ReferenceError(`Command \`${interaction.command.name}\` not found`);
 
 		if (interaction.isContextMenuCommand()) await (command as MenuCommandHandler)(interaction);
-		else {
+		else if (interaction.isChatInputCommand()) {
 			const rawOptions =
 				interaction.options.data[0]?.options?.[0]?.options
 				?? interaction.options.data[0]?.options

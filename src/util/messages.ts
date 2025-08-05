@@ -1,17 +1,17 @@
 import type {
 	ActionRow,
 	APIActionRowComponent,
+	APIButtonComponent,
 	APIEmbed,
-	APIMessageActionRowComponent,
+	APISelectMenuComponent,
 	Attachment,
-	BaseMessageOptions,
 	Collection,
-	Embed,
 	EmojiIdentifierResolvable,
 	Message,
 	MessageActionRowComponent,
 	MessageMentionOptions,
 	MessageReaction,
+	Partialize,
 } from "discord.js";
 
 import { ComponentType } from "discord.js";
@@ -59,6 +59,26 @@ export async function getFilesFromMessage(
 	return fetched.attachments;
 }
 
+type MessageSnapshot = Partialize<
+	Message,
+	null,
+	Exclude<
+		keyof Message,
+		| "attachments"
+		| "client"
+		| "components"
+		| "content"
+		| "createdTimestamp"
+		| "editedTimestamp"
+		| "embeds"
+		| "flags"
+		| "mentions"
+		| "stickers"
+		| "type"
+	>
+>;
+type MessageSnapshots = Collection<string, MessageSnapshot>;
+
 /**
  * Given a message, extract just enough information to resend a representation of it. Note that
  * `content` is not transformed. Use {@link messageToText} to extract the displayed message text.
@@ -73,13 +93,16 @@ export async function getMessageJSON(
 	embeds: readonly APIEmbed[];
 	allowedMentions: MessageMentionOptions;
 	files: readonly string[];
-	components: readonly APIActionRowComponent<APIMessageActionRowComponent>[];
+	components: readonly APIActionRowComponent<APIButtonComponent | APISelectMenuComponent>[];
 }> {
-	const snapshots = "messageSnapshots" in message ? message.messageSnapshots.values() : [];
+	const snapshots =
+		"messageSnapshots" in message ?
+			(message.messageSnapshots as MessageSnapshots).values()
+		:	[];
 	return {
 		content: [message, ...snapshots].map((snapshot) => snapshot.content).join("\n\n"),
 		embeds: [message, ...snapshots].flatMap((snapshot) =>
-			snapshot.embeds.map((embed: Embed) => embed.toJSON()),
+			snapshot.embeds.map((embed) => embed.toJSON()),
 		),
 		allowedMentions: {
 			parse: message.mentions.everyone ? ["everyone"] : undefined,
@@ -91,19 +114,17 @@ export async function getMessageJSON(
 			...(await getFilesFromMessage(message)).values(),
 			...message.stickers.values(),
 			...("messageSnapshots" in message ?
-				message.messageSnapshots.map(
-					({ attachments, stickers }: Pick<Message, "attachments" | "stickers">) => [
-						...attachments.filter((file) => !isFileExpired(file.url)).values(),
-						...stickers.values(),
-					],
-				)
+				(message.messageSnapshots as MessageSnapshots).map(({ attachments, stickers }) => [
+					...attachments.filter((file) => !isFileExpired(file.url)).values(),
+					...stickers.values(),
+				])
 			:	([] as const)),
 		]
 			.flat()
 			.slice(0, 10)
 			.map((attachment) => attachment.url),
 		components: message.components.map((component) => component.toJSON()),
-	} satisfies Required<BaseMessageOptions>;
+	};
 }
 
 /**
@@ -135,7 +156,7 @@ export async function reactAll(
  */
 export function disableComponents(
 	rows: ActionRow<MessageActionRowComponent>[],
-): APIActionRowComponent<APIMessageActionRowComponent>[] {
+): APIActionRowComponent<APIButtonComponent | APISelectMenuComponent>[] {
 	return rows.map(({ components }) => ({
 		components: components.map((component) => ({
 			...component.data,

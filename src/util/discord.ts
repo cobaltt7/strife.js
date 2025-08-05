@@ -10,7 +10,7 @@ import type {
 	User,
 } from "discord.js";
 
-import { ButtonStyle, ComponentType, GuildMember } from "discord.js";
+import { ActionRow, ButtonStyle, ComponentType, GuildMember } from "discord.js";
 
 import { footerSeperator, zeroWidthSpace } from "../util.js";
 import { disableComponents } from "./messages.js";
@@ -235,7 +235,10 @@ export async function paginate<Item>(
 		.on("end", async () => {
 			const [pagination, ...rest] = message.components;
 			await editReply({
-				components: pagination ? [...disableComponents([pagination]), ...rest] : [],
+				components:
+					pagination instanceof ActionRow ?
+						[...disableComponents([pagination]), ...rest]
+					:	[],
 			});
 		});
 
