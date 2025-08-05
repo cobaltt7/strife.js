@@ -4,6 +4,7 @@ import type {
 	ApplicationCommandOptionData,
 	Attachment,
 	AutocompleteInteraction,
+	ChannelType,
 	GuildBasedChannel,
 	GuildMember,
 	Role,
@@ -13,7 +14,8 @@ import type { GuildCacheReducer } from "../../util.js";
 import type { FlatCommandOptions } from "./flat.js";
 
 import { ChannelType as apiChannelType } from "discord-api-types/v10";
-import { ApplicationCommandOptionType, ChannelType } from "discord.js";
+import { ApplicationCommandOptionType } from "discord.js";
+import * as discord from "discord.js";
 
 /** An option. */
 export type CommandOption<InGuild extends boolean> =
@@ -174,18 +176,6 @@ export type OptionToType<InGuild extends boolean, Option extends CommandOption<I
 export type OptionChannelTypes<Types> =
 	Types extends ChannelType[] ? Types[number] : ApplicationCommandOptionAllowedChannelTypes;
 
-const defaultChannelTypes = new Set([
-	apiChannelType.GuildText,
-	apiChannelType.GuildVoice,
-	apiChannelType.GuildCategory,
-	apiChannelType.GuildAnnouncement,
-	apiChannelType.AnnouncementThread,
-	apiChannelType.PublicThread,
-	apiChannelType.PrivateThread,
-	apiChannelType.GuildStageVoice,
-	apiChannelType.GuildMedia,
-]);
-
 /** @internal */
 export function transformOptions(
 	options: Record<string, CommandOption<boolean>>,
@@ -223,9 +213,17 @@ export function transformOptions(
 			if (transformed.type === ApplicationCommandOptionType.Channel)
 				transformed.channelTypes =
 					option.channelTypes
-					?? Object.values(ChannelType).filter((type): type is ChannelType =>
-						defaultChannelTypes.has(type),
-					);
+					?? ([
+						apiChannelType.GuildText,
+						apiChannelType.GuildVoice,
+						apiChannelType.GuildCategory,
+						apiChannelType.GuildAnnouncement,
+						apiChannelType.AnnouncementThread,
+						apiChannelType.PublicThread,
+						apiChannelType.PrivateThread,
+						apiChannelType.GuildStageVoice,
+						...("MediaChannel" in discord ? [apiChannelType.GuildMedia] : []),
+					] as ApplicationCommandOptionAllowedChannelTypes[]);
 
 			if (transformed.type === ApplicationCommandOptionType.String) {
 				if (option.choices && !transformed.autocomplete)

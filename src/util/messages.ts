@@ -6,6 +6,7 @@ import type {
 	Attachment,
 	BaseMessageOptions,
 	Collection,
+	Embed,
 	EmojiIdentifierResolvable,
 	Message,
 	MessageActionRowComponent,
@@ -74,11 +75,11 @@ export async function getMessageJSON(
 	files: readonly string[];
 	components: readonly APIActionRowComponent<APIMessageActionRowComponent>[];
 }> {
-	const snapshots = message.messageSnapshots.values();
+	const snapshots = "messageSnapshots" in message ? message.messageSnapshots.values() : [];
 	return {
 		content: [message, ...snapshots].map((snapshot) => snapshot.content).join("\n\n"),
 		embeds: [message, ...snapshots].flatMap((snapshot) =>
-			snapshot.embeds.map((embed) => embed.toJSON()),
+			snapshot.embeds.map((embed: Embed) => embed.toJSON()),
 		),
 		allowedMentions: {
 			parse: message.mentions.everyone ? ["everyone"] : undefined,
@@ -89,10 +90,14 @@ export async function getMessageJSON(
 		files: [
 			...(await getFilesFromMessage(message)).values(),
 			...message.stickers.values(),
-			...message.messageSnapshots.map(({ attachments }) => [
-				...attachments.filter((file) => !isFileExpired(file.url)).values(),
-				...message.stickers.values(),
-			]),
+			...("messageSnapshots" in message ?
+				message.messageSnapshots.map(
+					({ attachments, stickers }: Pick<Message, "attachments" | "stickers">) => [
+						...attachments.filter((file) => !isFileExpired(file.url)).values(),
+						...stickers.values(),
+					],
+				)
+			:	([] as const)),
 		]
 			.flat()
 			.slice(0, 10)
