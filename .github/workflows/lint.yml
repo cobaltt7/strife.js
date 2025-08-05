@@ -106,11 +106,11 @@ jobs:
                   npm pkg set "dependencies[discord.js]"=${{matrix.version}}
 
                   new_overrides=$(curl -s "https://cdn.jsdelivr.net/npm/discord.js@${{matrix.version}}/package.json" | jq -c '.dependencies | with_entries(.value |= gsub("\\^|>"; "~"))')
-                  new_package=$(jq --tab --argjson newData "$new_overrides" '.overrides."discord.js" = $newData' package.json)
+                  new_package=$(jq --tab --argjson newData "$new_overrides" '.overrides = $newData' package.json)
                   echo "$new_package" > package.json
 
-                  discord_api_types=$(npm pkg get overrides["discord.js"].discord-api-types | sed "s/~//g")
-                  npm pkg set overrides["discord.js"].discord-api-types="$discord_api_types" --json
+                  discord_api_types=$(npm pkg get overrides.discord-api-types | sed "s/~//g")
+                  npm pkg set overrides.discord-api-types="$discord_api_types" --json
 
             - name: Install
               working-directory: ./strife.js

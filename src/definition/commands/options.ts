@@ -13,7 +13,7 @@ import type {
 import type { GuildCacheReducer } from "../../util.js";
 import type { FlatCommandOptions } from "./flat.js";
 
-import { ChannelType as apiChannelType } from "discord-api-types/v10";
+import { ChannelType as apiChannelType } from "dapi-types/v10";
 import { ApplicationCommandOptionType } from "discord.js";
 import * as discord from "discord.js";
 

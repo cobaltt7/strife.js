@@ -1,6 +1,6 @@
 import type { ChatInputCommandInteraction, Guild, Snowflake } from "discord.js";
 
-import { FormattingPatterns } from "discord-api-types/globals";
+import { FormattingPatterns } from "dapi-types/globals";
 import {
 	bold,
 	chatInputApplicationCommandMention,
