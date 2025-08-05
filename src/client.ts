@@ -127,32 +127,28 @@ export async function login(loginOptions: LoginOptions): Promise<void> {
 			"The `modulesDir` option is deprecated. Please use `modulesDirectory` instead.",
 			"DeprecationWarning",
 		);
-	const multipleDirectories = Array.isArray(
-		loginOptions.modulesDirectory ?? loginOptions.modulesDir,
-	);
+
 	const directories =
-		multipleDirectories ?
-			(loginOptions.modulesDirectory as string[])
-		:	([loginOptions.modulesDirectory ?? loginOptions.modulesDir] as string[]);
+		loginOptions.modulesDirectory ? [loginOptions.modulesDirectory].flat()
+		: loginOptions.modulesDir ? [loginOptions.modulesDir]
+		: [];
 
-	const allModules = await Promise.all(
-		directories.map(async (dir) => {
-			if (!dir) return [];
+	const promises = directories.map(async (directory) => {
+		const modules = await fileSystem.readdir(directory, { withFileTypes: true });
+		const promises = modules.map(async (module) => {
+			if (module.isFile() && path.extname(module.name) !== ".js") return;
 
-			const modules = await fileSystem.readdir(dir);
-			return modules.map(async (module) => {
-				const fullPath = path.join(dir, module);
-				const stats = await fileSystem.lstat(fullPath);
-				const resolved = stats.isDirectory() ? path.join(fullPath, "index.js") : fullPath;
+			const resolved =
+				module.isDirectory() ?
+					path.join(directory, module.name, "index.js")
+				:	path.join(directory, module.name);
 
-				if (path.extname(resolved) !== ".js") return;
+			await import(url.pathToFileURL(resolved).toString());
+		});
+		return await Promise.all(promises);
+	});
 
-				await import(url.pathToFileURL(path.resolve(dir, resolved)).toString());
-			});
-		}),
-	);
-
-	await Promise.all(allModules.flat().filter(Boolean));
+	await Promise.all(promises);
 
 	defineEvent("interactionCreate", async (interaction) => {
 		if (interaction.isAutocomplete()) {
@@ -361,7 +357,7 @@ export type LoginOptions = {
 	 */
 	clientOptions: ClientOptions;
 	/** @deprecated Use {@link LoginOptions.modulesDirectory} */
-	modulesDir?: string | string[];
+	modulesDir?: string;
 	/**
 	 * The directory to import modules from. It is recommended to set this to `fileURLToPath(new
 	 * URL("./modules", import.meta.url))`. Omit to not load any modules.
