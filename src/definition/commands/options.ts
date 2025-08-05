@@ -4,6 +4,7 @@ import type {
 	ApplicationCommandOptionData,
 	Attachment,
 	AutocompleteInteraction,
+	ChannelType,
 	GuildBasedChannel,
 	GuildMember,
 	Role,
@@ -12,7 +13,8 @@ import type {
 import type { GuildCacheReducer } from "../../util.js";
 import type { FlatCommandOptions } from "./flat.js";
 
-import { ApplicationCommandOptionType, ChannelType } from "discord.js";
+import { ChannelType as apiChannelType } from "discord-api-types/v10";
+import { ApplicationCommandOptionType } from "discord.js";
 import * as discord from "discord.js";
 
 /** An option. */
@@ -212,17 +214,16 @@ export function transformOptions(
 				transformed.channelTypes =
 					option.channelTypes
 					?? ([
-						ChannelType.GuildText,
-						ChannelType.GuildVoice,
-						ChannelType.GuildCategory,
-						ChannelType.GuildAnnouncement,
-						ChannelType.AnnouncementThread,
-						ChannelType.PublicThread,
-						ChannelType.PrivateThread,
-						ChannelType.GuildStageVoice,
-						ChannelType.GuildForum,
-						...("MediaChannel" in discord && "GuildMedia" in ChannelType ?
-							([ChannelType.GuildMedia] as const)
+						apiChannelType.GuildText,
+						apiChannelType.GuildVoice,
+						apiChannelType.GuildCategory,
+						apiChannelType.GuildAnnouncement,
+						apiChannelType.AnnouncementThread,
+						apiChannelType.PublicThread,
+						apiChannelType.PrivateThread,
+						apiChannelType.GuildStageVoice,
+						...("MediaChannel" in discord ?
+							([apiChannelType.GuildMedia] as const)
 						:	[]),
 					] as const);
 
