@@ -6,6 +6,8 @@ import type {
 	SelectMenuType,
 } from "discord.js";
 
+let deprecationEmittedForUnderscoreInId = false;
+
 /** An object containing all registered button handlers. */
 export const buttons: Record<string, ButtonHandler> = {};
 /** An event handler for a button click. */
@@ -17,6 +19,8 @@ export type ButtonHandler = (interaction: ButtonInteraction, data: string) => Aw
  * `customId`. For example, if the `customId` is `"abcd_foobar"`, then the callback for the `foobar`
  * button will be called and the `data` parameter will have a value of `"abcd"`.
  *
+ * Having any underscores other than the single seperator is deprecated.
+ *
  * @param buttonId The button id.
  * @param handler The button handler.
  */
@@ -26,6 +30,15 @@ export function defineButton(
 ): void {
 	if (buttons[buttonId])
 		throw new ReferenceError(`Handler for button ${buttonId} already exists`);
+
+	if (!deprecationEmittedForUnderscoreInId && buttonId.includes("_")) {
+		deprecationEmittedForUnderscoreInId = true;
+		process.emitWarning(
+			"Incuding underscores in a `customId` `id` is deprecated.",
+			"DeprecationWarning",
+		);
+	}
+
 	buttons[buttonId] = handler;
 }
 
@@ -43,6 +56,8 @@ export type ModalHandler = (
  * `customId`. For example, if the `customId` is `"abcd_foobar"`, then the callback for the `foobar`
  * modal will be called and the `data` parameter will have a value of `"abcd"`.
  *
+ * Having any underscores other than the single seperator is deprecated.
+ *
  * @param modalId The modal id.
  * @param handler The modal handler.
  */
@@ -51,6 +66,15 @@ export function defineModal(
 	handler: (interaction: ModalSubmitInteraction, data: string) => Awaitable<unknown>,
 ): void {
 	if (modals[modalId]) throw new ReferenceError(`Handler for modal ${modalId} already exists`);
+
+	if (!deprecationEmittedForUnderscoreInId && modalId.includes("_")) {
+		deprecationEmittedForUnderscoreInId = true;
+		process.emitWarning(
+			"Incuding underscores in a `customId` `id` is deprecated.",
+			"DeprecationWarning",
+		);
+	}
+
 	modals[modalId] = handler;
 }
 
@@ -68,6 +92,8 @@ export type SelectHandler<Type extends SelectMenuType = SelectMenuType> = (
  * select menu's `customId`. For example, if the `customId` is `"abcd_foobar"`, then the callback
  * for the `foobar` select menu will be called and the `data` parameter will have a value of
  * `"abcd"`.
+ *
+ * Having any underscores other than the single seperator is deprecated.
  *
  * @param selectMenuId The select menu id.
  * @param type The types of select menus to collect. By default, all types of select menus are
@@ -87,6 +113,14 @@ export function defineSelect(
 ): void {
 	if (selects[selectName])
 		throw new ReferenceError(`Handler for select menu ${selectName} already exists`);
+
+	if (!deprecationEmittedForUnderscoreInId && selectName.includes("_")) {
+		deprecationEmittedForUnderscoreInId = true;
+		process.emitWarning(
+			"Incuding underscores in a `customId` `id` is deprecated.",
+			"DeprecationWarning",
+		);
+	}
 
 	const types = typeof typesOrHandler === "function" || [typesOrHandler].flat();
 	const handler = typeof typesOrHandler === "function" ? typesOrHandler : optionalHandler;

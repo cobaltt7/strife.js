@@ -174,12 +174,12 @@ export async function login(loginOptions: LoginOptions): Promise<void> {
 		}
 
 		if (!interaction.isCommand()) {
-			const [id, name] = interaction.customId.split(/(?<=^[^_]*)_/);
-			if (!name) return;
+			const [data, id] = interaction.customId.split(/(?<=^[^_]*)_/);
+			if (!id) return;
 
-			if (interaction.isButton()) await buttons[name]?.(interaction, id ?? "");
-			else if (interaction.isModalSubmit()) await modals[name]?.(interaction, id ?? "");
-			else if (interaction.isAnySelectMenu()) await selects[name]?.(interaction, id ?? "");
+			if (interaction.isButton()) await buttons[id]?.(interaction, data ?? "");
+			else if (interaction.isModalSubmit()) await modals[id]?.(interaction, data ?? "");
+			else if (interaction.isAnySelectMenu()) await selects[id]?.(interaction, data ?? "");
 
 			return;
 		}

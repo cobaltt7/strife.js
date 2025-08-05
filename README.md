@@ -413,6 +413,9 @@ For example, if the `customId` is `"abcd_foobar"`, then the callback for the `fo
 
 The button `data` may not have underscores but the `id` may.
 For example, a `customId` of `"foo_bar_baz"` will result in an `id` of `"bar_baz"` and the `data` `"foo"`.
+**This will switch in v5.0.0** to permit underscores in the `data` but not the `id`.
+Until then, having any underscores other than the single seperator is deprecated.
+
 You can also omit the data from the `customId` altogether - a `customId` of `"_foobar"` will result in an `id` of `"foobar"` and the `data` `""`.
 
 It is not required for all `customId`s to follow this format nor to have an associated handler.
