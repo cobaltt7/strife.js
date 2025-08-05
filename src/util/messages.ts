@@ -59,7 +59,8 @@ export async function getFilesFromMessage(
 }
 
 /**
- * Given a message, extract just enough information to resend it.
+ * Given a message, extract just enough information to resend a representation of it. Note that
+ * `content` is not transformed. Use {@link messageToText} to extract the displayed message text.
  *
  * @param message The message to get the JSON of.
  * @returns The message JSON.
@@ -73,18 +74,31 @@ export async function getMessageJSON(
 	files: readonly string[];
 	components: readonly APIActionRowComponent<APIMessageActionRowComponent>[];
 }> {
+	const snapshots = message.messageSnapshots.values();
 	return {
-		content: message.content,
-		embeds: message.embeds.map((embed) => embed.toJSON()),
+		content: [message, ...snapshots].map((snapshot) => snapshot.content).join("\n\n"),
+		embeds: [message, ...snapshots].flatMap((snapshot) =>
+			snapshot.embeds.map((embed) => embed.toJSON()),
+		),
 		allowedMentions: {
 			parse: message.mentions.everyone ? ["everyone"] : undefined,
 			repliedUser: !!message.mentions.repliedUser,
 			roles: [...message.mentions.roles.keys()],
 			users: [...message.mentions.users.keys()],
 		},
-		files: (await getFilesFromMessage(message)).map((attachment) => attachment.url),
+		files: [
+			...(await getFilesFromMessage(message)).values(),
+			...message.stickers.values(),
+			...message.messageSnapshots.map(({ attachments }) => [
+				...attachments.filter((file) => !isFileExpired(file.url)).values(),
+				...message.stickers.values(),
+			]),
+		]
+			.flat()
+			.slice(0, 10)
+			.map((attachment) => attachment.url),
 		components: message.components.map((component) => component.toJSON()),
-	} satisfies Required<Omit<BaseMessageOptions, "poll">>;
+	} satisfies Required<BaseMessageOptions>;
 }
 
 /**
