@@ -109,7 +109,7 @@ jobs:
                   new_package=$(jq --tab --argjson newData "$new_overrides" '.overrides."discord.js" = $newData' package.json)
                   echo "$new_package" > package.json
 
-                  discord_api_types=$(npm pkg get overrides["discord.js"].discord-api-types | "s/^[^~]?/^/g" -E)
+                  discord_api_types=$(npm pkg get overrides["discord.js"].discord-api-types | sed "s/^[^~]?/^/g" -E)
                   npm pkg set overrides["discord.js"].discord-api-types="$discord_api_types" --json
 
             - name: Install
