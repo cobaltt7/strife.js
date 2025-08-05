@@ -3,6 +3,7 @@ import type {
 	APIActionRowComponent,
 	APIButtonComponent,
 	APIEmbed,
+	APIMessageComponent,
 	APISelectMenuComponent,
 	Attachment,
 	Collection,
@@ -93,7 +94,7 @@ export async function getMessageJSON(
 	embeds: readonly APIEmbed[];
 	allowedMentions: MessageMentionOptions;
 	files: readonly string[];
-	components: readonly APIActionRowComponent<APIButtonComponent | APISelectMenuComponent>[];
+	components: readonly APIMessageComponent[];
 }> {
 	const snapshots =
 		"messageSnapshots" in message ?
@@ -126,7 +127,6 @@ export async function getMessageJSON(
 		components: message.components.map((component) => component.toJSON()),
 	};
 }
-
 /**
  * React to a message with multiple emojis in order.
  *
