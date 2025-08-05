@@ -24,6 +24,7 @@ import {
 	DiscordAPIError,
 	GuildChannel,
 	GuildMember,
+	MessageFlags,
 	Partials,
 	RESTJSONErrorCodes,
 	Role,
@@ -242,7 +243,7 @@ export async function login(loginOptions: LoginOptions): Promise<void> {
 
 				if (interaction?.deferred || interaction?.replied)
 					await interaction.followUp({
-						ephemeral: true,
+						flags: MessageFlags.Ephemeral,
 						content: loginOptions.commandErrorMessage,
 					});
 				else if (
@@ -253,7 +254,7 @@ export async function login(loginOptions: LoginOptions): Promise<void> {
 					)
 				)
 					await interaction?.reply({
-						ephemeral: true,
+						flags: MessageFlags.Ephemeral,
 						content: loginOptions.commandErrorMessage,
 					});
 			}
