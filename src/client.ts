@@ -128,21 +128,26 @@ export async function login(loginOptions: LoginOptions): Promise<void> {
 			"DeprecationWarning",
 		);
 
-	const directory = loginOptions.modulesDirectory ?? loginOptions.modulesDir;
-	const modules = directory ? await fileSystem.readdir(directory) : [];
+	const directories =
+		loginOptions.modulesDirectory ? [loginOptions.modulesDirectory].flat()
+		: loginOptions.modulesDir ? [loginOptions.modulesDir]
+		: [];
 
-	const promises = modules.map(async (module) => {
-		const fullPath = path.join(directory ?? process.cwd(), module);
-		const resolved =
-			(await fileSystem.lstat(fullPath)).isDirectory() ?
-				path.join(fullPath, "./index.js")
-			:	fullPath;
-		if (path.extname(resolved) !== ".js") return;
+	const promises = directories.map(async (directory) => {
+		const modules = await fileSystem.readdir(directory, { withFileTypes: true });
+		const promises = modules.map(async (module) => {
+			if (module.isFile() && path.extname(module.name) !== ".js") return;
 
-		await import(
-			url.pathToFileURL(path.resolve(directory ?? process.cwd(), resolved)).toString()
-		);
+			const resolved =
+				module.isDirectory() ?
+					path.join(directory, module.name, "index.js")
+				:	path.join(directory, module.name);
+
+			await import(url.pathToFileURL(resolved).toString());
+		});
+		return await Promise.all(promises);
 	});
+
 	await Promise.all(promises);
 
 	defineEvent("interactionCreate", async (interaction) => {
@@ -357,7 +362,7 @@ export type LoginOptions = {
 	 * The directory to import modules from. It is recommended to set this to `fileURLToPath(new
 	 * URL("./modules", import.meta.url))`. Omit to not load any modules.
 	 */
-	modulesDirectory?: string;
+	modulesDirectory?: string | string[];
 	/**
 	 * The token to connect to Discord with.
 	 *

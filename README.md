@@ -64,12 +64,20 @@ strife.js has some defaults on top of discord.js's, which will be merged with th
 
 #### `modulesDirectory`
 
+Type: `string | string[]`
+
+The directory or directories to import modules from.
+It is recommended to set this to `fileURLToPath(new URL("./modules", import.meta.url))`.
+See [Usage](#usage) for detailed information.
+Omit to not load any modules.
+Previously called `modulesDir`
+
+#### `modulesDir`
+
 Type: `string`
 
-The directory to import modules from.
-See [Usage](#usage) for detailed information.
-It is recommended to set this to `fileURLToPath(new URL("./modules", import.meta.url))`.
-Omit to not load any modules.
+Deprecated legacy name of [`modulesDirectory`](#modulesdirectory).
+Does not support arrays.
 
 #### `botToken`
 
@@ -440,7 +448,7 @@ Each module should work independently.
 ### File Modules
 
 JavaScript files that lie directly inside `modulesDirectory` should be short - a few hundred lines at most.
-If they are any longer, make them [directory modules](#directory-modules) instead.
+If they are any longer, split up the files and make the modules [directory modules](#directory-modules) instead.
 
 ### Directory Modules
 
