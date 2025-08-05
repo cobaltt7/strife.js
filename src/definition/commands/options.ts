@@ -4,8 +4,7 @@ import type {
 	ApplicationCommandOptionData,
 	Attachment,
 	AutocompleteInteraction,
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	CommandInteractionOptionResolver,
+	ChannelType,
 	GuildBasedChannel,
 	GuildMember,
 	Role,
@@ -14,7 +13,8 @@ import type {
 import type { GuildCacheReducer } from "../../util.js";
 import type { FlatCommandOptions } from "./flat.js";
 
-import { ApplicationCommandOptionType, ChannelType } from "discord.js";
+import { ChannelType as apiChannelType } from "dapi-types/v10";
+import { ApplicationCommandOptionType } from "discord.js";
 import * as discord from "discord.js";
 
 /** An option. */
@@ -26,10 +26,7 @@ export type CommandOption<InGuild extends boolean> =
 	| StringChoicesOption;
 
 /** A base option. */
-export type BaseOption = {
-	description: string;
-	required?: boolean;
-};
+export type BaseOption = { description: string; required?: boolean };
 
 /**
  * A basic option that doesn't allow for further configuration.
@@ -104,19 +101,17 @@ export type StringOption<InGuild extends boolean> = {
 	/**
 	 * Define a callback to give users dynamic choices.
 	 *
-	 * In the callback, use {@link CommandInteractionOptionResolver.getFocused()} to get the value of the option so far.
-	 * You can also use {@link CommandInteractionOptionResolver.getBoolean() .getBoolean()},
+	 * In the callback, use {@link CommandInteractionOptionResolver.getFocused()} to get the value of
+	 * the option so far. You can also use
+	 * {@link CommandInteractionOptionResolver.getBoolean() .getBoolean()},
 	 * {@link CommandInteractionOptionResolver.getInteger() .getInteger()},
 	 * {@link CommandInteractionOptionResolver.getNumber() .getNumber()}, and
-	 * {@link CommandInteractionOptionResolver.getString() .getString()}. Other option-getters will not work, use
-	 * {@link CommandInteractionOptionResolver.get() .get()} instead. Return an array of choice objects. It will be
-	 * truncated to fit the 25-item limit automatically.
+	 * {@link CommandInteractionOptionResolver.getString() .getString()}. Other option-getters will
+	 * not work, use {@link CommandInteractionOptionResolver.get() .get()} instead. Return an array
+	 * of choice objects. It will be truncated to fit the 25-item limit automatically.
 	 *
-	 * Note that Discord does not require users to select values from the options, so handle values appropriately.
-	 *
-	 * Also note that TypeScript cannot automatically infer the type of the `interaction` parameter, however, it will
-	 * error if you set it incorrectly, so make sure you manually specify it as {@link AutocompleteInteraction} (or
-	 * {@link AutocompleteInteraction<"cached" | "raw">} for guild-only commands).
+	 * Note that Discord does not require users to select values from the options, so handle values
+	 * appropriately.
 	 */
 	autocomplete?: AutocompleteHandler<InGuild>;
 	choices?: never;
@@ -124,8 +119,8 @@ export type StringOption<InGuild extends boolean> = {
 /** A {@link ApplicationCommandOptionType.String string} option with specified preset choices. */
 export type StringChoicesOption = {
 	/**
-	 * Require users to pick values from a predefined list. The keys are the values passed to your bot and the values
-	 * are the descriptions displayed to the users.
+	 * Require users to pick values from a predefined list. The keys are the values passed to your
+	 * bot and the values are the descriptions displayed to the users.
 	 */
 	choices: Record<string, string>;
 	minLength?: never;
@@ -138,8 +133,9 @@ export type AutocompleteHandler<InGuild extends boolean> = (
 	interaction: AutocompleteInteraction<GuildCacheReducer<InGuild>>,
 ) => ApplicationCommandOptionChoiceData<string>[];
 /**
- * An object containing all registered autocomplete handlers, indexed by the command, subgroup, subcommand, and option.
- * If there is no subgroup or subcommand, {@link NoSubcommand} is used as a placeholder.
+ * An object containing all registered autocomplete handlers, indexed by the command, subgroup,
+ * subcommand, and option. If there is no subgroup or subcommand, {@link NoSubcommand} is used as a
+ * placeholder.
  */
 export const autocompleters: Record<
 	string,
@@ -188,11 +184,7 @@ export function transformOptions(
 		| { command: string; subcommand: string; subGroup?: string },
 ): Exclude<
 	ApplicationCommandOptionData,
-	{
-		type:
-			| ApplicationCommandOptionType.SubcommandGroup
-			| ApplicationCommandOptionType.Subcommand;
-	}
+	{ type: ApplicationCommandOptionType.SubcommandGroup | ApplicationCommandOptionType.Subcommand }
 >[] {
 	return Object.entries(options)
 		.map(([name, option]) => {
@@ -220,21 +212,18 @@ export function transformOptions(
 
 			if (transformed.type === ApplicationCommandOptionType.Channel)
 				transformed.channelTypes =
-					option.channelTypes ??
-					([
-						ChannelType.GuildText,
-						ChannelType.GuildVoice,
-						ChannelType.GuildCategory,
-						ChannelType.GuildAnnouncement,
-						ChannelType.AnnouncementThread,
-						ChannelType.PublicThread,
-						ChannelType.PrivateThread,
-						ChannelType.GuildStageVoice,
-						ChannelType.GuildForum,
-						...("MediaChannel" in discord && "GuildMedia" in ChannelType ?
-							([ChannelType.GuildMedia] as const)
-						:	[]),
-					] as const);
+					option.channelTypes
+					?? ([
+						apiChannelType.GuildText,
+						apiChannelType.GuildVoice,
+						apiChannelType.GuildCategory,
+						apiChannelType.GuildAnnouncement,
+						apiChannelType.AnnouncementThread,
+						apiChannelType.PublicThread,
+						apiChannelType.PrivateThread,
+						apiChannelType.GuildStageVoice,
+						...("MediaChannel" in discord ? [apiChannelType.GuildMedia] : []),
+					] as ApplicationCommandOptionAllowedChannelTypes[]);
 
 			if (transformed.type === ApplicationCommandOptionType.String) {
 				if (option.choices && !transformed.autocomplete)
@@ -246,8 +235,8 @@ export function transformOptions(
 			}
 
 			if (
-				transformed.type === ApplicationCommandOptionType.Number ||
-				transformed.type === ApplicationCommandOptionType.Integer
+				transformed.type === ApplicationCommandOptionType.Number
+				|| transformed.type === ApplicationCommandOptionType.Integer
 			) {
 				if (option.maxValue !== undefined) transformed.maxValue = option.maxValue;
 				if (option.minValue !== undefined) transformed.minValue = option.minValue;

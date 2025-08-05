@@ -1,8 +1,7 @@
 import type { Awaitable, ChatInputCommandInteraction } from "discord.js";
 import type { GuildCacheReducer } from "../../util.js";
 import type { BaseChatCommandData, BaseCommandKeys } from "../commands.js";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { FlatCommandData, FlatCommandOptions } from "./flat.js";
+import type { FlatCommandOptions } from "./flat.js";
 import type { OptionsToType } from "./options.js";
 import type { SubcommandData, SubcommandOptions } from "./subcommands.js";
 
@@ -20,10 +19,7 @@ import { commands, transformSubcommands } from "../commands.js";
  * @param data Sub group configuration data.
  * @param handler The command handler.
  */
-export function defineSubGroups<
-	InGuild extends true,
-	Options extends SubGroupsOptions<InGuild> = Record<string, never>,
->(
+export function defineSubGroups<InGuild extends true, Options extends SubGroupsOptions<InGuild>>(
 	data: SubGroupsData<InGuild, Options>,
 	handler: (
 		interaction: ChatInputCommandInteraction<GuildCacheReducer<InGuild>>,
@@ -38,10 +34,7 @@ export function defineSubGroups<
 		}[keyof Options],
 	) => Awaitable<unknown>,
 ): void;
-export function defineSubGroups<
-	InGuild extends false,
-	Options extends SubGroupsOptions<InGuild> = Record<string, never>,
->(
+export function defineSubGroups<InGuild extends false, Options extends SubGroupsOptions<InGuild>>(
 	data: SubGroupsData<InGuild, Options>,
 	handler: (
 		interaction: ChatInputCommandInteraction<GuildCacheReducer<InGuild>>,
@@ -91,17 +84,17 @@ export function defineSubGroups(
 export type SubGroupsData<InGuild extends boolean, Options extends SubGroupsOptions<InGuild>> = {
 	options?: never;
 	/**
-	 * Key-value pair where the keys are subgroup names and the values are subgroup details. In order for the handler to
-	 * be correctly typed, all subcommands must have {@link FlatCommandData.options} set, even if just to an empty
-	 * object.
+	 * Key-value pair where the keys are subgroup names and the values are subgroup details. In
+	 * order for the handler to be correctly typed, all subcommands must have
+	 * {@link FlatCommandData.options} set, even if just to an empty object.
 	 *
 	 * Mixing subgroups and subcommands on the same level is not currently supported.
 	 */
 	subcommands: {
 		[key in keyof Options]: Omit<SubcommandData<InGuild, Options[key]>, BaseCommandKeys>;
 	};
-} & BaseChatCommandData<InGuild> &
-	AugmentedSubGroupsData<InGuild, Options>;
+} & BaseChatCommandData<InGuild>
+	& AugmentedSubGroupsData<InGuild, Options>;
 /** Options for a subgroup command. */
 export type SubGroupsOptions<InGuild extends boolean> = Record<string, SubcommandOptions<InGuild>>;
 /** A subgroup command handler. */

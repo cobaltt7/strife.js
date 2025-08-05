@@ -21,8 +21,8 @@ export const allEvents: { [EventName in StrifeEvents]?: EventHandler<EventName>[
 export const preEvents: { [EventName in StrifeEvents]?: PreEventHandler<EventName> } = {};
 
 /**
- * Define an event handler. You are allowed to define multiple handlers for the same event. Note that handler execution
- * order is not guaranteed.
+ * Define an event handler. You are allowed to define multiple handlers for the same event. Note
+ * that handler execution order is not guaranteed.
  *
  * @param eventName The event to handle.
  * @param event The event handler.
@@ -37,15 +37,15 @@ export function defineEvent<EventName extends StrifeEvents>(
 }
 
 /**
- * Define a pre-event handler. Pre-events are a special type of event handler that executes before other handlers. They
- * determine if other handlers are executed or not.
+ * Define a pre-event handler. Pre-events are a special type of event handler that executes before
+ * other handlers. They determine if other handlers are executed or not.
  *
- * A use case for this would be an automoderation system working alongside an XP system. The automoderation system could
- * define a pre-event handler to delete rule-breaking messages and return `false` so users do not receive XP for
- * rule-breaking messages.
+ * A use case for this would be an automoderation system working alongside an XP system. The
+ * automoderation system could define a pre-event handler to delete rule-breaking messages and
+ * return `false` so users do not receive XP for rule-breaking messages.
  *
- * You are only allowed to define one pre-event handler per event. You can define a pre-event handler with or without
- * defining normal event handlers for that event.
+ * You are only allowed to define one pre-event handler per event. You can define a pre-event
+ * handler with or without defining normal event handlers for that event.
  *
  * @param eventName The event to handle.
  * @param event The event handler. Must return whether other handlers should be executed or not.
@@ -62,7 +62,8 @@ defineEvent.pre = function pre<EventName extends StrifeEvents>(
 };
 
 /**
- * For every defined event, combine all the handlers into one function, handling pre-events and errors correctly.
+ * For every defined event, combine all the handlers into one function, handling pre-events and
+ * errors correctly.
  *
  * @returns An object of event handlers, indexed by the event name.
  */
