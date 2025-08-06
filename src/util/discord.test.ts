@@ -36,9 +36,19 @@ describe("paginate", () => {
 				embeds: [
 					{
 						title: "Pagination Test",
-						description: "1. 1\n2. 2\n3. 3\n4. 4\n5. 5\n6. 6\n7. 7\n8. 8\n9. 9\n10. 10",
+						description:
+							"1. 1\n"
+							+ "2. 2\n"
+							+ "3. 3\n"
+							+ "4. 4\n"
+							+ "5. 5\n"
+							+ "6. 6\n"
+							+ "7. 7\n"
+							+ "8. 8\n"
+							+ "9. 9\n"
+							+ "10. 10",
 						fields: [],
-						footer: { text: `Page 1/1 • 10 items` },
+						footer: { text: "Page 1/1 • 10 items" },
 						author: undefined,
 						color: undefined,
 					},
@@ -54,7 +64,7 @@ describe("paginate", () => {
 				const embed = message.embeds?.[0] ?? {};
 				ok("description" in embed);
 				strictEqual(embed.description, "1. 1\n2. 2\n3. 3");
-				strictEqual(embed.footer?.text, `Page 1/2 • 6 items`);
+				strictEqual(embed.footer?.text, "Page 1/2 • 6 items");
 			},
 			{
 				title: "Pagination Test",
@@ -76,7 +86,7 @@ describe("paginate", () => {
 				const embed = message.embeds?.[0] ?? {};
 				ok("description" in embed);
 				strictEqual(embed.description, "__21. 21__\n22. 22\n23. 23\n24. 24\n25. 25");
-				strictEqual(embed.footer?.text, `Page 2/2 • 25 items`);
+				strictEqual(embed.footer?.text, "Page 2/2 • 25 items");
 			},
 			{
 				title: "Pagination Test",

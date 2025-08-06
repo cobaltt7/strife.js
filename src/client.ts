@@ -277,7 +277,7 @@ export async function login(loginOptions: LoginOptions): Promise<void> {
 			if (typeof access === "boolean") {
 				if (guildCommands.length > 1)
 					throw new TypeError(
-						`Cannot set a boolean access on a command with a duplicate name`,
+						"Cannot set a boolean access on a command with a duplicate name",
 					);
 				accumulator[globalCommandKey] ??= [];
 				accumulator[globalCommandKey].push({
