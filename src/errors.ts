@@ -1,6 +1,8 @@
 import type { Message, RepliableInteraction } from "discord.js";
 import type { SendableChannel } from "./util.js";
 
+import { isNativeError } from "node:util/types";
+
 import { inlineCode } from "discord.js";
 import { serializeError } from "serialize-error";
 
@@ -88,7 +90,7 @@ export function stringifyError(error: unknown): string {
 		(_, value) =>
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 			typeof value === "bigint" || typeof value === "symbol" ? value.toString()
-			: value instanceof Error ? standardizeError(value)
+			: isNativeError(value) ? standardizeError(value)
 			: value,
 		"  ",
 	);
