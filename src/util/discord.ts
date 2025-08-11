@@ -135,7 +135,7 @@ export async function paginate<Item>(
 	async function generateMessage(): Promise<BaseMessageOptions> {
 		const filtered = array.filter((_, index) => index >= offset && index < offset + pageLength);
 		async function formatLine(current: Item, index: number): Promise<string> {
-			const line = `${totalCount ? "-" : `${index + offset + 1}.`} ${await stringify(
+			const line = `${totalCount ? "-" : `${(index + offset + 1).toLocaleString()}.`} ${await stringify(
 				current,
 				index,
 				filtered,
@@ -191,7 +191,10 @@ export async function paginate<Item>(
 					fields: columns === 1 ? [] : columnize(lines, zeroWidthSpace, columns),
 
 					footer: {
-						text: `Page ${offset / pageLength + 1}/${pageCount}${
+						text: `Page ${(
+							offset / pageLength
+							+ 1
+						).toLocaleString()}/${pageCount.toLocaleString()}${
 							footerSeperator
 						}${itemCount.toLocaleString()} ${itemCount === 1 ? singular : plural}`,
 					},

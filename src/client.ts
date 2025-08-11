@@ -102,7 +102,7 @@ export async function login(loginOptions: LoginOptions): Promise<void> {
 		})
 		.rest.on("invalidRequestWarning", (data) =>
 			handleError(
-				`${data.count} requests; ${data.remainingTime}ms left`,
+				`${data.count.toLocaleString()} requests; ${data.remainingTime.toLocaleString()}ms left`,
 				"invalidRequestWarning",
 			),
 		)
