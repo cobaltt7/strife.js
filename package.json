@@ -34,7 +34,7 @@
 		"dev": "tsc --project tsconfig.json --watch",
 		"format": "prettier --write \"**\" \"!./dist/\" --ignore-unknown --cache",
 		"lint": "eslint",
-		"test": "npm run build && node --enable-source-maps --test"
+		"test": "npm run build && cd dist && node --enable-source-maps --test"
 	},
 	"prettier": "@redguy12/prettier-config",
 	"dependencies": {
