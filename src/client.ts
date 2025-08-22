@@ -56,11 +56,11 @@ export let client: Client<true>;
  */
 export async function login(loginOptions: LoginOptions): Promise<void> {
 	const [major, minor = "", patch] = version.split(".");
-	if (major !== "14" || +minor < 9 || patch?.includes("-dev"))
+	if (major !== "14" || +minor < 9 || +minor > 22 || patch?.includes("-dev"))
 		process.emitWarning(
 			`You are using an non-officially-supported version of discord.js (${
 				version
-			}). Please use version 14.9-14.21 for maximum stability.`,
+			}). Please use version 14.9-14.22 for maximum stability.`,
 			"ExperimentalWarning",
 		);
 
