@@ -39,7 +39,7 @@
 	"prettier": "@redguy12/prettier-config",
 	"dependencies": {
 		"dapi-types": "npm:discord-api-types@next",
-		"serialize-error": "12.0.0"
+		"serialize-error": "13.0.1"
 	},
 	"devDependencies": {
 		"@redguy12/prettier-config": "3.4.4",
