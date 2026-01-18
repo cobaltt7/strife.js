@@ -96,8 +96,17 @@ export function stringifyError(error: unknown): string {
 	);
 }
 
-export function standardizeError(error: unknown): object {
-	if (typeof error !== "object" || !error) return { error };
+type StandardizedError = {
+	name: unknown;
+	code: unknown;
+	message: unknown;
+	stack: unknown;
+	cause: unknown;
+	errors: unknown;
+};
+
+export function standardizeError(error: unknown): StandardizedError {
+	if (typeof error !== "object" || !error) return standardizeError({ message: error });
 
 	const serialized = serializeError(error);
 
@@ -119,6 +128,14 @@ export function standardizeError(error: unknown): object {
 	delete extra.cause;
 	delete extra.errors;
 
+	const cause = "cause" in error ? standardizeError(error.cause) : undefined;
+
+	if (cause && "cause" in error)
+		cause.stack =
+			typeof error.cause === "object" && error.cause && "stack" in error.cause ?
+				error.cause.stack
+			:	undefined;
+
 	return {
 		name: "name" in error ? error.name : undefined,
 		code: "code" in error ? error.code : undefined,
@@ -126,7 +143,7 @@ export function standardizeError(error: unknown): object {
 		stack: sanitizePath((error as { stack: string }).stack)
 			.split("\n")
 			.slice(Array.isArray(message) ? message.length : 1),
-		cause: "cause" in error ? standardizeError(error.cause) : undefined,
+		cause,
 		errors:
 			"errors" in error ?
 				Array.isArray(error.errors) ?
