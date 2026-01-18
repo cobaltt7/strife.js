@@ -97,12 +97,12 @@ export function stringifyError(error: unknown): string {
 }
 
 type StandardizedError = {
-	name: unknown;
-	code: unknown;
-	message: unknown;
-	stack: unknown;
-	cause: unknown;
-	errors: unknown;
+	name?: unknown;
+	code?: unknown;
+	message?: unknown;
+	stack?: unknown;
+	cause?: unknown;
+	errors?: unknown;
 };
 
 export function standardizeError(error: unknown): StandardizedError {
