@@ -64,7 +64,12 @@ export async function logError({
 
 		return await channel.send({
 			content: `${emoji ? `${emoji} ` : ""}**${name}** occurred in ${trigger}${
-				external ? "" : `\n\`\`\`json\n${errorString}\n\`\`\``
+				external ?
+					error && typeof error === "object" && "message" in error && error.message ?
+						// eslint-disable-next-line @typescript-eslint/no-base-to-string
+						`\n*\`${error.message.toString()}\`*`
+					:	""
+				:	`\n\`\`\`json\n${errorString}\n\`\`\``
 			}`,
 			files:
 				external ?
