@@ -1,8 +1,11 @@
 import type { CacheType, Channel } from "discord.js";
 
 /** @internal */
-export type GuildCacheReducer<InGuild extends boolean> =
-	InGuild extends true ? "cached" | "raw" : CacheType;
+export type GuildCacheReducer<IsInGuild extends boolean> =
+	IsInGuild extends true ? InGuild : CacheType;
+
+/** Can be passed to many discord.js classes as a type parameter to narrow it to be in a guild. */
+export type InGuild = "cached" | "raw";
 
 /**
  * Can be used in {@link BaseCommandData.access} to extend the guilds defined in
@@ -17,7 +20,7 @@ export const DEFAULT_GUILDS = "@defaults";
 export const footerSeperator = " • ";
 
 /** A zero-width space, useful to create embed fields with an empty title and/or value. */
-export const zeroWidthSpace = "\u200b";
+export const zeroWidthSpace = "\u200B";
 
 /** @internal */
 export type SendableChannel = Extract<Channel, { send(...args: unknown[]): unknown }>;
