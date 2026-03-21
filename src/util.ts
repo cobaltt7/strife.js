@@ -20,7 +20,7 @@ export const DEFAULT_GUILDS = "@defaults";
 export const footerSeperator = " • ";
 
 /** A zero-width space, useful to create embed fields with an empty title and/or value. */
-export const zeroWidthSpace = "\u200B";
+export const zeroWidthSpace = "\u200b";
 
 /** @internal */
 export type SendableChannel = Extract<Channel, { send(...args: unknown[]): unknown }>;
