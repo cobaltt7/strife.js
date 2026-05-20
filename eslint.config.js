@@ -13,4 +13,9 @@ export default defineConfig({ files: ["**/*.ts"] }, globalIgnores(["dist"]), ...
 			tsconfigRootDir: path.dirname(fileURLToPath(import.meta.url)),
 		},
 	},
+	rules: {
+		// Until we drop Node 18
+		"unicorn/no-array-reverse": "off",
+		"unicorn/no-array-sort": "off",
+	},
 });
