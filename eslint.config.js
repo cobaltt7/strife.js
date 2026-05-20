@@ -3,10 +3,8 @@ import { fileURLToPath } from "node:url";
 
 import cobaltConfigs, { globals } from "eslint-config-cobaltt7";
 import { defineConfig, globalIgnores } from "eslint/config";
-export default defineConfig(
-	{ files: ["**/*.ts"] },
-	globalIgnores(["dist"]),
-	...cobaltConfigs,{
+
+export default defineConfig({ files: ["**/*.ts"] }, globalIgnores(["dist"]), ...cobaltConfigs, {
 	languageOptions: {
 		ecmaVersion: 2022,
 		globals: globals.nodeBuiltin,
