@@ -90,6 +90,7 @@ export async function logError({
  * @returns The stringified error.
  */
 export function stringifyError(error: unknown): string {
+	// TODO: Error.isError in node 24
 	return JSON.stringify(
 		error,
 		(_, value) =>

@@ -149,7 +149,7 @@ jobs:
                   npm pkg set "name"=sample-bot
                   npm pkg set "dependencies[strife.js]"=file:../strife.js
                   echo -e 'import "discord.js";\nimport "strife.js";' > ./index.ts
-                  npm i
+                  npm install
 
             - name: Test Compatibility
               working-directory: ./sample-bot
