@@ -73,7 +73,7 @@ export async function logError({
 			}`,
 			files:
 				external ?
-					[{ attachment: Buffer.from(errorString, "utf8"), name: "error.json" }]
+					[{ attachment: Buffer.from(errorString, "utf-8"), name: "error.json" }]
 				:	[],
 		});
 	} catch (loggingError) {
