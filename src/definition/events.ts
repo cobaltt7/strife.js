@@ -1,6 +1,6 @@
 import type { Awaitable, ClientEvents } from "discord.js";
 
-// TODO: add interactionCreate
+// TODO: add interactionCreate?
 /** Events that are reserved for strife.js to handle and that end-users should not use. */
 export const reservedClientEvents = [
 	"ready",
