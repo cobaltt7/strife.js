@@ -58,15 +58,11 @@ export function formatAnyEmoji(
 ): string;
 export function formatAnyEmoji(
 	options?:
-		| string
-		| { animated?: boolean | null; id?: Snowflake | null; name?: string | null }
-		| null,
+		string | { animated?: boolean | null; id?: Snowflake | null; name?: string | null } | null,
 ): string | undefined;
 export function formatAnyEmoji(
 	options?:
-		| string
-		| { animated?: boolean | null; id?: Snowflake | null; name?: string | null }
-		| null,
+		string | { animated?: boolean | null; id?: Snowflake | null; name?: string | null } | null,
 ): string | undefined {
 	if (typeof options === "string") return options;
 	if (typeof options?.id !== "string") return options?.name ?? undefined;

@@ -47,7 +47,7 @@
 		"discord.js": "14.26.4",
 		"eslint": "10.4.0",
 		"eslint-config-cobaltt7": "1.4.1",
-		"prettier": "3.8.3",
+		"prettier": "3.9.5",
 		"typescript": "5.4.5"
 	},
 	"peerDependencies": {

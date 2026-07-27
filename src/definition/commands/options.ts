@@ -19,11 +19,7 @@ import * as discord from "discord.js";
 
 /** An option. */
 export type CommandOption<InGuild extends boolean> =
-	| BasicOption
-	| NumericalOption
-	| ChannelOption
-	| StringOption<InGuild>
-	| StringChoicesOption;
+	BasicOption | NumericalOption | ChannelOption | StringOption<InGuild> | StringChoicesOption;
 
 /** A base option. */
 export type BaseOption = { description: string; required?: boolean };
